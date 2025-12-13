@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/nav_home">
+
+    <fragment
+        android:id="@+id/nav_home"
+        android:name="org.oktail.kanjimori.ui.home.HomeFragment"
+        android:label="Kanji Mori"
+        tools:layout="@layout/fragment_home">
+        <action
+            android:id="@+id/action_nav_home_to_nav_recognition"
+            app:destination="@id/nav_recognition" />
+        <action
+            android:id="@+id/action_nav_home_to_nav_reading"
+            app:destination="@id/nav_reading" />
+        <action
+            android:id="@+id/action_nav_home_to_nav_writing"
+            app:destination="@id/nav_writing" />
+        <action
+            android:id="@+id/action_nav_home_to_nav_dictionary"
+            app:destination="@id/nav_dictionary" />
+        <action
+            android:id="@+id/action_nav_home_to_nav_results"
+            app:destination="@id/nav_results" />
+        <action
+            android:id="@+id/action_nav_home_to_nav_about"
+            app:destination="@id/nav_about" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_recognition"
+        android:name="org.oktail.kanjimori.ui.recognition.RecognitionFragment"
+        android:label="Reconnaissance"
+        tools:layout="@layout/fragment_recognition" />
+
+    <fragment
+        android:id="@+id/nav_reading"
+        android:name="org.oktail.kanjimori.ui.reading.ReadingFragment"
+        android:label="Lecture"
+        tools:layout="@layout/fragment_reading" />
+
+    <fragment
+        android:id="@+id/nav_writing"
+        android:name="org.oktail.kanjimori.ui.writing.WritingFragment"
+        android:label="Écriture"
+        tools:layout="@layout/fragment_writing" />
+
+    <fragment
+        android:id="@+id/nav_dictionary"
+        android:name="org.oktail.kanjimori.ui.dictionary.DictionaryFragment"
+        android:label="Dictionnaire"
+        tools:layout="@layout/fragment_dictionary" />
+
+    <fragment
+        android:id="@+id/nav_results"
+        android:name="org.oktail.kanjimori.ui.results.ResultsFragment"
+        android:label="Résultats"
+        tools:layout="@layout/fragment_results" />
+
+    <fragment
+        android:id="@+id/nav_about"
+        android:name="org.oktail.kanjimori.ui.about.AboutFragment"
+        android:label="À propos"
+        tools:layout="@layout/fragment_about" />
+</navigation>

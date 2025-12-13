@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#E0F7FA"
+    tools:context=".ui.reading.ReadingFragment">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="読み方"
+            android:textSize="34sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:text="Choisis un groupe de mots et apprends leurs prononciations." />
+
+        <!-- Kanji Tree Section -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="8dp"
+            android:background="@android:drawable/dialog_holo_light_frame">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Kanji Tree" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Si le mot contient des kanji que tu n'as pas encore appris :\n(10/10 au jeu de reconnaissance)" />
+
+            <CheckBox
+                android:id="@+id/checkbox_ignore"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Ignorer" />
+
+            <CheckBox
+                android:id="@+id/checkbox_include_anyway"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="les inclure quand même" />
+
+        </LinearLayout>
+
+        <!-- Japanese Language Proficiency Test -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Japanese Language Proficiency Test"
+                android:textSize="18sp" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:src="@android:drawable/ic_dialog_info" />
+        </RelativeLayout>
+
+        <GridLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:columnCount="5">
+
+            <Button
+                android:id="@+id/button_reading_n5"
+                android:layout_width="0dp"
+                android:layout_columnWeight="1"
+                android:layout_gravity="fill"
+                android:text="N5\n0%" />
+            <Button
+                android:id="@+id/button_reading_n4"
+                android:layout_width="0dp"
+                android:layout_columnWeight="1"
+                android:layout_gravity="fill"
+                android:text="N4\n0%" />
+            <Button
+                android:id="@+id/button_reading_n3"
+                android:layout_width="0dp"
+                android:layout_columnWeight="1"
+                android:layout_gravity="fill"
+                android:text="N3\n0%" />
+            <Button
+                android:id="@+id/button_reading_n2"
+                android:layout_width="0dp"
+                android:layout_columnWeight="1"
+                android:layout_gravity="fill"
+                android:text="N2\n0%" />
+            <Button
+                android:id="@+id/button_reading_n1"
+                android:layout_width="0dp"
+                android:layout_columnWeight="1"
+                android:layout_gravity="fill"
+                android:text="N1\n0%" />
+        </GridLayout>
+
+        <!-- Mots les plus utilisés -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Mots les plus utilisés"
+                android:textSize="18sp" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:src="@android:drawable/ic_dialog_info" />
+        </RelativeLayout>
+
+        <GridLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:columnCount="4">
+
+            <Button
+                android:id="@+id/button_words_1000"
+                android:layout_width="0dp"
+                android:layout_columnWeight="1"
+                android:layout_gravity="fill"
+                android:text="1000\n0%" />
+            <Button
+                android:id="@+id/button_words_2000"
+                android:layout_width="0dp"
+                android:layout_columnWeight="1"
+                android:layout_gravity="fill"
+                android:text="2000\n0%" />
+            <Button
+                android:id="@+id/button_words_3000"
+                android:layout_width="0dp"
+                android:layout_columnWeight="1"
+                android:layout_gravity="fill"
+                android:text="3000\n0%" />
+            <Button
+                android:id="@+id/button_words_4000"
+                android:layout_width="0dp"
+                android:layout_columnWeight="1"
+                android:layout_gravity="fill"
+                android:text="4000\n0%" />
+            <Button
+                android:id="@+id/button_words_5000"
+                android:layout_width="0dp"
+                android:layout_columnWeight="1"
+                android:layout_gravity="fill"
+                android:text="5000\n0%" />
+            <Button
+                android:id="@+id/button_words_6000"
+                android:layout_width="0dp"
+                android:layout_columnWeight="1"
+                android:layout_gravity="fill"
+                android:text="6000\n0%" />
+            <Button
+                android:id="@+id/button_words_7000"
+                android:layout_width="0dp"
+                android:layout_columnWeight="1"
+                android:layout_gravity="fill"
+                android:text="7000\n0%" />
+            <Button
+                android:id="@+id/button_words_8000"
+                android:layout_width="0dp"
+                android:layout_columnWeight="1"
+                android:layout_gravity="fill"
+                android:text="8000\n0%" />
+
+        </GridLayout>
+
+        <!-- Liste de l'utilisateurs / listes d'étude -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Liste de l'utilisateurs / listes d'étude"
+                android:textSize="18sp" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:src="@android:drawable/ic_dialog_info" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <Button
+                android:id="@+id/button_user_list"
+                android:layout_width="0dp"
+                android:layout_alignParentStart="true"
+                android:layout_toStartOf="@+id/button_modify"
+                android:layout_height="wrap_content"
+                android:text="Liste de l'utilisateur\n0%"/>
+
+            <Button
+                android:id="@+id/button_modify"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:text="Modifier"
+                android:drawableEnd="@android:drawable/ic_menu_edit" />
+
+        </RelativeLayout>
+
+    </LinearLayout>
+</ScrollView>
