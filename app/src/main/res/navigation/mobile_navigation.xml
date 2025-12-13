@@ -37,7 +37,11 @@
         android:id="@+id/nav_recognition"
         android:name="org.oktail.kanjimori.ui.recognition.RecognitionFragment"
         android:label="Reconnaissance"
-        tools:layout="@layout/fragment_recognition" />
+        tools:layout="@layout/fragment_recognition">
+        <action
+            android:id="@+id/action_nav_recognition_to_game_recap"
+            app:destination="@id/nav_game_recap" />
+    </fragment>
 
     <fragment
         android:id="@+id/nav_reading"
@@ -74,4 +78,28 @@
         android:name="org.oktail.kanjimori.ui.about.AboutFragment"
         android:label="À propos"
         tools:layout="@layout/fragment_about" />
+
+    <fragment
+        android:id="@+id/nav_game_recap"
+        android:name="org.oktail.kanjimori.ui.gamerecap.GameRecapFragment"
+        android:label="Récapitulatif du jeu"
+        tools:layout="@layout/fragment_game_recap">
+        <argument
+            android:name="level"
+            app:argType="string" />
+        <action
+            android:id="@+id/action_game_recap_to_recognition_game"
+            app:destination="@id/nav_recognition_game" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_recognition_game"
+        android:name="org.oktail.kanjimori.ui.recognitiongame.RecognitionGameFragment"
+        android:label="Jeu de reconnaissance"
+        tools:layout="@layout/fragment_recognition_game">
+        <argument
+            android:name="gameMode"
+            app:argType="string" />
+    </fragment>
+
 </navigation>

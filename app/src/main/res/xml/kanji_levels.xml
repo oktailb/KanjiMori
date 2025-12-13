@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<levels>
+    <level name="N5">
+        <kanji>下</kanji>
+        <kanji>校</kanji>
+        <kanji>子</kanji>
+        <kanji>右</kanji>
+        <kanji>生</kanji>
+        <kanji>十</kanji>
+        <kanji>三</kanji>
+        <kanji>天</kanji>
+        <kanji>百</kanji>
+        <kanji>小</kanji>
+        <kanji>五</kanji>
+        <kanji>高</kanji>
+        <kanji>学</kanji>
+        <kanji>女</kanji>
+        <kanji>午</kanji>
+        <kanji>木</kanji>
+        <kanji>長</kanji>
+        <kanji>男</kanji>
+        <kanji>西</kanji>
+        <kanji>間</kanji>
+        <kanji>食</kanji>
+        <kanji>書</kanji>
+        <kanji>人</kanji>
+        <kanji>四</kanji>
+        <kanji>外</kanji>
+        <kanji>八</kanji>
+        <kanji>気</kanji>
+        <kanji>父</kanji>
+        <kanji>半</kanji>
+        <kanji>中</kanji>
+        <kanji>母</kanji>
+        <kanji>後</kanji>
+        <kanji>東</kanji>
+        <kanji>聞</kanji>
+        <kanji>行</kanji>
+        <kanji>毎</kanji>
+        <kanji>一</kanji>
+        <kanji>本</kanji>
+        <kanji>七</kanji>
+        <kanji>国</kanji>
+    </level>
+    <!-- Vous pouvez ajouter d'autres niveaux ici, par exemple -->
+    <!-- 
+    <level name="N4">
+        <kanji>...</kanji>
+    </level>
+    -->
+</levels>

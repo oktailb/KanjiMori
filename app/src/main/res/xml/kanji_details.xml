@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<kanji_details>
+    <kanji character="下">
+        <meaning>sous, bas, inférieur</meaning>
+        <reading>ka, ge, shita, shimo, moto, sa(geru), kuda(ru)</reading>
+    </kanji>
+    <kanji character="校">
+        <meaning>école, révision</meaning>
+        <reading>kou, kyou</reading>
+    </kanji>
+    <kanji character="子">
+        <meaning>enfant</meaning>
+        <reading>shi, su, ko</reading>
+    </kanji>
+    <kanji character="右">
+        <meaning>droite</meaning>
+        <reading>u, yuu, migi</reading>
+    </kanji>
+    <kanji character="生">
+        <meaning>vie, naissance</meaning>
+        <reading>sei, shou, i(kiru), u(mu), o(u), ha(eru), nama</reading>
+    </kanji>
+    <!-- Ajoutez les autres kanjis du N5 et des autres niveaux ici -->
+</kanji_details>

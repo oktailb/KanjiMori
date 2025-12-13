@@ -38,6 +38,10 @@ class HomeFragment : Fragment() {
             findNavController().navigate(R.id.action_nav_home_to_nav_dictionary)
         }
 
+        binding.buttonOptions.setOnClickListener {
+            findNavController().navigate(R.id.action_nav_home_to_nav_options)
+        }
+
         binding.buttonResults.setOnClickListener {
             findNavController().navigate(R.id.action_nav_home_to_nav_results)
         }

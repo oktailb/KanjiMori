@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#E0F7FA"
+    tools:context=".ui.recognitiongame.RecognitionGameFragment">
+
+    <!-- Progress Bar -->
+    <LinearLayout
+        android:id="@+id/progress_bar_game"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:padding="8dp">
+
+        <!-- 10 placeholders for progress indicators -->
+        <ImageView style="@style/Widget.AppCompat.Button.Small" android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@android:drawable/checkbox_off_background"/>
+        <ImageView style="@style/Widget.AppCompat.Button.Small" android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@android:drawable/checkbox_off_background"/>
+        <ImageView style="@style/Widget.AppCompat.Button.Small" android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@android:drawable/checkbox_off_background"/>
+        <ImageView style="@style/Widget.AppCompat.Button.Small" android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@android:drawable/checkbox_off_background"/>
+        <ImageView style="@style/Widget.AppCompat.Button.Small" android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@android:drawable/checkbox_off_background"/>
+        <ImageView style="@style/Widget.AppCompat.Button.Small" android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@android:drawable/checkbox_off_background"/>
+        <ImageView style="@style/Widget.AppCompat.Button.Small" android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@android:drawable/checkbox_off_background"/>
+        <ImageView style="@style/Widget.AppCompat.Button.Small" android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@android:drawable/checkbox_off_background"/>
+        <ImageView style="@style/Widget.AppCompat.Button.Small" android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@android:drawable/checkbox_off_background"/>
+        <ImageView style="@style/Widget.AppCompat.Button.Small" android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@android:drawable/checkbox_off_background"/>
+
+    </LinearLayout>
+
+    <!-- Kanji Display -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/card_kanji"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        app:cardElevation="8dp"
+        app:cardCornerRadius="12dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <TextView
+            android:id="@+id/text_kanji_to_guess"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:textSize="96sp"
+            tools:text="天" />
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Answer Buttons -->
+    <GridLayout
+        android:id="@+id/grid_answers"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:columnCount="2"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <Button android:id="@+id/button_answer_1" android:layout_width="0dp" android:layout_columnWeight="1" android:layout_gravity="fill" tools:text="Option 1" android:lines="2"/>
+        <Button android:id="@+id/button_answer_2" android:layout_width="0dp" android:layout_columnWeight="1" android:layout_gravity="fill" tools:text="Option 2" android:lines="2"/>
+        <Button android:id="@+id/button_answer_3" android:layout_width="0dp" android:layout_columnWeight="1" android:layout_gravity="fill" tools:text="Option 3" android:lines="2"/>
+        <Button android:id="@+id/button_answer_4" android:layout_width="0dp" android:layout_columnWeight="1" android:layout_gravity="fill" tools:text="Option 4" android:lines="2"/>
+
+    </GridLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

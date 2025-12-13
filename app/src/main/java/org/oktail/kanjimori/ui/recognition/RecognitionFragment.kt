@@ -5,6 +5,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
+import org.oktail.kanjimori.R
 import org.oktail.kanjimori.databinding.FragmentRecognitionBinding
 
 class RecognitionFragment : Fragment() {
@@ -40,8 +42,34 @@ class RecognitionFragment : Fragment() {
         val root: View = binding.root
 
         updateButtonText()
+        setupClickListeners()
 
         return root
+    }
+
+    private fun setupClickListeners() {
+        binding.buttonHiragana.setOnClickListener { navigateToRecap("Hiragana") }
+        binding.buttonKatakana.setOnClickListener { navigateToRecap("Katakana") }
+        binding.buttonN5.setOnClickListener { navigateToRecap("N5") }
+        binding.buttonN4.setOnClickListener { navigateToRecap("N4") }
+        binding.buttonN3.setOnClickListener { navigateToRecap("N3") }
+        binding.buttonN2.setOnClickListener { navigateToRecap("N2") }
+        binding.buttonN1.setOnClickListener { navigateToRecap("N1") }
+        binding.buttonClass1.setOnClickListener { navigateToRecap("Classe 1") }
+        binding.buttonClass2.setOnClickListener { navigateToRecap("Classe 2") }
+        binding.buttonClass3.setOnClickListener { navigateToRecap("Classe 3") }
+        binding.buttonClass4.setOnClickListener { navigateToRecap("Classe 4") }
+        binding.buttonClass5.setOnClickListener { navigateToRecap("Classe 5") }
+        binding.buttonClass6.setOnClickListener { navigateToRecap("Classe 6") }
+        binding.buttonTest4.setOnClickListener { navigateToRecap("Test 4") }
+        binding.buttonTest3.setOnClickListener { navigateToRecap("Test 3") }
+        binding.buttonTestPre2.setOnClickListener { navigateToRecap("Test Pre-2") }
+        binding.buttonTest2.setOnClickListener { navigateToRecap("Test 2") }
+    }
+
+    private fun navigateToRecap(level: String) {
+        val bundle = Bundle().apply { putString("level", level) }
+        findNavController().navigate(R.id.action_nav_recognition_to_game_recap, bundle)
     }
 
     private fun updateButtonText() {
