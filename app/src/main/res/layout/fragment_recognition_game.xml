@@ -20,16 +20,16 @@
         android:padding="8dp">
 
         <!-- 10 placeholders for progress indicators -->
-        <ImageView style="@style/Widget.AppCompat.Button.Small" android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@android:drawable/checkbox_off_background"/>
-        <ImageView style="@style/Widget.AppCompat.Button.Small" android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@android:drawable/checkbox_off_background"/>
-        <ImageView style="@style/Widget.AppCompat.Button.Small" android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@android:drawable/checkbox_off_background"/>
-        <ImageView style="@style/Widget.AppCompat.Button.Small" android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@android:drawable/checkbox_off_background"/>
-        <ImageView style="@style/Widget.AppCompat.Button.Small" android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@android:drawable/checkbox_off_background"/>
-        <ImageView style="@style/Widget.AppCompat.Button.Small" android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@android:drawable/checkbox_off_background"/>
-        <ImageView style="@style/Widget.AppCompat.Button.Small" android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@android:drawable/checkbox_off_background"/>
-        <ImageView style="@style/Widget.AppCompat.Button.Small" android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@android:drawable/checkbox_off_background"/>
-        <ImageView style="@style/Widget.AppCompat.Button.Small" android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@android:drawable/checkbox_off_background"/>
-        <ImageView style="@style/Widget.AppCompat.Button.Small" android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@android:drawable/checkbox_off_background"/>
+        <ImageView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:src="@android:drawable/checkbox_off_background"/>
+        <ImageView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:src="@android:drawable/checkbox_off_background"/>
+        <ImageView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:src="@android:drawable/checkbox_off_background"/>
+        <ImageView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:src="@android:drawable/checkbox_off_background"/>
+        <ImageView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:src="@android:drawable/checkbox_off_background"/>
+        <ImageView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:src="@android:drawable/checkbox_off_background"/>
+        <ImageView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:src="@android:drawable/checkbox_off_background"/>
+        <ImageView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:src="@android:drawable/checkbox_off_background"/>
+        <ImageView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:src="@android:drawable/checkbox_off_background"/>
+        <ImageView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:src="@android:drawable/checkbox_off_background"/>
 
     </LinearLayout>
 

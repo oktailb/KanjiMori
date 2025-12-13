@@ -98,7 +98,13 @@
         android:label="Jeu de reconnaissance"
         tools:layout="@layout/fragment_recognition_game">
         <argument
+            android:name="level"
+            app:argType="string" />
+        <argument
             android:name="gameMode"
+            app:argType="string" />
+        <argument
+            android:name="readingMode"
             app:argType="string" />
     </fragment>
 

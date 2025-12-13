@@ -28,16 +28,22 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <GridLayout
-        android:id="@+id/grid_kanji"
+    <ScrollView
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_margin="16dp"
-        android:columnCount="8"
-        app:layout_constraintTop_toBottomOf="@id/text_level_title"
-        app:layout_constraintBottom_toTopOf="@id/bottom_controls"
+        app:layout_constraintTop_toBottomOf="@+id/text_level_title"
+        app:layout_constraintBottom_toTopOf="@+id/bottom_controls"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <GridLayout
+            android:id="@+id/grid_kanji"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:columnCount="8" />
+
+    </ScrollView>
 
     <LinearLayout
         android:id="@+id/bottom_controls"
@@ -50,6 +56,7 @@
         app:layout_constraintEnd_toEndOf="parent">
 
         <LinearLayout
+            android:id="@+id/pagination_controls"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
@@ -83,36 +90,63 @@
             android:gravity="center"
             tools:text="Nouveau: 0, 1:0, 2:0, 3:0, 4:5, 5:0, 6:10, 7:9, 8:3, 9:23, 10:29"/>
 
-        <LinearLayout
+        <RadioGroup
+            android:id="@+id/radio_group_game_mode"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginTop="8dp">
+
+            <RadioButton
+                android:id="@+id/radio_button_meaning"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sens"
+                android:checked="true" />
+
+            <RadioButton
+                android:id="@+id/radio_button_reading"
+                android:layout_width="wrap_content"
+                android_layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:text="Lecture" />
+
+        </RadioGroup>
+        
+        <RadioGroup
+            android:id="@+id/radio_group_reading_options"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
             android:layout_marginTop="8dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:visibility="gone">
 
-            <Button
-                android:id="@+id/button_mode"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            <RadioButton
+                android:id="@+id/radio_button_most_common"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="MODE:\nRéviser" />
+                android:text="Prononciations courantes"
+                android:checked="true" />
 
-            <Button
-                android:id="@+id/button_play"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginEnd="8dp"
-                android:layout_weight="1"
-                android:text="Jouer" />
-
-            <Button
-                android:id="@+id/button_game_options"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            <RadioButton
+                android:id="@+id/radio_button_random"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Options" />
-        </LinearLayout>
+                android:layout_marginStart="16dp"
+                android:text="Prononciations aléatoires" />
+
+        </RadioGroup>
+
+        <Button
+            android:id="@+id/button_play"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:text="Jouer" />
+
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
