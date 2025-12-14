@@ -109,5 +109,6 @@
     <string name="title_game_recap">Game Recap</string>
     <string name="my_image_description">Next page button</string>
     <string name="about_retribution">Retribution</string>
+    <string name="about_patreon">Support me on Patreon</string>
 
 </resources>
