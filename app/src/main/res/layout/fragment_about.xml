@@ -76,9 +76,10 @@
             android:text="Crédits"
             android:textSize="22sp" />
 
+        <!-- Patreon -->
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:orientation="vertical">
 
             <TextView
@@ -93,7 +94,6 @@
                 android:text="Design, programming, etc." />
         </LinearLayout>
 
-        <!-- Patreon -->
         <RelativeLayout
             android:id="@+id/layout_patreon"
             android:layout_width="match_parent"
@@ -146,6 +146,24 @@
         <!-- LECOQ Vincent -->
 
         <!-- Kanji data -->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=" "
+                android:textSize="18sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Japanese pedagogical content" />
+        </LinearLayout>
+
         <RelativeLayout
             android:id="@+id/layout_kanji_data"
             android:layout_width="match_parent"
