@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Kanji Mori</string>
+    <string name="navigation_drawer_open">Abrir gaveta de navegação</string>
+    <string name="navigation_drawer_close">Fechar gaveta de navegação</string>
+    <string name="nav_header_title">Android Studio</string>
+    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_desc">Cabeçalho de navegação</string>
+    <string name="action_settings">Configurações</string>
+
+    <string name="menu_transform">Transformar</string>
+    <string name="menu_reflow">Refluir</string>
+    <string name="menu_slideshow">Apresentação de slides</string>
+    <string name="menu_settings">Configurações</string>
+
+    <string name="lorem_ipsum_title">Lorem Ipsum</string>
+    <string name="lorem_ipsum">Lorem Ipsum is simply placeholder text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard placeholder text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.</string>
+    <string name="fab_content_description">Representa uma vista para invocar uma ação</string>
+    <string name="image_view_item_transform_content_description">Representa uma visualização de imagem no item</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_title">Opções</string>
+    <string name="settings_language">Idioma</string>
+    <string name="settings_pronunciation">Pronúncia</string>
+    <string name="settings_pronunciation_roman">Alfabeto romano</string>
+    <string name="settings_pronunciation_hiragana">Hiragana japonês</string>
+    <string name="settings_default_user_list">Lista de usuários padrão</string>
+    <string name="settings_add_wrong_answers">Adicionar respostas erradas automaticamente</string>
+    <string name="settings_remove_good_answers">Remover palavras 10/10 automaticamente</string>
+    <string name="settings_keyboard">Teclado</string>
+    <string name="settings_keyboard_system">Sistema</string>
+    <string name="settings_keyboard_integrated">Integrado</string>
+    <string name="settings_text_size">Tamanho do texto</string>
+    <string name="settings_animation_speed">Velocidade da animação</string>
+    <string name="settings_theme">Tema (Claro/Escuro)</string>
+    <string name="settings_reset_tutorial">Reiniciar tutorial</string>
+    <string name="settings_send_bug_report">Enviar um relatório de bug</string>
+
+    <!-- Game Recap Screen -->
+    <string name="game_recap_title">Jogo de reconhecimento</string>
+    <string name="game_recap_meaning">Significado</string>
+    <string name="game_recap_reading">Leitura</string>
+    <string name="game_recap_common_pronunciations">Pronúncias comuns</string>
+    <string name="game_recap_random_pronunciations">Pronúncias aleatórias</string>
+    <string name="game_recap_play">Jogar</string>
+
+    <!-- Recognition Screen -->
+    <string name="recognition_title">見覚え</string>
+    <string name="recognition_subtitle">Escolha um grupo de kanji e aprenda a reconhecer seus diferentes significados básicos</string>
+    <string name="recognition_fundamentals">Fundamentos</string>
+    <string name="recognition_jlpt">Teste de Proficiência em Língua Japonesa</string>
+    <string name="recognition_primary_school">Ensino Fundamental (Jōyō 1..1006)</string>
+    <string name="recognition_high_school">Ensino Médio (Jōyō 1007..2136)</string>
+
+    <!-- Writing Screen -->
+    <string name="writing_title">書き方</string>
+    <string name="writing_subtitle">Escolha um grupo de palavras e aprenda a escrevê-las.</string>
+    <string name="writing_kanji_tree">Árvore Kanji</string>
+    <string name="writing_kanji_tree_subtitle">Se você ainda não aprendeu algo:\n(10/10 no jogo correspondente)</string>
+    <string name="writing_kanji_tree_ignore">Ignorar</string>
+    <string name="writing_kanji_tree_include">incluí-los de qualquer maneira</string>
+    <string name="writing_find_words">Encontrar palavras</string>
+    <string name="writing_most_used_words">Palavras mais usadas</string>
+    <string name="writing_find_kanji">Encontrar um Kanji</string>
+    <string name="writing_lists">Listas</string>
+    <string name="writing_user_lists">Lista de usuários / listas de estudo</string>
+
+    <!-- Reading Screen -->
+    <string name="reading_title">読み方</string>
+    <string name="reading_subtitle">Escolha um grupo de palavras e aprenda suas pronúncias.</string>
+    <string name="reading_kanji_tree_subtitle">Se a palavra contiver kanji que você ainda não aprendeu:\n(10/10 no jogo de reconhecimento)</string>
+    <string name="reading_user_list">Lista de usuários</string>
+    <string name="reading_modify_button">Modificar</string>
+
+    <!-- Navigation Drawer -->
+    <string name="menu_recognition">Reconhecimento</string>
+    <string name="menu_reading">Leitura</string>
+    <string name="menu_writing">Escrita</string>
+    <string name="menu_dictionary">Dicionário</string>
+    <string name="menu_results">Resultados</string>
+    <string name="menu_about">Sobre</string>
+
+    <!-- Level/Button Names -->
+    <string name="level_n5">N5</string>
+    <string name="level_n4">N4</string>
+    <string name="level_n3">N3</string>
+    <string name="level_n2">N2</string>
+    <string name="level_n1">N1</string>
+    <string name="level_class_1">Classe 1</string>
+    <string name="level_class_2">Classe 2</string>
+    <string name="level_class_3">Classe 3</string>
+    <string name="level_class_4">Classe 4</string>
+    <string name="level_class_5">Classe 5</string>
+    <string name="level_class_6">Classe 6</string>
+    <string name="level_high_school_1">Teste 4</string>
+    <string name="level_high_school_2">Teste 3</string>
+    <string name="level_high_school_3">Teste Pré-2</string>
+    <string name="level_high_school_4">Teste 2</string>
+    <string name="level_hiragana">Hiragana</string>
+    <string name="level_katakana">Katakana</string>
+
+    <!-- Home Screen -->
+    <string name="home_recognition_subtitle">Aprenda a reconhecer kanji e a lembrar de seus significados básicos.</string>
+    <string name="home_reading_subtitle">Aprenda a ler palavras inteiras e como pronunciá-las em diferentes contextos</string>
+    <string name="home_writing_subtitle">Pratique a escrita de palavras e grave os kanji na sua memória.</string>
+
+    <!-- Toolbar Titles -->
+    <string name="title_home">Kanji Mori</string>
+    <string name="title_game_recap">Resumo do Jogo</string>
+
+</resources>

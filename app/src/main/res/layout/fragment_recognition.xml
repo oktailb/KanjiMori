@@ -16,14 +16,14 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="見覚え"
+            android:text="@string/recognition_title"
             android:textSize="34sp" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
-            android:text="Choisis un groupe de kanji et apprends à reconnaître leurs différentes significations de base" />
+            android:text="@string/recognition_subtitle" />
 
         <!-- Fundamentals -->
         <RelativeLayout
@@ -33,7 +33,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Fundamentals"
+                android:text="@string/recognition_fundamentals"
                 android:textSize="18sp" />
 
             <ImageView
@@ -53,14 +53,14 @@
                 android:layout_width="0dp"
                 android:layout_columnWeight="1"
                 android:layout_gravity="fill"
-                android:text="Hiragana\n0%" />
+                tools:text="Hiragana\n0%" />
 
             <Button
                 android:id="@+id/button_katakana"
                 android:layout_width="0dp"
                 android:layout_columnWeight="1"
                 android:layout_gravity="fill"
-                android:text="Katakana\n0%" />
+                tools:text="Katakana\n0%" />
         </GridLayout>
 
         <!-- Japanese Language Proficiency Test -->
@@ -72,7 +72,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Japanese Language Proficiency Test"
+                android:text="@string/recognition_jlpt"
                 android:textSize="18sp" />
 
             <ImageView
@@ -92,35 +92,35 @@
                 android:layout_width="0dp"
                 android:layout_columnWeight="1"
                 android:layout_gravity="fill"
-                android:text="N5\n0%" />
+                tools:text="N5\n0%" />
 
             <Button
                 android:id="@+id/button_n4"
                 android:layout_width="0dp"
                 android:layout_columnWeight="1"
                 android:layout_gravity="fill"
-                android:text="N4\n0%" />
+                tools:text="N4\n0%" />
 
             <Button
                 android:id="@+id/button_n3"
                 android:layout_width="0dp"
                 android:layout_columnWeight="1"
                 android:layout_gravity="fill"
-                android:text="N3\n0%" />
+                tools:text="N3\n0%" />
 
             <Button
                 android:id="@+id/button_n2"
                 android:layout_width="0dp"
                 android:layout_columnWeight="1"
                 android:layout_gravity="fill"
-                android:text="N2\n0%" />
+                tools:text="N2\n0%" />
 
             <Button
                 android:id="@+id/button_n1"
                 android:layout_width="0dp"
                 android:layout_columnWeight="1"
                 android:layout_gravity="fill"
-                android:text="N1\n0%" />
+                tools:text="N1\n0%" />
         </GridLayout>
 
         <!-- Ecole primaire -->
@@ -132,7 +132,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Ecole primaire (Jōyō 1..1006)"
+                android:text="@string/recognition_primary_school"
                 android:textSize="18sp" />
 
             <ImageView
@@ -152,42 +152,42 @@
                 android:layout_width="0dp"
                 android:layout_columnWeight="1"
                 android:layout_gravity="fill"
-                android:text="Classe 1\n0%" />
+                tools:text="Classe 1\n0%" />
 
             <Button
                 android:id="@+id/button_class2"
                 android:layout_width="0dp"
                 android:layout_columnWeight="1"
                 android:layout_gravity="fill"
-                android:text="Classe 2\n0%" />
+                tools:text="Classe 2\n0%" />
 
             <Button
                 android:id="@+id/button_class3"
                 android:layout_width="0dp"
                 android:layout_columnWeight="1"
                 android:layout_gravity="fill"
-                android:text="Classe 3\n0%" />
+                tools:text="Classe 3\n0%" />
 
             <Button
                 android:id="@+id/button_class4"
                 android:layout_width="0dp"
                 android:layout_columnWeight="1"
                 android:layout_gravity="fill"
-                android:text="Classe 4\n0%" />
+                tools:text="Classe 4\n0%" />
 
             <Button
                 android:id="@+id/button_class5"
                 android:layout_width="0dp"
                 android:layout_columnWeight="1"
                 android:layout_gravity="fill"
-                android:text="Classe 5\n0%" />
+                tools:text="Classe 5\n0%" />
 
             <Button
                 android:id="@+id/button_class6"
                 android:layout_width="0dp"
                 android:layout_columnWeight="1"
                 android:layout_gravity="fill"
-                android:text="Classe 6\n0%" />
+                tools:text="Classe 6\n0%" />
         </GridLayout>
 
         <!-- Lycée -->
@@ -199,7 +199,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Lycée (Jōyō 1007..2136)"
+                android:text="@string/recognition_high_school"
                 android:textSize="18sp" />
 
             <ImageView
@@ -219,28 +219,28 @@
                 android:layout_width="0dp"
                 android:layout_columnWeight="1"
                 android:layout_gravity="fill"
-                android:text="Test 4\n0%" />
+                tools:text="Test 4\n0%" />
 
             <Button
                 android:id="@+id/button_test3"
                 android:layout_width="0dp"
                 android:layout_columnWeight="1"
                 android:layout_gravity="fill"
-                android:text="Test 3\n0%" />
+                tools:text="Test 3\n0%" />
 
             <Button
                 android:id="@+id/button_test_pre2"
                 android:layout_width="0dp"
                 android:layout_columnWeight="1"
                 android:layout_gravity="fill"
-                android:text="Test Pre-2\n0%" />
+                tools:text="Test Pre-2\n0%" />
 
             <Button
                 android:id="@+id/button_test2"
                 android:layout_width="0dp"
                 android:layout_columnWeight="1"
                 android:layout_gravity="fill"
-                android:text="Test 2\n0%" />
+                tools:text="Test 2\n0%" />
         </GridLayout>
 
     </LinearLayout>

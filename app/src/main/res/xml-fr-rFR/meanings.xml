@@ -1,0 +1,1541 @@
+<?xml version="1.0" encoding="utf-8"?>
+<meanings locale="fr_FR">
+    <kanji id="1">
+        <meaning>Jour</meaning>
+        <meaning>Soleil</meaning>
+        <meaning>Japon</meaning>
+        <meaning>Compteur de jours</meaning>
+    </kanji>
+    <kanji id="2">
+        <meaning>Un</meaning>
+        <meaning>Radical un (no. 1)</meaning>
+    </kanji>
+    <kanji id="3">
+        <meaning>Personne</meaning>
+    </kanji>
+    <kanji id="4">
+        <meaning>Année</meaning>
+        <meaning>Compteur pour les années</meaning>
+    </kanji>
+    <kanji id="5">
+        <meaning>Grand</meaning>
+        <meaning>Gros</meaning>
+    </kanji>
+    <kanji id="6">
+        <meaning>Dix</meaning>
+    </kanji>
+    <kanji id="7">
+        <meaning>Deux</meaning>
+        <meaning>Radical deux (no. 7)</meaning>
+    </kanji>
+    <kanji id="8">
+        <meaning>Livre</meaning>
+        <meaning>Présent</meaning>
+        <meaning>Principal</meaning>
+        <meaning>Origine</meaning>
+        <meaning>Vrai</meaning>
+        <meaning>Réel</meaning>
+        <meaning>Compteur pour les objets longs et cylindriques</meaning>
+    </kanji>
+    <kanji id="9">
+        <meaning>Dans</meaning>
+        <meaning>Intérieur</meaning>
+        <meaning>Milieu</meaning>
+        <meaning>Moyen</meaning>
+        <meaning>Centre</meaning>
+    </kanji>
+    <kanji id="10">
+        <meaning>Sortie</meaning>
+        <meaning>Partir</meaning>
+        <meaning>Sortir</meaning>
+        <meaning>Se présenter</meaning>
+        <meaning>Éteindre</meaning>
+        <meaning>Dépasser</meaning>
+    </kanji>
+    <kanji id="11">
+        <meaning>Trois</meaning>
+    </kanji>
+    <kanji id="12">
+        <meaning>Voir</meaning>
+        <meaning>Espoirs</meaning>
+        <meaning>Chances</meaning>
+        <meaning>Idée</meaning>
+        <meaning>Opinion</meaning>
+        <meaning>Regarder</meaning>
+        <meaning>Visible</meaning>
+    </kanji>
+    <kanji id="13">
+        <meaning>Mois</meaning>
+        <meaning>Lune</meaning>
+    </kanji>
+    <kanji id="14">
+        <meaning>Vie</meaning>
+        <meaning>Authentique</meaning>
+        <meaning>Naissance</meaning>
+    </kanji>
+    <kanji id="15">
+        <meaning>Cinq</meaning>
+    </kanji>
+    <kanji id="16">
+        <meaning>Au-dessus</meaning>
+        <meaning>Haut</meaning>
+    </kanji>
+    <kanji id="17">
+        <meaning>Quatre</meaning>
+    </kanji>
+    <kanji id="18">
+        <meaning>Or</meaning>
+    </kanji>
+    <kanji id="19">
+        <meaning>Neuf</meaning>
+    </kanji>
+    <kanji id="20">
+        <meaning>Entrer</meaning>
+        <meaning>Insérer</meaning>
+    </kanji>
+    <kanji id="21">
+        <meaning>Se lever</meaning>
+        <meaning>Monter</meaning>
+        <meaning>Installer</meaning>
+        <meaning>Ériger</meaning>
+    </kanji>
+    <kanji id="22">
+        <meaning>Main</meaning>
+    </kanji>
+    <kanji id="23">
+        <meaning>Pouvoir</meaning>
+        <meaning>Force</meaning>
+        <meaning>Fort</meaning>
+        <meaning>Tension</meaning>
+        <meaning>Supporter</meaning>
+        <meaning>Exercer</meaning>
+    </kanji>
+    <kanji id="24">
+        <meaning>Étude</meaning>
+        <meaning>Apprentissage</meaning>
+        <meaning>Science</meaning>
+    </kanji>
+    <kanji id="25">
+        <meaning>Cercle</meaning>
+        <meaning>Yen</meaning>
+        <meaning>Rond</meaning>
+    </kanji>
+    <kanji id="26">
+        <meaning>Enfant</meaning>
+        <meaning>Signe du rat</meaning>
+        <meaning>23h-1h</meaning>
+        <meaning>Premier signe du zodiaque chinois</meaning>
+    </kanji>
+    <kanji id="27">
+        <meaning>Œil</meaning>
+        <meaning>Classe</meaning>
+        <meaning>Regard</meaning>
+        <meaning>Perspicacité</meaning>
+        <meaning>Expérience</meaning>
+        <meaning>Soin</meaning>
+        <meaning>Faveur</meaning>
+    </kanji>
+    <kanji id="28">
+        <meaning>Rizière</meaning>
+        <meaning>Paddy</meaning>
+    </kanji>
+    <kanji id="29">
+        <meaning>Huit</meaning>
+        <meaning>Radical huit (no. 12)</meaning>
+    </kanji>
+    <kanji id="30">
+        <meaning>Six</meaning>
+    </kanji>
+    <kanji id="31">
+        <meaning>Dessous</meaning>
+        <meaning>Bas</meaning>
+        <meaning>Descendre</meaning>
+        <meaning>Donner</meaning>
+        <meaning>Bas</meaning>
+        <meaning>Inférieur</meaning>
+    </kanji>
+    <kanji id="32">
+        <meaning>Esprit</meaning>
+        <meaning>Âme</meaning>
+        <meaning>Air</meaning>
+        <meaning>Atmosphère</meaning>
+        <meaning>Humeur</meaning>
+    </kanji>
+    <kanji id="33">
+        <meaning>Peu</meaning>
+        <meaning>Petit</meaning>
+    </kanji>
+    <kanji id="34">
+        <meaning>Sept</meaning>
+    </kanji>
+    <kanji id="35">
+        <meaning>Montagne</meaning>
+    </kanji>
+    <kanji id="36">
+        <meaning>Correct</meaning>
+        <meaning>Justice</meaning>
+        <meaning>Juste</meaning>
+        <meaning>10**40</meaning>
+    </kanji>
+    <kanji id="37">
+        <meaning>Femme</meaning>
+        <meaning>Femelle</meaning>
+    </kanji>
+    <kanji id="38">
+        <meaning>Cent</meaning>
+    </kanji>
+    <kanji id="39">
+        <meaning>Avant</meaning>
+        <meaning>Devant</meaning>
+        <meaning>Précédent</meaning>
+        <meaning>Futur</meaning>
+        <meaning>Priorité</meaning>
+    </kanji>
+    <kanji id="40">
+        <meaning>Nom</meaning>
+        <meaning>Célèbre</meaning>
+        <meaning>Distingué</meaning>
+        <meaning>Réputation</meaning>
+    </kanji>
+    <kanji id="41">
+        <meaning>Ruisseau</meaning>
+        <meaning>Rivière</meaning>
+        <meaning>Rivière ou radical de rivière à trois traits (no. 47)</meaning>
+    </kanji>
+    <kanji id="42">
+        <meaning>Phrase</meaning>
+        <meaning>Littérature</meaning>
+        <meaning>Style</meaning>
+        <meaning>Art</meaning>
+        <meaning>Décoration</meaning>
+        <meaning>Chiffres</meaning>
+        <meaning>Plan</meaning>
+        <meaning>Radical littéraire (no. 67)</meaning>
+    </kanji>
+    <kanji id="43">
+        <meaning>Mille</meaning>
+    </kanji>
+    <kanji id="44">
+        <meaning>Eau</meaning>
+    </kanji>
+    <kanji id="45">
+        <meaning>Homme</meaning>
+    </kanji>
+    <kanji id="46">
+        <meaning>Village</meaning>
+        <meaning>Ville</meaning>
+    </kanji>
+    <kanji id="47">
+        <meaning>Bouche</meaning>
+    </kanji>
+    <kanji id="48">
+        <meaning>Ville</meaning>
+        <meaning>Village</meaning>
+        <meaning>Quartier</meaning>
+        <meaning>Rue</meaning>
+    </kanji>
+    <kanji id="49">
+        <meaning>Examen</meaning>
+        <meaning>École</meaning>
+        <meaning>Impression</meaning>
+        <meaning>Preuve</meaning>
+        <meaning>Correction</meaning>
+    </kanji>
+    <kanji id="50">
+        <meaning>Vide</meaning>
+        <meaning>Ciel</meaning>
+        <meaning>Néant</meaning>
+        <meaning>Vacant</meaning>
+        <meaning>Aspirateur</meaning>
+    </kanji>
+    <kanji id="51">
+        <meaning>Sol</meaning>
+        <meaning>Terre</meaning>
+        <meaning>Sol</meaning>
+        <meaning>Turquie</meaning>
+    </kanji>
+    <kanji id="52">
+        <meaning>Arbre</meaning>
+        <meaning>Bois</meaning>
+    </kanji>
+    <kanji id="53">
+        <meaning>Voiture</meaning>
+    </kanji>
+    <kanji id="54">
+        <meaning>Pierre</meaning>
+    </kanji>
+    <kanji id="55">
+        <meaning>Jambe</meaning>
+        <meaning>Pied</meaning>
+        <meaning>Être suffisant</meaning>
+        <meaning>Compteur pour les paires de chaussures</meaning>
+    </kanji>
+    <kanji id="56">
+        <meaning>Tôt</meaning>
+        <meaning>Vite</meaning>
+    </kanji>
+    <kanji id="57">
+        <meaning>Blanc</meaning>
+    </kanji>
+    <kanji id="58">
+        <meaning>Caractère</meaning>
+        <meaning>Lettre</meaning>
+        <meaning>Mot</meaning>
+        <meaning>Section du village</meaning>
+    </kanji>
+    <kanji id="59">
+        <meaning>Son</meaning>
+        <meaning>Bruit</meaning>
+    </kanji>
+    <kanji id="60">
+        <meaning>Cieux</meaning>
+        <meaning>Ciel</meaning>
+        <meaning>Impérial</meaning>
+    </kanji>
+    <kanji id="61">
+        <meaning>Feu</meaning>
+    </kanji>
+    <kanji id="62">
+        <meaning>Fleur</meaning>
+    </kanji>
+    <kanji id="63">
+        <meaning>Rouge</meaning>
+    </kanji>
+    <kanji id="64">
+        <meaning>Bleu</meaning>
+        <meaning>Vert</meaning>
+    </kanji>
+    <kanji id="65">
+        <meaning>Bambou</meaning>
+    </kanji>
+    <kanji id="66">
+        <meaning>Droite</meaning>
+    </kanji>
+    <kanji id="67">
+        <meaning>Forêt</meaning>
+        <meaning>Bois</meaning>
+    </kanji>
+    <kanji id="68">
+        <meaning>Gauche</meaning>
+    </kanji>
+    <kanji id="69">
+        <meaning>Repos</meaning>
+        <meaning>Jour de congé</meaning>
+        <meaning>Prendre sa retraite</meaning>
+        <meaning>Dormir</meaning>
+    </kanji>
+    <kanji id="70">
+        <meaning>Bosquet</meaning>
+        <meaning>Forêt</meaning>
+    </kanji>
+    <kanji id="71">
+        <meaning>Roi</meaning>
+        <meaning>Règle</meaning>
+        <meaning>Magnat</meaning>
+    </kanji>
+    <kanji id="72">
+        <meaning>Bijou</meaning>
+        <meaning>Balle</meaning>
+    </kanji>
+    <kanji id="73">
+        <meaning>Soir</meaning>
+    </kanji>
+    <kanji id="74">
+        <meaning>Pluie</meaning>
+    </kanji>
+    <kanji id="75">
+        <meaning>Herbe</meaning>
+        <meaning>Mauvaises herbes</meaning>
+        <meaning>Herbes</meaning>
+        <meaning>Pâturage</meaning>
+        <meaning>Écrire</meaning>
+        <meaning>Brouillon</meaning>
+    </kanji>
+    <kanji id="76">
+        <meaning>Chien</meaning>
+    </kanji>
+    <kanji id="77">
+        <meaning>Oreille</meaning>
+    </kanji>
+    <kanji id="78">
+        <meaning>Insecte</meaning>
+        <meaning>Bestiole</meaning>
+        <meaning>Caractère</meaning>
+    </kanji>
+    <kanji id="79">
+        <meaning>Fil</meaning>
+    </kanji>
+    <kanji id="80">
+        <meaning>Coquillage</meaning>
+    </kanji>
+    <kanji id="81">
+        <meaning>Pays</meaning>
+    </kanji>
+    <kanji id="82">
+        <meaning>Réunion</meaning>
+        <meaning>Rencontrer</meaning>
+        <meaning>Fête</meaning>
+        <meaning>Association</meaning>
+        <meaning>Entrevue</meaning>
+        <meaning>Rejoindre</meaning>
+    </kanji>
+    <kanji id="83">
+        <meaning>Long</meaning>
+        <meaning>Chef</meaning>
+        <meaning>Supérieur</meaning>
+        <meaning>Ancien</meaning>
+    </kanji>
+    <kanji id="84">
+        <meaning>Même</meaning>
+        <meaning>Accepter</meaning>
+        <meaning>Égal</meaning>
+    </kanji>
+    <kanji id="85">
+        <meaning>Temps</meaning>
+        <meaning>Heure</meaning>
+    </kanji>
+    <kanji id="86">
+        <meaning>Soi-même</meaning>
+    </kanji>
+    <kanji id="87">
+        <meaning>Aller</meaning>
+        <meaning>Voyage</meaning>
+        <meaning>Effectuer</meaning>
+        <meaning>Mener</meaning>
+        <meaning>Agir</meaning>
+        <meaning>Ligne</meaning>
+        <meaning>Rangée</meaning>
+        <meaning>Banque</meaning>
+    </kanji>
+    <kanji id="88">
+        <meaning>Compagnie</meaning>
+        <meaning>Firme</meaning>
+        <meaning>Bureau</meaning>
+        <meaning>Association</meaning>
+        <meaning>Sanctuaire</meaning>
+    </kanji>
+    <kanji id="89">
+        <meaning>Partie</meaning>
+        <meaning>Minute de temps</meaning>
+        <meaning>Segment</meaning>
+        <meaning>Part</meaning>
+        <meaning>Degré</meaning>
+        <meaning>Son lot</meaning>
+        <meaning>Devoir</meaning>
+        <meaning>Comprendre</meaning>
+        <meaning>Savoir</meaning>
+        <meaning>Taux</meaning>
+        <meaning>1%</meaning>
+        <meaning>Chances</meaning>
+        <meaning>Shaku/100</meaning>
+    </kanji>
+    <kanji id="90">
+        <meaning>Derrière</meaning>
+        <meaning>Dos</meaning>
+        <meaning>Plus tard</meaning>
+    </kanji>
+    <kanji id="91">
+        <meaning>Devant</meaning>
+        <meaning>Avant</meaning>
+    </kanji>
+    <kanji id="92">
+        <meaning>Intervalle</meaning>
+        <meaning>Espace</meaning>
+    </kanji>
+    <kanji id="93">
+        <meaning>Est</meaning>
+    </kanji>
+    <kanji id="94">
+        <meaning>Sol</meaning>
+        <meaning>Terre</meaning>
+    </kanji>
+    <kanji id="95">
+        <meaning>Adapter</meaning>
+        <meaning>Convenir</meaning>
+        <meaning>Rejoindre</meaning>
+        <meaning>0.1</meaning>
+    </kanji>
+    <kanji id="96">
+        <meaning>Marché</meaning>
+        <meaning>Cité</meaning>
+        <meaning>Ville</meaning>
+    </kanji>
+    <kanji id="97">
+        <meaning>Intérieur</meaning>
+        <meaning>Au sein de</meaning>
+        <meaning>Entre</meaning>
+        <meaning>Parmi</meaning>
+        <meaning>Maison</meaning>
+        <meaning>Foyer</meaning>
+    </kanji>
+    <kanji id="98">
+        <meaning>Direction</meaning>
+        <meaning>Personne</meaning>
+        <meaning>Alternative</meaning>
+    </kanji>
+    <kanji id="99">
+        <meaning>Maintenant</meaning>
+    </kanji>
+    <kanji id="100">
+        <meaning>-fois</meaning>
+        <meaning>Tour</meaning>
+        <meaning>Jeu</meaning>
+        <meaning>Tourner</meaning>
+        <meaning>Compteur d'occurrences</meaning>
+    </kanji>
+    <kanji id="101">
+        <meaning>Nouveau</meaning>
+    </kanji>
+    <kanji id="102">
+        <meaning>Emplacement</meaning>
+        <meaning>Lieu</meaning>
+    </kanji>
+    <kanji id="103">
+        <meaning>Riz</meaning>
+        <meaning>Usa</meaning>
+        <meaning>Mètre</meaning>
+    </kanji>
+    <kanji id="104">
+        <meaning>Grand</meaning>
+        <meaning>Haut</meaning>
+        <meaning>Cher</meaning>
+    </kanji>
+    <kanji id="105">
+        <meaning>Clair</meaning>
+        <meaning>Lumière</meaning>
+    </kanji>
+    <kanji id="106">
+        <meaning>Capitale</meaning>
+        <meaning>10**16</meaning>
+    </kanji>
+    <kanji id="107">
+        <meaning>Trafic</meaning>
+        <meaning>Traverser</meaning>
+        <meaning>Avenue</meaning>
+        <meaning>Trajet</meaning>
+        <meaning>Compteur pour lettres, notes, documents, etc.</meaning>
+    </kanji>
+    <kanji id="108">
+        <meaning>Extérieur</meaning>
+    </kanji>
+    <kanji id="109">
+        <meaning>Dire</meaning>
+        <meaning>Mot</meaning>
+    </kanji>
+    <kanji id="110">
+        <meaning>Logique</meaning>
+        <meaning>Arrangement</meaning>
+        <meaning>Raison</meaning>
+        <meaning>Justice</meaning>
+        <meaning>Vérité</meaning>
+    </kanji>
+    <kanji id="111">
+        <meaning>Corps</meaning>
+        <meaning>Substance</meaning>
+        <meaning>Objet</meaning>
+        <meaning>Réalité</meaning>
+        <meaning>Compteur pour images</meaning>
+    </kanji>
+    <kanji id="112">
+        <meaning>Frapper</meaning>
+        <meaning>Juste</meaning>
+        <meaning>Approprié</meaning>
+        <meaning>Lui-même</meaning>
+    </kanji>
+    <kanji id="113">
+        <meaning>Cou</meaning>
+        <meaning>Compteur pour chansons et poèmes</meaning>
+    </kanji>
+    <kanji id="114">
+        <meaning>Venir</meaning>
+        <meaning>Dû</meaning>
+        <meaning>Prochain</meaning>
+        <meaning>Cause</meaning>
+        <meaning>Devenir</meaning>
+    </kanji>
+    <kanji id="115">
+        <meaning>Faire</meaning>
+        <meaning>Production</meaning>
+        <meaning>Préparer</meaning>
+        <meaning>Construire</meaning>
+    </kanji>
+    <kanji id="116">
+        <meaning>Utiliser</meaning>
+        <meaning>Affaires</meaning>
+        <meaning>Service</meaning>
+        <meaning>Usage</meaning>
+        <meaning>Employer</meaning>
+    </kanji>
+    <kanji id="117">
+        <meaning>Fort</meaning>
+    </kanji>
+    <kanji id="118">
+        <meaning>Public</meaning>
+        <meaning>Prince</meaning>
+        <meaning>Officiel</meaning>
+        <meaning>Gouvernemental</meaning>
+    </kanji>
+    <kanji id="119">
+        <meaning>Plaines</meaning>
+        <meaning>Champ</meaning>
+        <meaning>Rustique</meaning>
+        <meaning>Vie civile</meaning>
+    </kanji>
+    <kanji id="120">
+        <meaning>Penser</meaning>
+    </kanji>
+    <kanji id="121">
+        <meaning>Maison</meaning>
+        <meaning>Foyer</meaning>
+        <meaning>Famille</meaning>
+        <meaning>Professionnel</meaning>
+        <meaning>Expert</meaning>
+        <meaning>Artiste</meaning>
+    </kanji>
+    <kanji id="122">
+        <meaning>Conte</meaning>
+        <meaning>Parler</meaning>
+    </kanji>
+    <kanji id="123">
+        <meaning>Beaucoup</meaning>
+        <meaning>Fréquent</meaning>
+        <meaning>Très</meaning>
+    </kanji>
+    <kanji id="124">
+        <meaning>Nombre</meaning>
+        <meaning>Force</meaning>
+        <meaning>Destin</meaning>
+        <meaning>Loi</meaning>
+        <meaning>Chiffres</meaning>
+    </kanji>
+    <kanji id="125">
+        <meaning>Scribe</meaning>
+        <meaning>Compte</meaning>
+        <meaning>Récit</meaning>
+    </kanji>
+    <kanji id="126">
+        <meaning>Nord</meaning>
+    </kanji>
+    <kanji id="127">
+        <meaning>Midi</meaning>
+        <meaning>Signe du Cheval</meaning>
+        <meaning>11h-13h</meaning>
+        <meaning>Septième signe du zodiaque chinois</meaning>
+    </kanji>
+    <kanji id="128">
+        <meaning>Cœur</meaning>
+        <meaning>Esprit</meaning>
+        <meaning>Âme</meaning>
+        <meaning>Radical du cœur (n° 61)</meaning>
+    </kanji>
+    <kanji id="129">
+        <meaning>Tache</meaning>
+        <meaning>Point</meaning>
+        <meaning>Marque</meaning>
+        <meaning>Grain</meaning>
+        <meaning>Virgule décimale</meaning>
+    </kanji>
+    <kanji id="130">
+        <meaning>Enseigner</meaning>
+        <meaning>Foi</meaning>
+        <meaning>Doctrine</meaning>
+    </kanji>
+    <kanji id="131">
+        <meaning>Écrire</meaning>
+    </kanji>
+    <kanji id="132">
+        <meaning>Vif</meaning>
+        <meaning>Réanimation</meaning>
+        <meaning>Aidé</meaning>
+        <meaning>Vivant</meaning>
+    </kanji>
+    <kanji id="133">
+        <meaning>Prairie</meaning>
+        <meaning>Original</meaning>
+        <meaning>Primitif</meaning>
+        <meaning>Champ</meaning>
+        <meaning>Plaine</meaning>
+        <meaning>Prairie</meaning>
+        <meaning>Toundra</meaning>
+        <meaning>Nature sauvage</meaning>
+    </kanji>
+    <kanji id="134">
+        <meaning>Mêler</meaning>
+        <meaning>Mélange</meaning>
+        <meaning>Association</meaning>
+        <meaning>Va-et-vient</meaning>
+    </kanji>
+    <kanji id="135">
+        <meaning>Commencement</meaning>
+        <meaning>Temps ancien</meaning>
+        <meaning>Origine</meaning>
+    </kanji>
+    <kanji id="136">
+        <meaning>Près</meaning>
+        <meaning>Tôt</meaning>
+        <meaning>Parent</meaning>
+        <meaning>Équivalent</meaning>
+    </kanji>
+    <kanji id="137">
+        <meaning>Considérer</meaning>
+        <meaning>Réfléchir</meaning>
+    </kanji>
+    <kanji id="138">
+        <meaning>Trait de pinceau</meaning>
+        <meaning>Image</meaning>
+    </kanji>
+    <kanji id="139">
+        <meaning>Mer</meaning>
+        <meaning>Océan</meaning>
+    </kanji>
+    <kanji id="140">
+        <meaning>Vendre</meaning>
+    </kanji>
+    <kanji id="141">
+        <meaning>Association</meaning>
+        <meaning>Tresse</meaning>
+        <meaning>Natter</meaning>
+        <meaning>Construire</meaning>
+        <meaning>Assembler</meaning>
+        <meaning>Unir</meaning>
+        <meaning>Coopérer</meaning>
+        <meaning>Saisir</meaning>
+    </kanji>
+    <kanji id="142">
+        <meaning>Savoir</meaning>
+        <meaning>Sagesse</meaning>
+    </kanji>
+    <kanji id="143">
+        <meaning>Chaussée</meaning>
+        <meaning>Rue</meaning>
+        <meaning>Quartier</meaning>
+        <meaning>Voyage</meaning>
+        <meaning>Parcours</meaning>
+        <meaning>Morale</meaning>
+        <meaning>Enseignements</meaning>
+    </kanji>
+    <kanji id="144">
+        <meaning>Tirer</meaning>
+        <meaning>Remorquer</meaning>
+        <meaning>Secouer</meaning>
+        <meaning>Admettre</meaning>
+        <meaning>Installer</meaning>
+        <meaning>Citer</meaning>
+        <meaning>Se référer à</meaning>
+    </kanji>
+    <kanji id="145">
+        <meaning>Moitié</meaning>
+        <meaning>Milieu</meaning>
+        <meaning>Nombre impair</meaning>
+        <meaning>Semi-</meaning>
+        <meaning>Partiel-</meaning>
+    </kanji>
+    <kanji id="146">
+        <meaning>Complot</meaning>
+        <meaning>Plan</meaning>
+        <meaning>Schéma</meaning>
+        <meaning>Mesure</meaning>
+    </kanji>
+    <kanji id="147">
+        <meaning>Directement</meaning>
+        <meaning>Honnêteté</meaning>
+        <meaning>Franchise</meaning>
+        <meaning>Réparer</meaning>
+    </kanji>
+    <kanji id="148">
+        <meaning>Matin</meaning>
+        <meaning>Dynastie</meaning>
+        <meaning>Régime</meaning>
+        <meaning>Époque</meaning>
+        <meaning>Période</meaning>
+        <meaning>(Corée du) Nord</meaning>
+    </kanji>
+    <kanji id="149">
+        <meaning>Ouest</meaning>
+        <meaning>Espagne</meaning>
+    </kanji>
+    <kanji id="150">
+        <meaning>Piédestal</meaning>
+        <meaning>Un support</meaning>
+        <meaning>Compteur pour machines et véhicules</meaning>
+    </kanji>
+    <kanji id="151">
+        <meaning>Large</meaning>
+        <meaning>Vaste</meaning>
+        <meaning>Spacieux</meaning>
+    </kanji>
+    <kanji id="152">
+        <meaning>Électricité</meaning>
+    </kanji>
+    <kanji id="153">
+        <meaning>Peu</meaning>
+        <meaning>Petit</meaning>
+    </kanji>
+    <kanji id="154">
+        <meaning>Artisanat</meaning>
+        <meaning>Construction</meaning>
+        <meaning>Radical Katakana E (n° 48)</meaning>
+    </kanji>
+    <kanji id="155">
+        <meaning>Mot</meaning>
+        <meaning>Parole</meaning>
+        <meaning>Langage</meaning>
+    </kanji>
+    <kanji id="156">
+        <meaning>Arrêter</meaning>
+        <meaning>Halte</meaning>
+    </kanji>
+    <kanji id="157">
+        <meaning>Entendre</meaning>
+        <meaning>Demander</meaning>
+        <meaning>Écouter</meaning>
+    </kanji>
+    <kanji id="158">
+        <meaning>Couper</meaning>
+        <meaning>Coupure</meaning>
+        <meaning>Être tranchant</meaning>
+    </kanji>
+    <kanji id="159">
+        <meaning>Manger</meaning>
+        <meaning>Nourriture</meaning>
+    </kanji>
+    <kanji id="160">
+        <meaning>Quoi</meaning>
+    </kanji>
+    <kanji id="161">
+        <meaning>Sud</meaning>
+    </kanji>
+    <kanji id="162">
+        <meaning>Tour</meaning>
+        <meaning>Numéro dans une série</meaning>
+    </kanji>
+    <kanji id="163">
+        <meaning>Calculer</meaning>
+        <meaning>Divination</meaning>
+        <meaning>Nombre</meaning>
+        <meaning>Abaque</meaning>
+        <meaning>Probabilité</meaning>
+    </kanji>
+    <kanji id="164">
+        <meaning>Musique</meaning>
+        <meaning>Confort</meaning>
+        <meaning>Aise</meaning>
+    </kanji>
+    <kanji id="165">
+        <meaning>Dix mille</meaning>
+        <meaning>10 000</meaning>
+    </kanji>
+    <kanji id="166">
+        <meaning>Magasin</meaning>
+        <meaning>Boutique</meaning>
+    </kanji>
+    <kanji id="167">
+        <meaning>Ligne</meaning>
+        <meaning>Voie</meaning>
+    </kanji>
+    <kanji id="168">
+        <meaning>Voix</meaning>
+    </kanji>
+    <kanji id="169">
+        <meaning>Parent</meaning>
+        <meaning>Intimité</meaning>
+        <meaning>Parent</meaning>
+        <meaning>Familiarité</meaning>
+        <meaning>Donneur (cartes)</meaning>
+    </kanji>
+    <kanji id="170">
+        <meaning>Forme</meaning>
+        <meaning>Style</meaning>
+    </kanji>
+    <kanji id="171">
+        <meaning>Tête</meaning>
+        <meaning>Compteur pour grands animaux</meaning>
+    </kanji>
+    <kanji id="172">
+        <meaning>Chaque</meaning>
+    </kanji>
+    <kanji id="173">
+        <meaning>Porte</meaning>
+        <meaning>Compteur pour canons</meaning>
+    </kanji>
+    <kanji id="174">
+        <meaning>Solution</meaning>
+        <meaning>Réponse</meaning>
+    </kanji>
+    <kanji id="175">
+        <meaning>Nuit</meaning>
+        <meaning>Soir</meaning>
+    </kanji>
+    <kanji id="176">
+        <meaning>Retour à la maison</meaning>
+        <meaning>Arriver à</meaning>
+        <meaning>Mener à</meaning>
+        <meaning>Aboutir à</meaning>
+    </kanji>
+    <kanji id="177">
+        <meaning>Vallée</meaning>
+    </kanji>
+    <kanji id="178">
+        <meaning>Vieux</meaning>
+    </kanji>
+    <kanji id="179">
+        <meaning>Chanson</meaning>
+        <meaning>Chanter</meaning>
+    </kanji>
+    <kanji id="180">
+        <meaning>Acheter</meaning>
+    </kanji>
+    <kanji id="181">
+        <meaning>Rayon</meaning>
+        <meaning>Lumière</meaning>
+    </kanji>
+    <kanji id="182">
+        <meaning>Département</meaning>
+        <meaning>Cours</meaning>
+        <meaning>Section</meaning>
+    </kanji>
+    <kanji id="183">
+        <meaning>Délicat</meaning>
+        <meaning>Maigrir</meaning>
+        <meaning>S'effiler</meaning>
+        <meaning>Mince</meaning>
+        <meaning>Étroit</meaning>
+        <meaning>Détaillé</meaning>
+        <meaning>Précis</meaning>
+    </kanji>
+    <kanji id="184">
+        <meaning>Carte</meaning>
+        <meaning>Dessin</meaning>
+        <meaning>Plan</meaning>
+        <meaning>Extraordinaire</meaning>
+        <meaning>Audacieux</meaning>
+    </kanji>
+    <kanji id="185">
+        <meaning>Semaine</meaning>
+    </kanji>
+    <kanji id="186">
+        <meaning>Rond</meaning>
+        <meaning>Plein (mois)</meaning>
+        <meaning>Perfection</meaning>
+        <meaning>-ship</meaning>
+        <meaning>Pilules</meaning>
+        <meaning>Arrondir</meaning>
+        <meaning>Enrouler</meaning>
+        <meaning>S'enrouler</meaning>
+        <meaning>Séduire</meaning>
+        <meaning>Expliquer</meaning>
+    </kanji>
+    <kanji id="187">
+        <meaning>Pièce</meaning>
+        <meaning>Appartement</meaning>
+        <meaning>Chambre</meaning>
+        <meaning>Serre</meaning>
+        <meaning>Cave</meaning>
+    </kanji>
+    <kanji id="188">
+        <meaning>Dodu</meaning>
+        <meaning>Épais</meaning>
+        <meaning>Gros</meaning>
+    </kanji>
+    <kanji id="189">
+        <meaning>Marcher</meaning>
+        <meaning>Compteur de pas</meaning>
+    </kanji>
+    <kanji id="190">
+        <meaning>Vent</meaning>
+        <meaning>Air</meaning>
+        <meaning>Style</meaning>
+        <meaning>Manière</meaning>
+    </kanji>
+    <kanji id="191">
+        <meaning>Papier</meaning>
+    </kanji>
+    <kanji id="192">
+        <meaning>Mère</meaning>
+    </kanji>
+    <kanji id="193">
+        <meaning>Noir</meaning>
+    </kanji>
+    <kanji id="194">
+        <meaning>Porte</meaning>
+        <meaning>Compteur pour maisons</meaning>
+        <meaning>Radical de porte (n° 63)</meaning>
+    </kanji>
+    <kanji id="195">
+        <meaning>Printemps</meaning>
+        <meaning>Printemps (saison)</meaning>
+    </kanji>
+    <kanji id="196">
+        <meaning>Lire</meaning>
+    </kanji>
+    <kanji id="197">
+        <meaning>Couleur</meaning>
+    </kanji>
+    <kanji id="198">
+        <meaning>Ami</meaning>
+    </kanji>
+    <kanji id="199">
+        <meaning>Courir</meaning>
+    </kanji>
+    <kanji id="200">
+        <meaning>Parc</meaning>
+        <meaning>Jardin</meaning>
+        <meaning>Cour</meaning>
+        <meaning>Ferme</meaning>
+    </kanji>
+    <kanji id="201">
+        <meaning>Automne</meaning>
+    </kanji>
+    <kanji id="202">
+        <meaning>Cheval</meaning>
+    </kanji>
+    <kanji id="203">
+        <meaning>Père</meaning>
+    </kanji>
+    <kanji id="204">
+        <meaning>Été</meaning>
+    </kanji>
+    <kanji id="205">
+        <meaning>Visage</meaning>
+        <meaning>Expression</meaning>
+    </kanji>
+    <kanji id="206">
+        <meaning>Navire</meaning>
+        <meaning>Bateau</meaning>
+    </kanji>
+    <kanji id="207">
+        <meaning>Plumes</meaning>
+        <meaning>Compteur pour oiseaux, lapins</meaning>
+    </kanji>
+    <kanji id="208">
+        <meaning>Rocher</meaning>
+        <meaning>Roche</meaning>
+        <meaning>Falaise</meaning>
+    </kanji>
+    <kanji id="209">
+        <meaning>Angle</meaning>
+        <meaning>Coin</meaning>
+        <meaning>Carré</meaning>
+        <meaning>Corne</meaning>
+        <meaning>Bois de cerf</meaning>
+    </kanji>
+    <kanji id="210">
+        <meaning>Étang</meaning>
+        <meaning>Citerne</meaning>
+        <meaning>Piscine</meaning>
+        <meaning>Réservoir</meaning>
+    </kanji>
+    <kanji id="211">
+        <meaning>Étoile</meaning>
+        <meaning>Tache</meaning>
+        <meaning>Point</meaning>
+        <meaning>Marque</meaning>
+    </kanji>
+    <kanji id="212">
+        <meaning>Temple bouddhiste</meaning>
+    </kanji>
+    <kanji id="213">
+        <meaning>Lointain</meaning>
+        <meaning>Loin</meaning>
+    </kanji>
+    <kanji id="214">
+        <meaning>Image</meaning>
+        <meaning>Dessin</meaning>
+        <meaning>Peinture</meaning>
+        <meaning>Croquis</meaning>
+    </kanji>
+    <kanji id="215">
+        <meaning>Jour de la semaine</meaning>
+    </kanji>
+    <kanji id="216">
+        <meaning>Faible</meaning>
+        <meaning>Frêle</meaning>
+    </kanji>
+    <kanji id="217">
+        <meaning>Viande</meaning>
+    </kanji>
+    <kanji id="218">
+        <meaning>S'éclaircir</meaning>
+    </kanji>
+    <kanji id="219">
+        <meaning>Oiseau</meaning>
+        <meaning>Poulet</meaning>
+    </kanji>
+    <kanji id="220">
+        <meaning>Hiver</meaning>
+    </kanji>
+    <kanji id="221">
+        <meaning>Ri</meaning>
+        <meaning>Village</meaning>
+        <meaning>Maison des parents</meaning>
+        <meaning>Ligue</meaning>
+    </kanji>
+    <kanji id="222">
+        <meaning>Journée</meaning>
+        <meaning>Midi</meaning>
+    </kanji>
+    <kanji id="223">
+        <meaning>Thé</meaning>
+    </kanji>
+    <kanji id="224">
+        <meaning>Neige</meaning>
+    </kanji>
+    <kanji id="225">
+        <meaning>Frère cadet</meaning>
+        <meaning>Service fidèle aux aînés</meaning>
+    </kanji>
+    <kanji id="226">
+        <meaning>Fourrure</meaning>
+        <meaning>Cheveux</meaning>
+        <meaning>Plume</meaning>
+        <meaning>Duvet</meaning>
+    </kanji>
+    <kanji id="227">
+        <meaning>Vache</meaning>
+    </kanji>
+    <kanji id="228">
+        <meaning>Poisson</meaning>
+    </kanji>
+    <kanji id="229">
+        <meaning>Frère aîné</meaning>
+        <meaning>Grand frère</meaning>
+    </kanji>
+    <kanji id="230">
+        <meaning>Jaune</meaning>
+    </kanji>
+    <kanji id="231">
+        <meaning>Nuage</meaning>
+    </kanji>
+    <kanji id="232">
+        <meaning>Gazouiller</meaning>
+        <meaning>Pleurer</meaning>
+        <meaning>Aboyer</meaning>
+        <meaning>Son</meaning>
+        <meaning>Sonner</meaning>
+        <meaning>Écho</meaning>
+        <meaning>Klaxonner</meaning>
+    </kanji>
+    <kanji id="233">
+        <meaning>Fléchette</meaning>
+        <meaning>Flèche</meaning>
+    </kanji>
+    <kanji id="234">
+        <meaning>Sœur cadette</meaning>
+    </kanji>
+    <kanji id="235">
+        <meaning>Sœur aînée</meaning>
+    </kanji>
+    <kanji id="236">
+        <meaning>Génie</meaning>
+        <meaning>Ans</meaning>
+        <meaning>Shaku cubique</meaning>
+    </kanji>
+    <kanji id="237">
+        <meaning>Orge</meaning>
+        <meaning>Blé</meaning>
+    </kanji>
+    <kanji id="238">
+        <meaning>Épée</meaning>
+        <meaning>Sabre</meaning>
+        <meaning>Couteau</meaning>
+    </kanji>
+    <kanji id="239">
+        <meaning>Arc</meaning>
+        <meaning>Arc (tir à l'arc, violon)</meaning>
+    </kanji>
+    <kanji id="240">
+        <meaning>Vapeur</meaning>
+    </kanji>
+    <kanji id="241">
+        <meaning>Matière</meaning>
+        <meaning>Chose</meaning>
+        <meaning>Fait</meaning>
+        <meaning>Affaires</meaning>
+        <meaning>Raison</meaning>
+        <meaning>Possiblement</meaning>
+    </kanji>
+    <kanji id="242">
+        <meaning>Départ</meaning>
+        <meaning>Décharge</meaning>
+        <meaning>Publier</meaning>
+        <meaning>Émettre</meaning>
+        <meaning>Partir de</meaning>
+        <meaning>Révéler</meaning>
+        <meaning>Compteur de coups de feu</meaning>
+    </kanji>
+    <kanji id="243">
+        <meaning>Vis-à-vis</meaning>
+        <meaning>Opposé</meaning>
+        <meaning>Même</meaning>
+        <meaning>Égal</meaning>
+        <meaning>Contre</meaning>
+        <meaning>Anti-</meaning>
+        <meaning>Comparer</meaning>
+    </kanji>
+    <kanji id="244">
+        <meaning>Section</meaning>
+        <meaning>Bureau</meaning>
+        <meaning>Département</meaning>
+        <meaning>Classe</meaning>
+        <meaning>Copie</meaning>
+        <meaning>Partie</meaning>
+        <meaning>Portion</meaning>
+        <meaning>Compteur pour les exemplaires d'un journal ou d'un magazine</meaning>
+    </kanji>
+    <kanji id="245">
+        <meaning>Quelqu'un</meaning>
+        <meaning>Personne</meaning>
+    </kanji>
+    <kanji id="246">
+        <meaning>Affaires</meaning>
+        <meaning>Vocation</meaning>
+        <meaning>Arts</meaning>
+        <meaning>Performance</meaning>
+    </kanji>
+    <kanji id="247">
+        <meaning>Inter-</meaning>
+        <meaning>Mutuel</meaning>
+        <meaning>Ensemble</meaning>
+        <meaning>L'un l'autre</meaning>
+        <meaning>Ministre d'État</meaning>
+        <meaning>Conseiller</meaning>
+        <meaning>Aspect</meaning>
+        <meaning>Phase</meaning>
+        <meaning>Physionomie</meaning>
+    </kanji>
+    <kanji id="248">
+        <meaning>Déterminer</meaning>
+        <meaning>Fixer</meaning>
+        <meaning>Établir</meaning>
+        <meaning>Décider</meaning>
+    </kanji>
+    <kanji id="249">
+        <meaning>Employé</meaning>
+        <meaning>Membre</meaning>
+        <meaning>Nombre</meaning>
+        <meaning>Le responsable</meaning>
+    </kanji>
+    <kanji id="250">
+        <meaning>Ouvrir</meaning>
+        <meaning>Déplier</meaning>
+        <meaning>Décapsuler</meaning>
+    </kanji>
+    <kanji id="251">
+        <meaning>Question</meaning>
+        <meaning>Demander</meaning>
+        <meaning>Problème</meaning>
+    </kanji>
+    <kanji id="252">
+        <meaning>Substitut</meaning>
+        <meaning>Changer</meaning>
+        <meaning>Convertir</meaning>
+        <meaning>Remplacer</meaning>
+        <meaning>Période</meaning>
+        <meaning>Âge</meaning>
+        <meaning>Compteur pour les décennies d'âges, d'époques, etc.</meaning>
+        <meaning>Génération</meaning>
+        <meaning>Charge</meaning>
+        <meaning>Taux</meaning>
+        <meaning>Frais</meaning>
+    </kanji>
+    <kanji id="253">
+        <meaning>Réalité</meaning>
+        <meaning>Vérité</meaning>
+    </kanji>
+    <kanji id="254">
+        <meaning>Décider</meaning>
+        <meaning>Fixer</meaning>
+        <meaning>Convenir de</meaning>
+        <meaning>Nommer</meaning>
+    </kanji>
+    <kanji id="255">
+        <meaning>Bouger</meaning>
+        <meaning>Mouvement</meaning>
+        <meaning>Changer</meaning>
+        <meaning>Confusion</meaning>
+        <meaning>Déplacer</meaning>
+        <meaning>Secouer</meaning>
+    </kanji>
+    <kanji id="256">
+        <meaning>Entier</meaning>
+        <meaning>Complet</meaning>
+        <meaning>Tout</meaning>
+        <meaning>Achever</meaning>
+    </kanji>
+    <kanji id="257">
+        <meaning>Surface</meaning>
+        <meaning>Tableau</meaning>
+        <meaning>Graphique</meaning>
+        <meaning>Diagramme</meaning>
+    </kanji>
+    <kanji id="258">
+        <meaning>Mélodie</meaning>
+        <meaning>Ton</meaning>
+        <meaning>Mètre</meaning>
+        <meaning>Clé (musique)</meaning>
+        <meaning>Style d'écriture</meaning>
+        <meaning>Préparer</meaning>
+        <meaning>Exorciser</meaning>
+        <meaning>Enquêter</meaning>
+        <meaning>Harmoniser</meaning>
+        <meaning>Arbitrer</meaning>
+    </kanji>
+    <kanji id="259">
+        <meaning>Changer</meaning>
+        <meaning>Prendre la forme de</meaning>
+        <meaning>Influence</meaning>
+        <meaning>Enchanter</meaning>
+        <meaning>Tromper</meaning>
+        <meaning>-isation</meaning>
+    </kanji>
+    <kanji id="260">
+        <meaning>Seigneur</meaning>
+        <meaning>Chef</meaning>
+        <meaning>Maître</meaning>
+        <meaning>Chose principale</meaning>
+        <meaning>Principal</meaning>
+    </kanji>
+    <kanji id="261">
+        <meaning>Sujet</meaning>
+    </kanji>
+    <kanji id="262">
+        <meaning>Idée</meaning>
+        <meaning>Esprit</meaning>
+        <meaning>Cœur</meaning>
+        <meaning>Goût</meaning>
+        <meaning>Pensée</meaning>
+        <meaning>Désir</meaning>
+        <meaning>Soin</meaning>
+        <meaning>Goût</meaning>
+    </kanji>
+    <kanji id="263">
+        <meaning>Degrés</meaning>
+        <meaning>Occurrence</meaning>
+        <meaning>Temps</meaning>
+        <meaning>Compteur d'occurrences</meaning>
+        <meaning>Considérer</meaning>
+        <meaning>Attitude</meaning>
+    </kanji>
+    <kanji id="264">
+        <meaning>Période</meaning>
+        <meaning>Temps</meaning>
+        <meaning>Date</meaning>
+        <meaning>Terme</meaning>
+    </kanji>
+    <kanji id="265">
+        <meaning>Tenir</meaning>
+        <meaning>Avoir</meaning>
+    </kanji>
+    <kanji id="266">
+        <meaning>Prendre</meaning>
+        <meaning>Chercher</meaning>
+        <meaning>Ramasser</meaning>
+    </kanji>
+    <kanji id="267">
+        <meaning>Métropole</meaning>
+        <meaning>Capitale</meaning>
+        <meaning>Tout</meaning>
+        <meaning>Tout</meaning>
+    </kanji>
+    <kanji id="268">
+        <meaning>Harmonie</meaning>
+        <meaning>Style japonais</meaning>
+        <meaning>Paix</meaning>
+        <meaning>Adoucir</meaning>
+        <meaning>Japon</meaning>
+    </kanji>
+    <kanji id="269">
+        <meaning>Même</meaning>
+        <meaning>Plat</meaning>
+        <meaning>Paix</meaning>
+    </kanji>
+    <kanji id="270">
+        <meaning>Génération</meaning>
+        <meaning>Monde</meaning>
+        <meaning>Société</meaning>
+        <meaning>Public</meaning>
+    </kanji>
+    <kanji id="271">
+        <meaning>Accepter</meaning>
+        <meaning>Subir</meaning>
+        <meaning>Répondre (téléphone)</meaning>
+        <meaning>Prendre</meaning>
+        <meaning>Obtenir</meaning>
+        <meaning>Attraper</meaning>
+        <meaning>Recevoir</meaning>
+    </kanji>
+    <kanji id="272">
+        <meaning>Arrondissement</meaning>
+        <meaning>Quartier</meaning>
+    </kanji>
+    <kanji id="273">
+        <meaning>Préfecture</meaning>
+    </kanji>
+    <kanji id="274">
+        <meaning>Avancer</meaning>
+        <meaning>Procéder</meaning>
+        <meaning>Progresser</meaning>
+        <meaning>Promouvoir</meaning>
+    </kanji>
+    <kanji id="275">
+        <meaning>Détendre</meaning>
+        <meaning>Bon marché</meaning>
+        <meaning>Bas</meaning>
+        <meaning>Calme</meaning>
+        <meaning>Reposé</meaning>
+        <meaning>Content</meaning>
+        <meaning>Paisible</meaning>
+    </kanji>
+    <kanji id="276">
+        <meaning>Inst.</meaning>
+        <meaning>Institution</meaning>
+        <meaning>Temple</meaning>
+        <meaning>Manoir</meaning>
+        <meaning>École</meaning>
+    </kanji>
+    <kanji id="277">
+        <meaning>Doigt</meaning>
+        <meaning>Pointer du doigt</meaning>
+        <meaning>Indiquer</meaning>
+        <meaning>Mettre dedans</meaning>
+        <meaning>Jouer (échecs)</meaning>
+        <meaning>Mesurer (règle)</meaning>
+    </kanji>
+    <kanji id="278">
+        <meaning>Monde</meaning>
+        <meaning>Frontière</meaning>
+    </kanji>
+    <kanji id="279">
+        <meaning>N°</meaning>
+        <meaning>Résidence</meaning>
+    </kanji>
+    <kanji id="280">
+        <meaning>Auparavant</meaning>
+        <meaning>Précédent</meaning>
+        <meaning>Moi-même</meaning>
+        <meaning>Je</meaning>
+    </kanji>
+    <kanji id="281">
+        <meaning>Là-bas</meaning>
+        <meaning>Face à</meaning>
+        <meaning>Au-delà</meaning>
+        <meaning>Confronter</meaning>
+        <meaning>Défier</meaning>
+        <meaning>Tendre vers</meaning>
+        <meaning>Approcher</meaning>
+    </kanji>
+    <kanji id="282">
+        <meaning>Victoire</meaning>
+        <meaning>Gagner</meaning>
+        <meaning>L'emporter</meaning>
+        <meaning>Exceller</meaning>
+    </kanji>
+    <kanji id="283">
+        <meaning>Masque</meaning>
+        <meaning>Visage</meaning>
+        <meaning>Traits</meaning>
+        <meaning>Surface</meaning>
+    </kanji>
+    <kanji id="284">
+        <meaning>Comité</meaning>
+        <meaning>Confier à</meaning>
+        <meaning>Laisser à</meaning>
+        <meaning>Consacrer</meaning>
+        <meaning>Jeter</meaning>
+    </kanji>
+    <kanji id="285">
+        <meaning>Anti-</meaning>
+    </kanji>
+    <kanji id="286">
+        <meaning>Lourd</meaning>
+        <meaning>Important</meaning>
+        <meaning>Estime</meaning>
+        <meaning>Respect</meaning>
+        <meaning>Entasser</meaning>
+        <meaning>Empiler</meaning>
+        <meaning>Nid de boîtes</meaning>
+        <meaning>-pli</meaning>
+    </kanji>
+    <kanji id="287">
+        <meaning>Rassembler</meaning>
+        <meaning>Rencontrer</meaning>
+        <meaning>Se rassembler</meaning>
+        <meaning>Essaim</meaning>
+        <meaning>Troupeau</meaning>
+    </kanji>
+    <kanji id="288">
+        <meaning>Chose</meaning>
+        <meaning>Objet</meaning>
+        <meaning>Matière</meaning>
+    </kanji>
+    <kanji id="289">
+        <meaning>Utiliser</meaning>
+        <meaning>Envoyer en mission</meaning>
+        <meaning>Ordre</meaning>
+        <meaning>Messager</meaning>
+        <meaning>Envoyé</meaning>
+        <meaning>Ambassadeur</meaning>
+        <meaning>Cause</meaning>
+    </kanji>
+    <kanji id="290">
+        <meaning>Lieu</meaning>
+        <meaning>Étendue</meaning>
+    </kanji>
+    <kanji id="291">
+        <meaning>Suivant</meaning>
+        <meaning>Ordre</meaning>
+        <meaning>Séquence</meaning>
+    </kanji>
+    <kanji id="292">
+        <meaning>Marchandises</meaning>
+        <meaning>Raffinement</meaning>
+        <meaning>Dignité</meaning>
+        <meaning>Article</meaning>
+        <meaning>Compteur pour les plats</meaning>
+    </kanji>
+    <kanji id="293">
+        <meaning>Mort</meaning>
+        <meaning>Mourir</meaning>
+    </kanji>
+    <kanji id="294">
+        <meaning>Responsable</meaning>
+        <meaning>Connexion</meaning>
+        <meaning>Devoir</meaning>
+        <meaning>Se préoccuper</meaning>
+    </kanji>
+    <kanji id="295">
+        <meaning>Émotion</meaning>
+        <meaning>Sentiment</meaning>
+        <meaning>Sensation</meaning>
+    </kanji>
+    <kanji id="296">
+        <meaning>Jeter</meaning>
+        <meaning>Débarrasser</meaning>
+        <meaning>Abandonner</meaning>
+        <meaning>Se lancer dans</meaning>
+        <meaning>Rejoindre</meaning>
+        <meaning>Investir dans</meaning>
+        <meaning>Lancer</meaning>
+        <meaning>Abandonner</meaning>
+        <meaning>Vendre à perte</meaning>
+    </kanji>
+    <kanji id="297">
+        <meaning>Frapper</meaning>
+        <meaning>Coup</meaning>
+        <meaning>Heurter</meaning>
+        <meaning>Marteler</meaning>
+        <meaning>Douzaine</meaning>
+    </kanji>
+    <kanji id="298">
+        <meaning>Commencer</meaning>
+    </kanji>
+    <kanji id="299">
+        <meaning>Île</meaning>
+    </kanji>
+    <kanji id="300">
+        <meaning>Les deux</meaning>
+        <meaning>Ancienne pièce de monnaie japonaise</meaning>
+        <meaning>Compteur pour les voitures (par ex. dans un train)</meaning>
+        <meaning>Deux</meaning>
+    </kanji>
+</meanings>

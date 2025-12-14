@@ -1,9 +1,11 @@
 package org.oktail.kanjimori.ui.recognitiongame
 
+import android.content.res.Resources
 import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,9 +18,11 @@ import org.oktail.kanjimori.R
 import org.oktail.kanjimori.data.ScoreManager
 import org.oktail.kanjimori.databinding.FragmentRecognitionGameBinding
 import org.xmlpull.v1.XmlPullParser
+import org.xmlpull.v1.XmlPullParserException
+import java.io.IOException
 
 data class Reading(val value: String, val type: String, val frequency: Int)
-data class KanjiDetail(val character: String, val meaning: String, val readings: List<Reading>)
+data class KanjiDetail(val id: String, val character: String, val meanings: List<String>, val readings: List<Reading>)
 enum class GameStatus { NOT_ANSWERED, CORRECT, INCORRECT }
 
 class RecognitionGameFragment : Fragment() {
@@ -54,7 +58,7 @@ class RecognitionGameFragment : Fragment() {
         readingMode = args.readingMode
         val level = args.level
 
-        loadAllKanjiDetailsFromXml()
+        loadAllKanjiDetails()
         val kanjiForLevel = loadKanjiForLevel(level)
         allKanjiDetails.clear()
         allKanjiDetails.addAll(allKanjiDetailsXml.filter { kanjiForLevel.contains(it.character) })
@@ -63,6 +67,9 @@ class RecognitionGameFragment : Fragment() {
 
         if (allKanjiDetails.isNotEmpty()) {
             startNewSet()
+        } else {
+            Log.e("RecognitionGameFragment", "No kanji loaded for level: $level. Check XML files.")
+            findNavController().popBackStack()
         }
 
         val answerButtons = listOf(binding.buttonAnswer1, binding.buttonAnswer2, binding.buttonAnswer3, binding.buttonAnswer4)
@@ -130,34 +137,71 @@ class RecognitionGameFragment : Fragment() {
         }
     }
 
-    private fun loadAllKanjiDetailsFromXml() {
-        val parser = resources.getXml(R.xml.kanji_details)
-        var character: String? = null
-        var meaning: String? = null
-        var readings = mutableListOf<Reading>()
-
+    private fun loadMeanings(): Map<String, List<String>> {
+        val meaningsMap = mutableMapOf<String, MutableList<String>>()
         try {
+            val parser = resources.getXml(R.xml.meanings)
+            var currentId: String? = null
             var eventType = parser.eventType
             while (eventType != XmlPullParser.END_DOCUMENT) {
                 when (eventType) {
                     XmlPullParser.START_TAG -> {
-                        when (parser.name) {
-                            "kanji" -> {
-                                character = parser.getAttributeValue(null, "character")
-                                readings = mutableListOf()
+                        if (parser.name == "kanji") {
+                            currentId = parser.getAttributeValue(null, "id")
+                            if (currentId != null) {
+                                meaningsMap.putIfAbsent(currentId, mutableListOf())
                             }
-                            "meaning" -> meaning = parser.nextText()
-                            "reading" -> {
-                                val type = parser.getAttributeValue(null, "type")
-                                val frequency = parser.getAttributeValue(null, "frequency").toInt()
-                                val value = parser.nextText()
-                                readings.add(Reading(value, type, frequency))
-                            }
+                        } else if (parser.name == "meaning" && currentId != null) {
+                            meaningsMap[currentId]?.add(parser.nextText())
                         }
                     }
                     XmlPullParser.END_TAG -> {
-                        if (parser.name == "kanji" && character != null && meaning != null) {
-                            allKanjiDetailsXml.add(KanjiDetail(character, meaning, readings))
+                        if (parser.name == "kanji") {
+                            currentId = null
+                        }
+                    }
+                }
+                eventType = parser.next()
+            }
+        } catch (e: Resources.NotFoundException) {
+            Log.e("RecognitionGameFragment", "meanings.xml not found for current locale. Fallback should occur.", e)
+        } catch (e: XmlPullParserException) {
+            Log.e("RecognitionGameFragment", "Error parsing meanings.xml", e)
+        } catch (e: IOException) {
+            Log.e("RecognitionGameFragment", "IO error reading meanings.xml", e)
+        }
+        return meaningsMap
+    }
+
+    private fun loadAllKanjiDetails() {
+        val meanings = loadMeanings()
+        val parser = resources.getXml(R.xml.kanji_details)
+
+        try {
+            var eventType = parser.eventType
+            var currentKanjiDetail: KanjiDetail? = null
+
+            while (eventType != XmlPullParser.END_DOCUMENT) {
+                when (eventType) {
+                    XmlPullParser.START_TAG -> {
+                        if (parser.name == "kanji") {
+                            val id = parser.getAttributeValue(null, "id")
+                            val character = parser.getAttributeValue(null, "character")
+                            if (id != null && character != null) {
+                                val kanjiMeanings = meanings[id] ?: emptyList()
+                                currentKanjiDetail = KanjiDetail(id, character, kanjiMeanings, mutableListOf())
+                                allKanjiDetailsXml.add(currentKanjiDetail)
+                            }
+                        } else if (parser.name == "reading" && currentKanjiDetail != null) {
+                            val type = parser.getAttributeValue(null, "type")
+                            val frequency = parser.getAttributeValue(null, "frequency").toInt()
+                            val value = parser.nextText()
+                            (currentKanjiDetail.readings as MutableList).add(Reading(value, type, frequency))
+                        }
+                    }
+                    XmlPullParser.END_TAG -> {
+                        if (parser.name == "kanji") {
+                            currentKanjiDetail = null
                         }
                     }
                 }
@@ -180,16 +224,16 @@ class RecognitionGameFragment : Fragment() {
         val answers = generateAnswers(currentKanji)
         val answerButtons = listOf(binding.buttonAnswer1, binding.buttonAnswer2, binding.buttonAnswer3, binding.buttonAnswer4)
 
-        answerButtons.zip(answers).forEach { (button, answer) ->
-            button.text = answer
+        answerButtons.zip(answers).forEach { (button, answerText) ->
+            button.text = answerText
             button.setBackgroundColor(Color.LTGRAY)
             button.isEnabled = true
         }
     }
 
     private fun generateAnswers(correctKanji: KanjiDetail): List<String> {
-        this.correctAnswer = if (gameMode == "meaning") {
-            correctKanji.meaning
+        correctAnswer = if (gameMode == "meaning") {
+            correctKanji.meanings.firstOrNull() ?: ""
         } else {
             if (readingMode == "common") {
                 correctKanji.readings.maxByOrNull { it.frequency }?.value
@@ -198,33 +242,42 @@ class RecognitionGameFragment : Fragment() {
             }
         } ?: ""
 
-        if (this.correctAnswer.isEmpty()) return listOf("", "", "", "")
+        if (correctAnswer.isEmpty()) return listOf("", "", "", "")
+
+        // Get up to 3 meanings for the correct answer button
+        val correctButtonText = if (gameMode == "meaning") {
+            correctKanji.meanings.take(3).joinToString("\n")
+        } else {
+            correctAnswer
+        }
 
         val incorrectPool = allKanjiDetailsXml
             .asSequence()
-            .map {
-                if (gameMode == "meaning") it.meaning
-                else it.readings.shuffled().firstOrNull()?.value
+            .filter { it.id != correctKanji.id }
+            .map { detail ->
+                if (gameMode == "meaning") {
+                    detail.meanings.take(3).joinToString("\n")
+                } else {
+                    detail.readings.shuffled().firstOrNull()?.value ?: ""
+                }
             }
-            .filterNotNull()
-            .filter { it != this.correctAnswer && it.isNotEmpty() }
+            .filter { it.isNotEmpty() }
             .distinct()
             .shuffled()
             .take(3)
             .toList()
 
-        return (incorrectPool + this.correctAnswer).shuffled()
+        return (incorrectPool + correctButtonText).shuffled()
     }
 
     private fun onAnswerClicked(button: Button) {
-        val isCorrect = button.text == this.correctAnswer
+        val isCorrect = button.text.lines().firstOrNull() == correctAnswer
 
         ScoreManager.saveScore(requireContext(), currentKanji.character, isCorrect)
 
         if (isCorrect) {
             button.setBackgroundColor(Color.GREEN)
             kanjiStatus[currentKanji] = GameStatus.CORRECT
-            // Only remove from revision list if the answer is correct
             revisionList.remove(currentKanji)
         } else {
             button.setBackgroundColor(Color.RED)

@@ -12,7 +12,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="Jeu de reconnaissance"
+        android:text="@string/game_recap_title"
         android:textSize="24sp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -32,7 +32,7 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_margin="16dp"
-        app:layout_constraintTop_toBottomOf="@+id/text_level_title"
+        app:layout_constraintTop_toBottomOf="@id/text_level_title"
         app:layout_constraintBottom_toTopOf="@+id/bottom_controls"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
@@ -102,7 +102,7 @@
                 android:id="@+id/radio_button_meaning"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Sens"
+                android:text="@string/game_recap_meaning"
                 android:checked="true" />
 
             <RadioButton
@@ -110,7 +110,7 @@
                 android:layout_width="wrap_content"
                 android_layout_height="wrap_content"
                 android:layout_marginStart="16dp"
-                android:text="Lecture" />
+                android:text="@string/game_recap_reading" />
 
         </RadioGroup>
         
@@ -127,7 +127,7 @@
                 android:id="@+id/radio_button_most_common"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Prononciations courantes"
+                android:text="@string/game_recap_common_pronunciations"
                 android:checked="true" />
 
             <RadioButton
@@ -135,7 +135,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
-                android:text="Prononciations aléatoires" />
+                android:text="@string/game_recap_random_pronunciations" />
 
         </RadioGroup>
 
@@ -145,7 +145,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
-            android:text="Jouer" />
+            android:text="@string/game_recap_play" />
 
     </LinearLayout>
 

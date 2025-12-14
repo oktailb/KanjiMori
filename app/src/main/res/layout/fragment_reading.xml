@@ -15,14 +15,14 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="読み方"
+            android:text="@string/reading_title"
             android:textSize="34sp" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
-            android:text="Choisis un groupe de mots et apprends leurs prononciations." />
+            android:text="@string/reading_subtitle" />
 
         <!-- Kanji Tree Section -->
         <LinearLayout
@@ -35,24 +35,24 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Kanji Tree" />
+                android:text="@string/writing_kanji_tree" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Si le mot contient des kanji que tu n'as pas encore appris :\n(10/10 au jeu de reconnaissance)" />
+                android:text="@string/reading_kanji_tree_subtitle" />
 
             <CheckBox
                 android:id="@+id/checkbox_ignore"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Ignorer" />
+                android:text="@string/writing_kanji_tree_ignore" />
 
             <CheckBox
                 android:id="@+id/checkbox_include_anyway"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="les inclure quand même" />
+                android:text="@string/writing_kanji_tree_include" />
 
         </LinearLayout>
 
@@ -65,7 +65,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Japanese Language Proficiency Test"
+                android:text="@string/recognition_jlpt"
                 android:textSize="18sp" />
 
             <ImageView
@@ -85,31 +85,31 @@
                 android:layout_width="0dp"
                 android:layout_columnWeight="1"
                 android:layout_gravity="fill"
-                android:text="N5\n0%" />
+                tools:text="N5\n0%" />
             <Button
                 android:id="@+id/button_reading_n4"
                 android:layout_width="0dp"
                 android:layout_columnWeight="1"
                 android:layout_gravity="fill"
-                android:text="N4\n0%" />
+                tools:text="N4\n0%" />
             <Button
                 android:id="@+id/button_reading_n3"
                 android:layout_width="0dp"
                 android:layout_columnWeight="1"
                 android:layout_gravity="fill"
-                android:text="N3\n0%" />
+                tools:text="N3\n0%" />
             <Button
                 android:id="@+id/button_reading_n2"
                 android:layout_width="0dp"
                 android:layout_columnWeight="1"
                 android:layout_gravity="fill"
-                android:text="N2\n0%" />
+                tools:text="N2\n0%" />
             <Button
                 android:id="@+id/button_reading_n1"
                 android:layout_width="0dp"
                 android:layout_columnWeight="1"
                 android:layout_gravity="fill"
-                android:text="N1\n0%" />
+                tools:text="N1\n0%" />
         </GridLayout>
 
         <!-- Mots les plus utilisés -->
@@ -121,7 +121,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Mots les plus utilisés"
+                android:text="@string/writing_most_used_words"
                 android:textSize="18sp" />
 
             <ImageView
@@ -141,49 +141,49 @@
                 android:layout_width="0dp"
                 android:layout_columnWeight="1"
                 android:layout_gravity="fill"
-                android:text="1000\n0%" />
+                tools:text="1000\n0%" />
             <Button
                 android:id="@+id/button_words_2000"
                 android:layout_width="0dp"
                 android:layout_columnWeight="1"
                 android:layout_gravity="fill"
-                android:text="2000\n0%" />
+                tools:text="2000\n0%" />
             <Button
                 android:id="@+id/button_words_3000"
                 android:layout_width="0dp"
                 android:layout_columnWeight="1"
                 android:layout_gravity="fill"
-                android:text="3000\n0%" />
+                tools:text="3000\n0%" />
             <Button
                 android:id="@+id/button_words_4000"
                 android:layout_width="0dp"
                 android:layout_columnWeight="1"
                 android:layout_gravity="fill"
-                android:text="4000\n0%" />
+                tools:text="4000\n0%" />
             <Button
                 android:id="@+id/button_words_5000"
                 android:layout_width="0dp"
                 android:layout_columnWeight="1"
                 android:layout_gravity="fill"
-                android:text="5000\n0%" />
+                tools:text="5000\n0%" />
             <Button
                 android:id="@+id/button_words_6000"
                 android:layout_width="0dp"
                 android:layout_columnWeight="1"
                 android:layout_gravity="fill"
-                android:text="6000\n0%" />
+                tools:text="6000\n0%" />
             <Button
                 android:id="@+id/button_words_7000"
                 android:layout_width="0dp"
                 android:layout_columnWeight="1"
                 android:layout_gravity="fill"
-                android:text="7000\n0%" />
+                tools:text="7000\n0%" />
             <Button
                 android:id="@+id/button_words_8000"
                 android:layout_width="0dp"
                 android:layout_columnWeight="1"
                 android:layout_gravity="fill"
-                android:text="8000\n0%" />
+                tools:text="8000\n0%" />
 
         </GridLayout>
 
@@ -196,7 +196,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Liste de l'utilisateurs / listes d'étude"
+                android:text="@string/writing_user_lists"
                 android:textSize="18sp" />
 
             <ImageView
@@ -216,14 +216,14 @@
                 android:layout_alignParentStart="true"
                 android:layout_toStartOf="@+id/button_modify"
                 android:layout_height="wrap_content"
-                android:text="Liste de l'utilisateur\n0%"/>
+                android:text="@string/reading_user_list"/>
 
             <Button
                 android:id="@+id/button_modify"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
-                android:text="Modifier"
+                android:text="@string/reading_modify_button"
                 android:drawableEnd="@android:drawable/ic_menu_edit" />
 
         </RelativeLayout>

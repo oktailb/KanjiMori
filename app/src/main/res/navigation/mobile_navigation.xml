@@ -8,7 +8,7 @@
     <fragment
         android:id="@+id/nav_home"
         android:name="org.oktail.kanjimori.ui.home.HomeFragment"
-        android:label="Kanji Mori"
+        android:label="@string/title_home"
         tools:layout="@layout/fragment_home">
         <action
             android:id="@+id/action_nav_home_to_nav_recognition"
@@ -36,7 +36,7 @@
     <fragment
         android:id="@+id/nav_recognition"
         android:name="org.oktail.kanjimori.ui.recognition.RecognitionFragment"
-        android:label="Reconnaissance"
+        android:label="@string/menu_recognition"
         tools:layout="@layout/fragment_recognition">
         <action
             android:id="@+id/action_nav_recognition_to_game_recap"
@@ -46,43 +46,43 @@
     <fragment
         android:id="@+id/nav_reading"
         android:name="org.oktail.kanjimori.ui.reading.ReadingFragment"
-        android:label="Lecture"
+        android:label="@string/menu_reading"
         tools:layout="@layout/fragment_reading" />
 
     <fragment
         android:id="@+id/nav_writing"
         android:name="org.oktail.kanjimori.ui.writing.WritingFragment"
-        android:label="Écriture"
+        android:label="@string/menu_writing"
         tools:layout="@layout/fragment_writing" />
 
     <fragment
         android:id="@+id/nav_dictionary"
         android:name="org.oktail.kanjimori.ui.dictionary.DictionaryFragment"
-        android:label="Dictionnaire"
+        android:label="@string/menu_dictionary"
         tools:layout="@layout/fragment_dictionary" />
 
     <fragment
         android:id="@+id/nav_settings"
         android:name="org.oktail.kanjimori.ui.settings.SettingsFragment"
-        android:label="Options"
+        android:label="@string/settings_title"
         tools:layout="@layout/fragment_settings" />
 
     <fragment
         android:id="@+id/nav_results"
         android:name="org.oktail.kanjimori.ui.results.ResultsFragment"
-        android:label="Résultats"
+        android:label="@string/menu_results"
         tools:layout="@layout/fragment_results" />
 
     <fragment
         android:id="@+id/nav_about"
         android:name="org.oktail.kanjimori.ui.about.AboutFragment"
-        android:label="À propos"
+        android:label="@string/menu_about"
         tools:layout="@layout/fragment_about" />
 
     <fragment
         android:id="@+id/nav_game_recap"
         android:name="org.oktail.kanjimori.ui.gamerecap.GameRecapFragment"
-        android:label="Récapitulatif du jeu"
+        android:label="@string/title_game_recap"
         tools:layout="@layout/fragment_game_recap">
         <argument
             android:name="level"
@@ -95,7 +95,7 @@
     <fragment
         android:id="@+id/nav_recognition_game"
         android:name="org.oktail.kanjimori.ui.recognitiongame.RecognitionGameFragment"
-        android:label="Jeu de reconnaissance"
+        android:label="@string/game_recap_title"
         tools:layout="@layout/fragment_recognition_game">
         <argument
             android:name="level"

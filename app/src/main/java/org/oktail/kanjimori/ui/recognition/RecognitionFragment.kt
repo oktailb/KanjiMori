@@ -4,18 +4,22 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import org.oktail.kanjimori.R
 import org.oktail.kanjimori.data.ScoreManager
 import org.oktail.kanjimori.databinding.FragmentRecognitionBinding
-import org.oktail.kanjimori.ui.gamerecap.KanjiScore
 import org.xmlpull.v1.XmlPullParser
+
+data class LevelInfo(val button: Button, val xmlName: String, val stringResId: Int)
 
 class RecognitionFragment : Fragment() {
 
     private var _binding: FragmentRecognitionBinding? = null
     private val binding get() = _binding!!
+
+    private lateinit var levelInfos: List<LevelInfo>
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -28,23 +32,47 @@ class RecognitionFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        updateAllButtonPercentages()
+        initializeLevelInfos()
         setupClickListeners()
     }
 
+    override fun onResume() {
+        super.onResume()
+        updateAllButtonPercentages()
+    }
+
+    private fun initializeLevelInfos() {
+        levelInfos = listOf(
+            LevelInfo(binding.buttonN5, "N5", R.string.level_n5),
+            LevelInfo(binding.buttonN4, "N4", R.string.level_n4),
+            LevelInfo(binding.buttonN3, "N3", R.string.level_n3),
+            LevelInfo(binding.buttonN2, "N2", R.string.level_n2),
+            LevelInfo(binding.buttonN1, "N1", R.string.level_n1),
+            LevelInfo(binding.buttonClass1, "Grade 1", R.string.level_class_1),
+            LevelInfo(binding.buttonClass2, "Grade 2", R.string.level_class_2),
+            LevelInfo(binding.buttonClass3, "Grade 3", R.string.level_class_3),
+            LevelInfo(binding.buttonClass4, "Grade 4", R.string.level_class_4),
+            LevelInfo(binding.buttonClass5, "Grade 5", R.string.level_class_5),
+            LevelInfo(binding.buttonClass6, "Grade 6", R.string.level_class_6),
+            LevelInfo(binding.buttonTest4, "Grade 7", R.string.level_high_school_1),
+            LevelInfo(binding.buttonTest3, "Grade 8", R.string.level_high_school_2),
+            LevelInfo(binding.buttonTestPre2, "Grade 9", R.string.level_high_school_3),
+            LevelInfo(binding.buttonTest2, "Grade 10", R.string.level_high_school_4),
+            LevelInfo(binding.buttonHiragana, "Hiragana", R.string.level_hiragana),
+            LevelInfo(binding.buttonKatakana, "Katakana", R.string.level_katakana)
+        )
+    }
+
     private fun updateAllButtonPercentages() {
-        val levels = listOf("N5", "N4", "N3", "N2", "N1", "Classe 1", "Classe 2", "Classe 3", "Classe 4", "Classe 5", "Classe 6", "Test 4", "Test 3", "Test Pre-2", "Test 2", "Hiragana", "Katakana")
         val allKanji = loadAllKanji()
 
-        for (level in levels) {
-            val kanjiForLevel = getKanjiForLevel(level, allKanji)
-            if (kanjiForLevel.isNotEmpty()) {
-                val masteryPercentage = calculateMasteryPercentage(kanjiForLevel)
-                updateButtonText(level, masteryPercentage)
-            }
+        for (info in levelInfos) {
+            val kanjiForLevel = getKanjiForLevel(info.xmlName, allKanji)
+            val masteryPercentage = calculateMasteryPercentage(kanjiForLevel)
+            updateButtonText(info, masteryPercentage)
         }
     }
-    
+
     private fun loadAllKanji(): Map<String, String> {
         val allKanji = mutableMapOf<String, String>()
         val parser = resources.getXml(R.xml.kanji_levels)
@@ -65,7 +93,7 @@ class RecognitionFragment : Fragment() {
         }
         return allKanji
     }
-    
+
     private fun getKanjiForLevel(levelName: String, allKanji: Map<String, String>): List<String> {
         val levelKanjiIds = mutableListOf<String>()
         val parser = resources.getXml(R.xml.kanji_levels)
@@ -96,61 +124,33 @@ class RecognitionFragment : Fragment() {
 
     private fun calculateMasteryPercentage(kanjiList: List<String>): Double {
         if (kanjiList.isEmpty()) return 0.0
-        val masteredCount = kanjiList.count { 
-            val score = ScoreManager.getScore(requireContext(), it)
-            (score.successes - score.failures) >= 10
+
+        val totalMasteryPoints = kanjiList.sumOf { kanji ->
+            val score = ScoreManager.getScore(requireContext(), kanji)
+            val balance = score.successes - score.failures
+            balance.coerceIn(0, 10).toDouble()
         }
-        return (masteredCount.toDouble() / kanjiList.size) * 100
+
+        val maxPossiblePoints = kanjiList.size * 10.0
+        if (maxPossiblePoints == 0.0) return 0.0
+
+        return (totalMasteryPoints / maxPossiblePoints) * 100
     }
 
-    private fun updateButtonText(level: String, percentage: Double) {
-        val formattedPercentage = String.format("%.1f%%", percentage)
-        val button = when(level) {
-            "N5" -> binding.buttonN5
-            "N4" -> binding.buttonN4
-            "N3" -> binding.buttonN3
-            "N2" -> binding.buttonN2
-            "N1" -> binding.buttonN1
-            "Classe 1" -> binding.buttonClass1
-            "Classe 2" -> binding.buttonClass2
-            "Classe 3" -> binding.buttonClass3
-            "Classe 4" -> binding.buttonClass4
-            "Classe 5" -> binding.buttonClass5
-            "Classe 6" -> binding.buttonClass6
-            "Test 4" -> binding.buttonTest4
-            "Test 3" -> binding.buttonTest3
-            "Test Pre-2" -> binding.buttonTestPre2
-            "Test 2" -> binding.buttonTest2
-            "Hiragana" -> binding.buttonHiragana
-            "Katakana" -> binding.buttonKatakana
-            else -> null
-        }
-        button?.text = "$level\n$formattedPercentage"
+    private fun updateButtonText(info: LevelInfo, percentage: Double) {
+        val displayName = getString(info.stringResId)
+        val formattedPercentage = "${percentage.toInt()}%"
+        info.button.text = "$displayName\n$formattedPercentage"
     }
 
     private fun setupClickListeners() {
-        val action = R.id.action_nav_recognition_to_game_recap
-        binding.buttonHiragana.setOnClickListener { navigateToRecap("Hiragana") }
-        binding.buttonKatakana.setOnClickListener { navigateToRecap("Katakana") }
-        binding.buttonN5.setOnClickListener { navigateToRecap("N5") }
-        binding.buttonN4.setOnClickListener { navigateToRecap("N4") }
-        binding.buttonN3.setOnClickListener { navigateToRecap("N3") }
-        binding.buttonN2.setOnClickListener { navigateToRecap("N2") }
-        binding.buttonN1.setOnClickListener { navigateToRecap("N1") }
-        binding.buttonClass1.setOnClickListener { navigateToRecap("Classe 1") }
-        binding.buttonClass2.setOnClickListener { navigateToRecap("Classe 2") }
-        binding.buttonClass3.setOnClickListener { navigateToRecap("Classe 3") }
-        binding.buttonClass4.setOnClickListener { navigateToRecap("Classe 4") }
-        binding.buttonClass5.setOnClickListener { navigateToRecap("Classe 5") }
-        binding.buttonClass6.setOnClickListener { navigateToRecap("Classe 6") }
-        binding.buttonTest4.setOnClickListener { navigateToRecap("Test 4") }
-        binding.buttonTest3.setOnClickListener { navigateToRecap("Test 3") }
-        binding.buttonTestPre2.setOnClickListener { navigateToRecap("Test Pre-2") }
-        binding.buttonTest2.setOnClickListener { navigateToRecap("Test 2") }
+        for (info in levelInfos) {
+            info.button.setOnClickListener { navigateToRecap(info.xmlName) }
+        }
     }
 
-    private fun navigateToRecap(level: String) {
-        val bundle = Bundle().apply { putString("level", level) }
+    private fun navigateToRecap(levelXmlName: String) {
+        val bundle = Bundle().apply { putString("level", levelXmlName) }
         findNavController().navigate(R.id.action_nav_recognition_to_game_recap, bundle)
     }
 

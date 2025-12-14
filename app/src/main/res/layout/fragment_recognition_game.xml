@@ -12,24 +12,73 @@
         android:id="@+id/progress_bar_game"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
         android:gravity="center"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        android:orientation="horizontal"
+        android:padding="8dp"
         app:layout_constraintEnd_toEndOf="parent"
-        android:padding="8dp">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <!-- 10 placeholders for progress indicators -->
-        <ImageView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:src="@android:drawable/checkbox_off_background"/>
-        <ImageView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:src="@android:drawable/checkbox_off_background"/>
-        <ImageView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:src="@android:drawable/checkbox_off_background"/>
-        <ImageView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:src="@android:drawable/checkbox_off_background"/>
-        <ImageView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:src="@android:drawable/checkbox_off_background"/>
-        <ImageView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:src="@android:drawable/checkbox_off_background"/>
-        <ImageView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:src="@android:drawable/checkbox_off_background"/>
-        <ImageView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:src="@android:drawable/checkbox_off_background"/>
-        <ImageView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:src="@android:drawable/checkbox_off_background"/>
-        <ImageView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:src="@android:drawable/checkbox_off_background"/>
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:src="@android:drawable/checkbox_off_background" />
+
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:src="@android:drawable/checkbox_off_background" />
+
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:src="@android:drawable/checkbox_off_background" />
+
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:src="@android:drawable/checkbox_off_background" />
+
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:src="@android:drawable/checkbox_off_background" />
+
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:src="@android:drawable/checkbox_off_background" />
+
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:src="@android:drawable/checkbox_off_background" />
+
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:src="@android:drawable/checkbox_off_background" />
+
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:src="@android:drawable/checkbox_off_background" />
+
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:src="@android:drawable/checkbox_off_background" />
 
     </LinearLayout>
 
@@ -38,19 +87,19 @@
         android:id="@+id/card_kanji"
         android:layout_width="200dp"
         android:layout_height="200dp"
-        app:cardElevation="8dp"
         app:cardCornerRadius="12dp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:cardElevation="8dp"
+        app:layout_constraintBottom_toTopOf="@id/grid_answers"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintTop_toBottomOf="@id/progress_bar_game">
 
         <TextView
             android:id="@+id/text_kanji_to_guess"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center"
-            android:textSize="96sp"
+            android:textSize="120sp"
             tools:text="天" />
 
     </com.google.android.material.card.MaterialCardView>
@@ -63,13 +112,44 @@
         android:layout_margin="16dp"
         android:columnCount="2"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
 
-        <Button android:id="@+id/button_answer_1" android:layout_width="0dp" android:layout_columnWeight="1" android:layout_gravity="fill" tools:text="Option 1" android:lines="2"/>
-        <Button android:id="@+id/button_answer_2" android:layout_width="0dp" android:layout_columnWeight="1" android:layout_gravity="fill" tools:text="Option 2" android:lines="2"/>
-        <Button android:id="@+id/button_answer_3" android:layout_width="0dp" android:layout_columnWeight="1" android:layout_gravity="fill" tools:text="Option 3" android:lines="2"/>
-        <Button android:id="@+id/button_answer_4" android:layout_width="0dp" android:layout_columnWeight="1" android:layout_gravity="fill" tools:text="Option 4" android:lines="2"/>
+        <Button
+            android:id="@+id/button_answer_1"
+            android:layout_width="0dp"
+            android:layout_height="120dp"
+            android:layout_columnWeight="1"
+            android:layout_gravity="fill"
+            android:minLines="3"
+            tools:text="Option 1\nOption 1b\nOption 1c" />
+
+        <Button
+            android:id="@+id/button_answer_2"
+            android:layout_width="0dp"
+            android:layout_height="120dp"
+            android:layout_columnWeight="1"
+            android:layout_gravity="fill"
+            android:minLines="3"
+            tools:text="Option 2" />
+
+        <Button
+            android:id="@+id/button_answer_3"
+            android:layout_width="0dp"
+            android:layout_height="120dp"
+            android:layout_columnWeight="1"
+            android:layout_gravity="fill"
+            android:minLines="3"
+            tools:text="Option 3" />
+
+        <Button
+            android:id="@+id/button_answer_4"
+            android:layout_width="0dp"
+            android:layout_height="120dp"
+            android:layout_columnWeight="1"
+            android:layout_gravity="fill"
+            android:minLines="3"
+            tools:text="Option 4" />
 
     </GridLayout>
 

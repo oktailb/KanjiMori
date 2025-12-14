@@ -34,19 +34,19 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Reconnaissance"
+                    android:text="@string/menu_recognition"
                     android:textSize="20sp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Apprendre à reconnaître les kanji et à se rappeler leurs significations de base." />
+                    android:text="@string/home_recognition_subtitle" />
             </LinearLayout>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="見覚え"
+                android:text="@string/recognition_title"
                 android:textSize="24sp" />
         </LinearLayout>
 
@@ -71,19 +71,19 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Lecture"
+                    android:text="@string/menu_reading"
                     android:textSize="20sp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Apprenez à lire des mots en entier et comment les prononcer dans différents contextes" />
+                    android:text="@string/home_reading_subtitle" />
             </LinearLayout>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="読み方"
+                android:text="@string/reading_title"
                 android:textSize="24sp" />
         </LinearLayout>
 
@@ -108,19 +108,19 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Écriture"
+                    android:text="@string/menu_writing"
                     android:textSize="20sp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Entraînez-vous à écrire des mots et à graver le kanji dans votre mémoire." />
+                    android:text="@string/home_writing_subtitle" />
             </LinearLayout>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="書き方"
+                android:text="@string/writing_title"
                 android:textSize="24sp" />
         </LinearLayout>
 
@@ -140,7 +140,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Dictionnaire"
+                android:text="@string/menu_dictionary"
                 android:textSize="20sp" />
 
             <ImageView
@@ -165,7 +165,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Options"
+                android:text="@string/settings_title"
                 android:textSize="20sp" />
 
             <ImageView
@@ -190,7 +190,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Résultats"
+                android:text="@string/menu_results"
                 android:textSize="20sp" />
 
             <ImageView
@@ -215,7 +215,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="À propos"
+                android:text="@string/menu_about"
                 android:textSize="20sp" />
 
             <ImageView

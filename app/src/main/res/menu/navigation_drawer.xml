@@ -6,21 +6,21 @@
     <group android:checkableBehavior="single">
         <item
             android:id="@+id/nav_recognition"
-            android:title="Reconnaissance" />
+            android:title="@string/menu_recognition" />
         <item
             android:id="@+id/nav_reading"
-            android:title="Lecture" />
+            android:title="@string/menu_reading" />
         <item
             android:id="@+id/nav_writing"
-            android:title="Écriture" />
+            android:title="@string/menu_writing" />
         <item
             android:id="@+id/nav_dictionary"
-            android:title="Dictionnaire" />
+            android:title="@string/menu_dictionary" />
         <item
             android:id="@+id/nav_results"
-            android:title="Résultats" />
+            android:title="@string/menu_results" />
         <item
             android:id="@+id/nav_about"
-            android:title="À propos" />
+            android:title="@string/menu_about" />
     </group>
 </menu>
