@@ -56,10 +56,11 @@
             android:clickable="true"
             android:focusable="true"
             android:background="?android:attr/selectableItemBackground">
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Traqueur d'incidents\nProblèmes connus et fonctionnalités prévues"
+                android:text="Traqueur d'incidents,\nProblèmes connus et fonctionnalités prévues"
                 android:textSize="18sp" />
             <ImageView
                 android:layout_width="wrap_content"
@@ -183,6 +184,29 @@
                 android:src="@android:drawable/ic_menu_send"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"/>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/layout_header_picture"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="8dp"
+            android:background="?android:attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Header picture by Charles Knowles"
+                android:textSize="18sp" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:src="@android:drawable/ic_menu_send" />
         </RelativeLayout>
 
     </LinearLayout>

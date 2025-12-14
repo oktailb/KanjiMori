@@ -54,6 +54,11 @@ class AboutFragment : Fragment() {
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/davidluzgouveia/kanji-data"))
             startActivity(intent)
         }
+
+        binding.layoutHeaderPicture.setOnClickListener {
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.flickr.com/photos/theknowlesgallery/"))
+            startActivity(intent)
+        }
     }
 
     override fun onDestroyView() {
