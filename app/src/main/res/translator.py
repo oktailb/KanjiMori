@@ -53,6 +53,7 @@ def translate_xml(source_file, target_lang):
         'de': 'de_DE',
         'it': 'it_IT',
         'pt': 'pt_PT',
+        'br': 'pt_BR',
         'ru': 'ru_RU',
         'ja': 'ja_JP',
         'zh': 'zh_CN',

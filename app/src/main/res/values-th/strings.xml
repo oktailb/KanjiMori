@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Kanji Mori</string>
+    <string name="navigation_drawer_open">เปิดลิ้นชักการนำทาง</string>
+    <string name="navigation_drawer_close">ปิดลิ้นชักการนำทาง</string>
+    <string name="nav_header_title">Android Studio</string>
+    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_desc">ส่วนหัวการนำทาง</string>
+    <string name="action_settings">การตั้งค่า</string>
+
+    <string name="menu_transform">แปลงร่าง</string>
+    <string name="menu_reflow">จัดเรียงใหม่</string>
+    <string name="menu_slideshow">สไลด์โชว์</string>
+    <string name="menu_settings">การตั้งค่า</string>
+
+    <string name="lorem_ipsum_title">Lorem Ipsum</string>
+    <string name="lorem_ipsum">Lorem Ipsum เป็นเพียงข้อความตัวยึดตำแหน่งของอุตสาหกรรมการพิมพ์และการเรียงพิมพ์ Lorem Ipsum เป็นข้อความตัวยึดตำแหน่งมาตรฐานของอุตสาหกรรมมาตั้งแต่ทศวรรษ 1500 เมื่อเครื่องพิมพ์ที่ไม่รู้จักรายหนึ่งนำถาดเรียงพิมพ์มาสลับกันเพื่อสร้างหนังสือตัวอย่าง</string>
+    <string name="fab_content_description">แสดงมุมมองเพื่อเรียกใช้การดำเนินการ</string>
+    <string name="image_view_item_transform_content_description">แสดงมุมมองรูปภาพในรายการ</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_title">ตัวเลือก</string>
+    <string name="settings_language">ภาษา</string>
+    <string name="settings_pronunciation">การออกเสียง</string>
+    <string name="settings_pronunciation_roman">ตัวอักษรโรมัน</string>
+    <string name="settings_pronunciation_hiragana">ฮิรางานะของญี่ปุ่น</string>
+    <string name="settings_default_user_list">รายการผู้ใช้เริ่มต้น</string>
+    <string name="settings_add_wrong_answers">เพิ่มคำตอบที่ผิดโดยอัตโนมัติ</string>
+    <string name="settings_remove_good_answers">ลบคำ 10/10 โดยอัตโนมัติ</string>
+    <string name="settings_keyboard">แป้นพิมพ์</string>
+    <string name="settings_keyboard_system">ระบบ</string>
+    <string name="settings_keyboard_integrated">ในตัว</string>
+    <string name="settings_text_size">ขนาดตัวอักษร</string>
+    <string name="settings_animation_speed">ความเร็วของแอนิเมชัน</string>
+    <string name="settings_theme">ธีม (สว่าง/มืด)</string>
+    <string name="settings_reset_tutorial">รีเซ็ตบทแนะนำ</string>
+    <string name="settings_send_bug_report">ส่งรายงานข้อบกพร่อง</string>
+
+    <!-- Game Recap Screen -->
+    <string name="game_recap_title">เกมทายภาพ</string>
+    <string name="game_recap_meaning">ความหมาย</string>
+    <string name="game_recap_reading">การอ่าน</string>
+    <string name="game_recap_common_pronunciations">การออกเสียงทั่วไป</string>
+    <string name="game_recap_random_pronunciations">การออกเสียงแบบสุ่ม</string>
+    <string name="game_recap_play">เล่น</string>
+
+    <!-- Recognition Screen -->
+    <string name="recognition_title">見覚え</string>
+    <string name="recognition_subtitle">เลือกกลุ่มคันจิและเรียนรู้ที่จะจดจำความหมายพื้นฐานต่างๆ</string>
+    <string name="recognition_fundamentals">พื้นฐาน</string>
+    <string name="recognition_jlpt">การทดสอบวัดระดับความสามารถทางภาษาญี่ปุ่น</string>
+    <string name="recognition_primary_school">โรงเรียนประถม (Jōyō 1..1006)</string>
+    <string name="recognition_high_school">โรงเรียนมัธยม (Jōyō 1007..2136)</string>
+
+    <!-- Writing Screen -->
+    <string name="writing_title">書き方</string>
+    <string name="writing_subtitle">เลือกกลุ่มคำและเรียนรู้วิธีการเขียน</string>
+    <string name="writing_kanji_tree">Kanji Tree</string>
+    <string name="writing_kanji_tree_subtitle">หากคุณยังไม่ได้เรียนรู้บางสิ่ง:
+(10/10 ในเกมที่เกี่ยวข้อง)</string>
+    <string name="writing_kanji_tree_ignore">ไม่สนใจ</string>
+    <string name="writing_kanji_tree_include">รวมไว้ด้วย</string>
+    <string name="writing_find_words">ค้นหาคำ</string>
+    <string name="writing_most_used_words">คำที่ใช้บ่อยที่สุด</string>
+    <string name="writing_find_kanji">ค้นหาคันจิ</string>
+    <string name="writing_lists">รายการ</string>
+    <string name="writing_user_lists">รายการผู้ใช้ / รายการศึกษา</string>
+
+    <!-- Reading Screen -->
+    <string name="reading_title">読み方</string>
+    <string name="reading_subtitle">เลือกกลุ่มคำและเรียนรู้การออกเสียง</string>
+    <string name="reading_kanji_tree_subtitle">หากคำมีคันจิที่คุณยังไม่ได้เรียนรู้:
+(10/10 ในเกมทายภาพ)</string>
+    <string name="reading_user_list">รายการผู้ใช้</string>
+    <string name="reading_modify_button">แก้ไข</string>
+
+    <!-- Navigation Drawer -->
+    <string name="menu_recognition">การจดจำ</string>
+    <string name="menu_reading">การอ่าน</string>
+    <string name="menu_writing">การเขียน</string>
+    <string name="menu_dictionary">พจนานุกรม</string>
+    <string name="menu_results">ผลลัพธ์</string>
+    <string name="menu_about">เกี่ยวกับ</string>
+
+    <!-- Level/Button Names -->
+    <string name="level_n5">N5</string>
+    <string name="level_n4">N4</string>
+    <string name="level_n3">N3</string>
+    <string name="level_n2">N2</string>
+    <string name="level_n1">N1</string>
+    <string name="level_class_1">ชั้น 1</string>
+    <string name="level_class_2">ชั้น 2</string>
+    <string name="level_class_3">ชั้น 3</string>
+    <string name="level_class_4">ชั้น 4</string>
+    <string name="level_class_5">ชั้น 5</string>
+    <string name="level_class_6">ชั้น 6</string>
+    <string name="level_high_school_1">การทดสอบ 4</string>
+    <string name="level_high_school_2">การทดสอบ 3</string>
+    <string name="level_high_school_3">การทดสอบก่อน 2</string>
+    <string name="level_high_school_4">การทดสอบ 2</string>
+    <string name="level_hiragana">ฮิรางานะ</string>
+    <string name="level_katakana">คาตาคานะ</string>
+
+    <!-- Home Screen -->
+    <string name="home_recognition_subtitle">เรียนรู้ที่จะจดจำคันจิและจดจำความหมายพื้นฐาน</string>
+    <string name="home_reading_subtitle">เรียนรู้วิธีการอ่านคำทั้งหมดและวิธีการออกเสียงในบริบทต่างๆ</string>
+    <string name="home_writing_subtitle">ฝึกเขียนคำและจดจำคันจิในความทรงจำของคุณ</string>
+
+    <!-- Toolbar Titles -->
+    <string name="title_home">Kanji Mori</string>
+    <string name="title_game_recap">สรุปเกม</string>
+
+    <!-- About Screen -->
+    <string name="about_retribution">การตอบแทน</string>
+    <string name="about_patreon">สนับสนุนฉันบน Patreon</string>
+    <string name="about_tipeee">บริจาคบน Tipeee</string>
+    <string name="my_image_description">ปุ่มหน้าถัดไป</string>
+
+    <!-- Results Screen -->
+    <string name="results_title">ผลลัพธ์</string>
+    <string name="results_recognition_title">การจดจำ</string>
+    <string name="results_hiragana">ฮิรางานะ - %1$d%%</string>
+    <string name="results_katakana">คาตาคานะ - %1$d%%</string>
+    <string name="results_jlpt_n5">JLPT N5 - %1$d%%</string>
+    <string name="results_jlpt_n4">JLPT N4 - %1$d%%</string>
+    <string name="results_jlpt_n3">JLPT N3 - %1$d%%</string>
+    <string name="results_jlpt_n2">JLPT N2 - %1$d%%</string>
+    <string name="results_jlpt_n1">JLPT N1 - %1$d%%</string>
+    <string name="results_grade_1">ชั้น 1 - %1$d%%</string>
+    <string name="results_grade_2">ชั้น 2 - %1$d%%</string>
+    <string name="results_grade_3">ชั้น 3 - %1$d%%</string>
+    <string name="results_grade_4">ชั้น 4 - %1$d%%</string>
+    <string name="results_grade_5">ชั้น 5 - %1$d%%</string>
+    <string name="results_grade_6">ชั้น 6 - %1$d%%</string>
+    <string name="results_college">มัธยมต้น - %1$d%%</string>
+    <string name="results_high_school">มัธยมปลาย - %1$d%%</string>
+    <string name="results_reading_title">การอ่าน - %1$d%%</string>
+    <string name="results_total_count">ทั้งหมด: %1$d</string>
+    <string name="results_writing_title">การเขียน - %1$d%%</string>
+    <string name="results_backup">สำรอง</string>
+    <string name="results_restore">กู้คืน</string>
+    <string name="results_sync">ซิงค์</string>
+
+    <!-- Language Names -->
+    <string name="language_fr_fr">ภาษาฝรั่งเศส (ฝรั่งเศส)</string>
+    <string name="language_en_gb">ภาษาอังกฤษ (สหราชอาณาจักร)</string>
+    <string name="language_it_it">ภาษาอิตาลี</string>
+    <string name="language_de_de">ภาษาเยอรมัน (DE)</string>
+    <string name="language_es_sp">ภาษาสเปน (สเปน)</string>
+    <string name="language_bn_bn">ภาษาเบงกาลี</string>
+    <string name="language_th">ภาษาไทย</string>
+    <string name="language_ar_ar">ภาษาอาหรับ (ซาอุดีอาระเบีย)</string>
+    <string name="language_pt_br">ภาษาโปรตุเกส (โปรตุเกส)</string>
+
+</resources>

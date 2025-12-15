@@ -120,4 +120,40 @@
     <string name="about_tipeee">Faire un don sur Tipeee</string>
     <string name="my_image_description">Next page button</string>
 
+    <!-- Results Screen -->
+    <string name="results_title">Résultats</string>
+    <string name="results_recognition_title">Reconnaissance</string>
+    <string name="results_hiragana">Hiraganas - %1$d%%</string>
+    <string name="results_katakana">Katakanas - %1$d%%</string>
+    <string name="results_jlpt_n5">JLPT N5 - %1$d%%</string>
+    <string name="results_jlpt_n4">JLPT N4 - %1$d%%</string>
+    <string name="results_jlpt_n3">JLPT N3 - %1$d%%</string>
+    <string name="results_jlpt_n2">JLPT N2 - %1$d%%</string>
+    <string name="results_jlpt_n1">JLPT N1 - %1$d%%</string>
+    <string name="results_grade_1">Grade 1 - %1$d%%</string>
+    <string name="results_grade_2">Grade 2 - %1$d%%</string>
+    <string name="results_grade_3">Grade 3 - %1$d%%</string>
+    <string name="results_grade_4">Grade 4 - %1$d%%</string>
+    <string name="results_grade_5">Grade 5 - %1$d%%</string>
+    <string name="results_grade_6">Grade 6 - %1$d%%</string>
+    <string name="results_college">Collège - %1$d%%</string>
+    <string name="results_high_school">Lycée - %1$d%%</string>
+    <string name="results_reading_title">Lecture - %1$d%%</string>
+    <string name="results_total_count">Total: %1$d</string>
+    <string name="results_writing_title">Écriture - %1$d%%</string>
+    <string name="results_backup">Backup</string>
+    <string name="results_restore">Restore</string>
+    <string name="results_sync">Sync</string>
+
+    <!-- Language Names -->
+    <string name="language_fr_fr">Français (France)</string>
+    <string name="language_en_gb">English (UK)</string>
+    <string name="language_it_it">Italiano</string>
+    <string name="language_de_de">Deutsch (DE)</string>
+    <string name="language_es_sp">Español (España)</string>
+    <string name="language_bn_bn">Bengali</string>
+    <string name="language_th">Thai</string>
+    <string name="language_ar_ar">Arabian (Saudi Arabia)</string>
+    <string name="language_pt_br">Português (Portugal)</string>
+
 </resources>
