@@ -85,7 +85,11 @@
         android:id="@+id/nav_reading"
         android:name="org.oktail.kanjimori.ui.reading.ReadingFragment"
         android:label="@string/menu_reading"
-        tools:layout="@layout/fragment_reading" />
+        tools:layout="@layout/fragment_reading">
+        <action
+            android:id="@+id/action_nav_reading_to_word_list"
+            app:destination="@id/nav_word_list" />
+    </fragment>
 
     <fragment
         android:id="@+id/nav_writing"
@@ -143,6 +147,16 @@
             app:argType="string" />
         <argument
             android:name="readingMode"
+            app:argType="string" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_word_list"
+        android:name="org.oktail.kanjimori.ui.wordlist.WordListFragment"
+        android:label="Word List"
+        tools:layout="@layout/fragment_word_list">
+        <argument
+            android:name="wordList"
             app:argType="string" />
     </fragment>
 

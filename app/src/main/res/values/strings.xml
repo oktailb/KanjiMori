@@ -77,6 +77,9 @@
     <string name="reading_kanji_tree_subtitle">Si le mot contient des kanji que tu n\'as pas encore appris :\n(10/10 au jeu de reconnaissance)</string>
     <string name="reading_user_list">Liste de l\'utilisateur</string>
     <string name="reading_modify_button">Modifier</string>
+    <string name="reading_kanji_solo">Kanji seul</string>
+    <string name="reading_simple_words">Mots simples</string>
+    <string name="reading_compound_words">Mots composés</string>
 
     <!-- Navigation Drawer -->
     <string name="menu_recognition">Reconnaissance</string>
@@ -144,6 +147,10 @@
     <string name="results_backup">Backup</string>
     <string name="results_restore">Restore</string>
     <string name="results_sync">Sync</string>
+
+    <!-- Word List Screen -->
+    <string name="mode_revise">Réviser</string>
+    <string name="options">Options</string>
 
     <!-- Language Names -->
     <string name="language_fr_fr">Français (France)</string>

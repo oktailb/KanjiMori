@@ -5,6 +5,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
+import org.oktail.kanjimori.R
 import org.oktail.kanjimori.databinding.FragmentReadingBinding
 
 class ReadingFragment : Fragment() {
@@ -37,6 +39,7 @@ class ReadingFragment : Fragment() {
         val root: View = binding.root
 
         updateButtonText()
+        setupClickListeners()
 
         return root
     }
@@ -56,6 +59,41 @@ class ReadingFragment : Fragment() {
         binding.buttonWords7000.text = "7000\n$words7000Percentage%"
         binding.buttonWords8000.text = "8000\n$words8000Percentage%"
         binding.buttonUserList.text = "Liste de l'utilisateur\n$userListPercentage%"
+    }
+
+    private fun setupClickListeners() {
+        binding.buttonWords1000.setOnClickListener {
+            val action = ReadingFragmentDirections.actionNavReadingToWordList("bccwj_wordlist_1000")
+            findNavController().navigate(action)
+        }
+        binding.buttonWords2000.setOnClickListener {
+            val action = ReadingFragmentDirections.actionNavReadingToWordList("bccwj_wordlist_2000")
+            findNavController().navigate(action)
+        }
+        binding.buttonWords3000.setOnClickListener {
+            val action = ReadingFragmentDirections.actionNavReadingToWordList("bccwj_wordlist_3000")
+            findNavController().navigate(action)
+        }
+        binding.buttonWords4000.setOnClickListener {
+            val action = ReadingFragmentDirections.actionNavReadingToWordList("bccwj_wordlist_4000")
+            findNavController().navigate(action)
+        }
+        binding.buttonWords5000.setOnClickListener {
+            val action = ReadingFragmentDirections.actionNavReadingToWordList("bccwj_wordlist_5000")
+            findNavController().navigate(action)
+        }
+        binding.buttonWords6000.setOnClickListener {
+            val action = ReadingFragmentDirections.actionNavReadingToWordList("bccwj_wordlist_6000")
+            findNavController().navigate(action)
+        }
+        binding.buttonWords7000.setOnClickListener {
+            val action = ReadingFragmentDirections.actionNavReadingToWordList("bccwj_wordlist_7000")
+            findNavController().navigate(action)
+        }
+        binding.buttonWords8000.setOnClickListener {
+            val action = ReadingFragmentDirections.actionNavReadingToWordList("bccwj_wordlist_8000")
+            findNavController().navigate(action)
+        }
     }
 
     override fun onDestroyView() {
