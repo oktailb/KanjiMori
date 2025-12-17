@@ -74,12 +74,7 @@ class WordListFragment : Fragment() {
         }
 
         binding.buttonPlay.setOnClickListener {
-            val action = WordListFragmentDirections.actionNavWordListToNavRecognitionGame(
-                level = "Custom",
-                gameMode = "reading",
-                readingMode = "common",
-                customWordList = displayedWords.map { it.text }.toTypedArray()
-            )
+            val action = WordListFragmentDirections.actionNavWordListToNavWordQuiz(wordListName)
             findNavController().navigate(action)
         }
     }

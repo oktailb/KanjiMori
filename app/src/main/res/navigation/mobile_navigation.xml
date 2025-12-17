@@ -141,17 +141,21 @@
         tools:layout="@layout/fragment_recognition_game">
         <argument
             android:name="level"
-            app:argType="string" />
+            app:argType="string"
+            android:defaultValue="N5" />
         <argument
             android:name="gameMode"
-            app:argType="string" />
+            app:argType="string"
+            android:defaultValue="meaning" />
         <argument
             android:name="readingMode"
-            app:argType="string" />
+            app:argType="string"
+            android:defaultValue="common" />
         <argument
             android:name="customWordList"
             app:argType="string[]"
-            app:nullable="true" />
+            app:nullable="true"
+            android:defaultValue="@null"/>
     </fragment>
 
     <fragment
@@ -163,8 +167,18 @@
             android:name="wordList"
             app:argType="string" />
         <action
-            android:id="@+id/action_nav_word_list_to_nav_recognition_game"
-            app:destination="@id/nav_recognition_game" />
+            android:id="@+id/action_nav_word_list_to_nav_word_quiz"
+            app:destination="@id/nav_word_quiz" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_word_quiz"
+        android:name="org.oktail.kanjimori.ui.wordquiz.WordQuizFragment"
+        android:label="Word Quiz"
+        tools:layout="@layout/fragment_word_quiz">
+        <argument
+            android:name="wordList"
+            app:argType="string" />
     </fragment>
 
 </navigation>
