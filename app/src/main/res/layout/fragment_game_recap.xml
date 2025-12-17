@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#E0F7FA"
+    android:background="@color/home_background"
     tools:context=".ui.gamerecap.GameRecapFragment">
 
     <TextView
@@ -104,6 +104,7 @@
                 android:id="@+id/radio_button_meaning"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textColor="@color/black"
                 android:text="@string/game_recap_meaning"
                 android:checked="true" />
 
@@ -112,6 +113,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
+                android:textColor="@color/black"
                 android:text="@string/game_recap_reading" />
 
         </RadioGroup>
@@ -130,6 +132,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/game_recap_common_pronunciations"
+                android:textColor="@color/black"
                 android:checked="true" />
 
             <RadioButton
@@ -137,6 +140,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
+                android:textColor="@color/black"
                 android:text="@string/game_recap_random_pronunciations" />
 
         </RadioGroup>
