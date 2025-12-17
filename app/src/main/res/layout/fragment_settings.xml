@@ -28,6 +28,8 @@
 
         <Spinner
             android:id="@+id/spinner_language"
+            android:background="@color/leaf_green"
+            android:popupBackground="@color/leaf_green"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
@@ -48,6 +50,7 @@
                 android:id="@+id/radio_roman_alphabet"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textColor="@color/black"
                 android:text="@string/settings_pronunciation_roman" />
 
             <RadioButton
@@ -56,10 +59,11 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:checked="true"
+                android:textColor="@color/black"
                 android:text="@string/settings_pronunciation_hiragana" />
         </RadioGroup>
 
-        <!-- Liste d\'utilisateurs par défaut -->
+        <!-- Liste d'utilisateurs par défaut -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -72,6 +76,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:checked="true"
+            android:textColor="@color/black"
             android:text="@string/settings_add_wrong_answers" />
 
         <CheckBox
@@ -79,6 +84,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:checked="true"
+            android:textColor="@color/black"
             android:text="@string/settings_remove_good_answers" />
 
         <!-- Clavier -->
@@ -99,6 +105,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:checked="true"
+                android:textColor="@color/black"
                 android:text="@string/settings_keyboard_system" />
 
             <RadioButton
@@ -106,6 +113,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
+                android:textColor="@color/black"
                 android:text="@string/settings_keyboard_integrated" />
         </RadioGroup>
 
@@ -122,7 +130,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
-        <!-- Vitesse d\'animation -->
+        <!-- Vitesse d'animation -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

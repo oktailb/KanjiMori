@@ -45,20 +45,20 @@ class ReadingFragment : Fragment() {
     }
 
     private fun updateButtonText() {
-        binding.buttonReadingN5.text = "N5\n$n5Percentage%"
-        binding.buttonReadingN4.text = "N4\n$n4Percentage%"
-        binding.buttonReadingN3.text = "N3\n$n3Percentage%"
-        binding.buttonReadingN2.text = "N2\n$n2Percentage%"
-        binding.buttonReadingN1.text = "N1\n$n1Percentage%"
-        binding.buttonWords1000.text = "1000\n$words1000Percentage%"
-        binding.buttonWords2000.text = "2000\n$words2000Percentage%"
-        binding.buttonWords3000.text = "3000\n$words3000Percentage%"
-        binding.buttonWords4000.text = "4000\n$words4000Percentage%"
-        binding.buttonWords5000.text = "5000\n$words5000Percentage%"
-        binding.buttonWords6000.text = "6000\n$words6000Percentage%"
-        binding.buttonWords7000.text = "7000\n$words7000Percentage%"
-        binding.buttonWords8000.text = "8000\n$words8000Percentage%"
-        binding.buttonUserList.text = "Liste de l'utilisateur\n$userListPercentage%"
+        binding.buttonReadingN5.text = "N5\n${n5Percentage.toInt()}%"
+        binding.buttonReadingN4.text = "N4\n${n4Percentage.toInt()}%"
+        binding.buttonReadingN3.text = "N3\n${n3Percentage.toInt()}%"
+        binding.buttonReadingN2.text = "N2\n${n2Percentage.toInt()}%"
+        binding.buttonReadingN1.text = "N1\n${n1Percentage.toInt()}%"
+        binding.buttonWords1000.text = "1000\n${words1000Percentage.toInt()}%"
+        binding.buttonWords2000.text = "2000\n${words2000Percentage.toInt()}%"
+        binding.buttonWords3000.text = "3000\n${words3000Percentage.toInt()}%"
+        binding.buttonWords4000.text = "4000\n${words4000Percentage.toInt()}%"
+        binding.buttonWords5000.text = "5000\n${words5000Percentage.toInt()}%"
+        binding.buttonWords6000.text = "6000\n${words6000Percentage.toInt()}%"
+        binding.buttonWords7000.text = "7000\n${words7000Percentage.toInt()}%"
+        binding.buttonWords8000.text = "8000\n${words8000Percentage.toInt()}%"
+        binding.buttonUserList.text = "Liste de l'utilisateur\n${userListPercentage.toInt()}%"
     }
 
     private fun setupClickListeners() {

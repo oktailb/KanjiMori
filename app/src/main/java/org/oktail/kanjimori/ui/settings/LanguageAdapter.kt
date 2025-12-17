@@ -19,7 +19,9 @@ class LanguageAdapter(context: Context, languages: List<LanguageItem>) :
     }
 
     override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
-        return createItemView(position, convertView, parent)
+        val view = createItemView(position, convertView, parent)
+        view.setBackgroundColor(context.resources.getColor(R.color.leaf_green, null))
+        return view
     }
 
     private fun createItemView(position: Int, convertView: View?, parent: ViewGroup): View {

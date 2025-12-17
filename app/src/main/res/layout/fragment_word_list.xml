@@ -33,6 +33,7 @@
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
+            android:textColor="@color/black"
             android:text="@string/reading_kanji_solo" />
 
         <CheckBox
@@ -40,6 +41,7 @@
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
+            android:textColor="@color/black"
             android:text="@string/reading_simple_words" />
 
         <CheckBox
@@ -47,6 +49,7 @@
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
+            android:textColor="@color/black"
             android:text="@string/reading_compound_words" />
     </LinearLayout>
 
@@ -59,11 +62,11 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <GridLayout
-            android:id="@+id/grid_words"
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/words_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:columnCount="5" />
+            app:chipSpacing="4dp" />
 
     </ScrollView>
 

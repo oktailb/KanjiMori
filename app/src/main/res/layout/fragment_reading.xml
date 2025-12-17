@@ -46,12 +46,14 @@
                 android:id="@+id/checkbox_ignore"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textColor="@color/black"
                 android:text="@string/writing_kanji_tree_ignore" />
 
             <CheckBox
                 android:id="@+id/checkbox_include_anyway"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textColor="@color/black"
                 android:text="@string/writing_kanji_tree_include" />
 
         </LinearLayout>

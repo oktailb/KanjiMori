@@ -5,9 +5,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.navArgs
+import com.google.android.material.chip.Chip
 import org.oktail.kanjimori.R
 import org.oktail.kanjimori.data.KanjiScore
 import org.oktail.kanjimori.data.ScoreManager
@@ -22,7 +22,7 @@ class WordListFragment : Fragment() {
 
     private var wordList: List<String> = emptyList()
     private var currentPage = 0
-    private val pageSize = 80 // 8 columns * 10 rows
+    private val pageSize = 80
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -64,7 +64,7 @@ class WordListFragment : Fragment() {
     private fun updateUi() {
         if (wordList.isEmpty()) {
             binding.textStats.text = ""
-            binding.gridWords.removeAllViews()
+            binding.wordsContainer.removeAllViews()
             binding.textPagination.text = "0..0 / 0"
             return
         }
@@ -99,25 +99,18 @@ class WordListFragment : Fragment() {
         val startIndex = currentPage * pageSize
         val endIndex = (startIndex + pageSize).coerceAtMost(wordList.size)
 
-        binding.gridWords.removeAllViews()
+        binding.wordsContainer.removeAllViews()
         for (i in startIndex until endIndex) {
             val word = wordList[i]
             val score = wordScores[i]
 
-            val textView = TextView(context).apply {
+            val chip = Chip(context).apply {
                 text = word
                 textSize = 24f
-                textAlignment = View.TEXT_ALIGNMENT_CENTER
-                setBackgroundColor(calculateColor(score))
-                val params = android.widget.GridLayout.LayoutParams().apply {
-                    width = 0
-                    height = android.widget.GridLayout.LayoutParams.WRAP_CONTENT
-                    columnSpec = android.widget.GridLayout.spec(android.widget.GridLayout.UNDEFINED, 1f)
-                    setMargins(4, 4, 4, 4)
-                }
-                layoutParams = params
+                chipBackgroundColor = android.content.res.ColorStateList.valueOf(calculateColor(score))
+                setTextColor(Color.BLACK)
             }
-            binding.gridWords.addView(textView)
+            binding.wordsContainer.addView(chip)
         }
 
         // --- Update Pagination UI ---
