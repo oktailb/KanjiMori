@@ -61,7 +61,7 @@ class RecognitionGameFragment : Fragment() {
         loadAllKanjiDetails()
         val kanjiForLevel = loadKanjiForLevel(level)
         allKanjiDetails.clear()
-        allKanjiDetails.addAll(allKanjiDetailsXml.filter { kanjiForLevel.contains(it.character) })
+        allKanjiDetails.addAll(allKanjiDetailsXml.filter { kanjiForLevel.contains(it.character) && it.meanings.isNotEmpty() })
         allKanjiDetails.shuffle()
         kanjiListPosition = 0
 
@@ -248,7 +248,7 @@ class RecognitionGameFragment : Fragment() {
 
         if (correctAnswer.isEmpty()) return listOf("", "", "", "")
 
-        val incorrectPool = allKanjiDetailsXml
+        val incorrectPool = allKanjiDetails
             .asSequence()
             .filter { it.id != correctKanji.id }
             .map { detail ->

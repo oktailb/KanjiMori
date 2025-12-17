@@ -1,7 +1,9 @@
 package org.oktail.kanjimori.ui.wordlist
 
+import android.content.res.Resources
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,7 +14,11 @@ import org.oktail.kanjimori.R
 import org.oktail.kanjimori.data.KanjiScore
 import org.oktail.kanjimori.data.ScoreManager
 import org.oktail.kanjimori.databinding.FragmentWordListBinding
+import org.oktail.kanjimori.ui.recognitiongame.KanjiDetail
+import org.oktail.kanjimori.ui.recognitiongame.Reading
 import org.xmlpull.v1.XmlPullParser
+import org.xmlpull.v1.XmlPullParserException
+import java.io.IOException
 
 class WordListFragment : Fragment() {
 
@@ -23,6 +29,7 @@ class WordListFragment : Fragment() {
     private var wordList: List<String> = emptyList()
     private var currentPage = 0
     private val pageSize = 80
+    private val allKanjiDetailsXml = mutableListOf<KanjiDetail>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -40,6 +47,7 @@ class WordListFragment : Fragment() {
         binding.textListTitle.text = wordListName.replace("bccwj_wordlist_", "Common Words ").replace(".xml", "")
 
         wordList = loadWordsForList(wordListName)
+        loadAllKanjiDetails()
 
         binding.buttonNextPage.setOnClickListener {
             if ((currentPage + 1) * pageSize < wordList.size) {
@@ -103,12 +111,18 @@ class WordListFragment : Fragment() {
         for (i in startIndex until endIndex) {
             val word = wordList[i]
             val score = wordScores[i]
+            val kanjiDetail = allKanjiDetailsXml.firstOrNull { it.character == word }
 
             val chip = Chip(context).apply {
                 text = word
                 textSize = 24f
                 chipBackgroundColor = android.content.res.ColorStateList.valueOf(calculateColor(score))
                 setTextColor(Color.BLACK)
+
+                if (kanjiDetail != null && kanjiDetail.meanings.isEmpty()) {
+                    chipStrokeWidth = 4f
+                    chipStrokeColor = android.content.res.ColorStateList.valueOf(Color.RED)
+                }
             }
             binding.wordsContainer.addView(chip)
         }
@@ -141,6 +155,81 @@ class WordListFragment : Fragment() {
         }
 
         return words
+    }
+
+    private fun loadAllKanjiDetails() {
+        val meanings = loadMeanings()
+        val parser = resources.getXml(R.xml.kanji_details)
+
+        try {
+            var eventType = parser.eventType
+            var currentKanjiDetail: KanjiDetail? = null
+
+            while (eventType != XmlPullParser.END_DOCUMENT) {
+                when (eventType) {
+                    XmlPullParser.START_TAG -> {
+                        if (parser.name == "kanji") {
+                            val id = parser.getAttributeValue(null, "id")
+                            val character = parser.getAttributeValue(null, "character")
+                            if (id != null && character != null) {
+                                val kanjiMeanings = meanings[id] ?: emptyList()
+                                currentKanjiDetail = KanjiDetail(id, character, kanjiMeanings, mutableListOf())
+                                allKanjiDetailsXml.add(currentKanjiDetail)
+                            }
+                        } else if (parser.name == "reading" && currentKanjiDetail != null) {
+                            val type = parser.getAttributeValue(null, "type")
+                            val frequency = parser.getAttributeValue(null, "frequency").toInt()
+                            val value = parser.nextText()
+                            (currentKanjiDetail.readings as MutableList).add(Reading(value, type, frequency))
+                        }
+                    }
+                    XmlPullParser.END_TAG -> {
+                        if (parser.name == "kanji") {
+                            currentKanjiDetail = null
+                        }
+                    }
+                }
+                eventType = parser.next()
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun loadMeanings(): Map<String, List<String>> {
+        val meaningsMap = mutableMapOf<String, MutableList<String>>()
+        try {
+            val parser = resources.getXml(R.xml.meanings)
+            var currentId: String? = null
+            var eventType = parser.eventType
+            while (eventType != XmlPullParser.END_DOCUMENT) {
+                when (eventType) {
+                    XmlPullParser.START_TAG -> {
+                        if (parser.name == "kanji") {
+                            currentId = parser.getAttributeValue(null, "id")
+                            if (currentId != null) {
+                                meaningsMap.putIfAbsent(currentId, mutableListOf())
+                            }
+                        } else if (parser.name == "meaning" && currentId != null) {
+                            meaningsMap[currentId]?.add(parser.nextText())
+                        }
+                    }
+                    XmlPullParser.END_TAG -> {
+                        if (parser.name == "kanji") {
+                            currentId = null
+                        }
+                    }
+                }
+                eventType = parser.next()
+            }
+        } catch (e: Resources.NotFoundException) {
+            Log.e("WordListFragment", "meanings.xml not found for current locale. Fallback should occur.", e)
+        } catch (e: XmlPullParserException) {
+            Log.e("WordListFragment", "Error parsing meanings.xml", e)
+        } catch (e: IOException) {
+            Log.e("WordListFragment", "IO error reading meanings.xml", e)
+        }
+        return meaningsMap
     }
 
     private fun calculateColor(score: KanjiScore): Int {
