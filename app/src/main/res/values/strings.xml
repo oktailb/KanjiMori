@@ -141,9 +141,9 @@
     <string name="results_grade_6">Grade 6 - %1$d%%</string>
     <string name="results_college">Collège - %1$d%%</string>
     <string name="results_high_school">Lycée - %1$d%%</string>
-    <string name="results_reading_title">Lecture - %1$d%%</string>
+    <string name="results_reading_title">Lecture</string>
     <string name="results_total_count">Total: %1$d</string>
-    <string name="results_writing_title">Écriture - %1$d%%</string>
+    <string name="results_writing_title">Écriture</string>
     <string name="results_backup">Backup</string>
     <string name="results_restore">Restore</string>
     <string name="results_sync">Sync</string>

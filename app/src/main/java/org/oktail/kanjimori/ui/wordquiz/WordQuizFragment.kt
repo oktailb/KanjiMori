@@ -138,7 +138,6 @@ class WordQuizFragment : Fragment() {
 
     private fun onAnswerClicked(button: Button) {
         val isCorrect = button.text == correctAnswer
-        val answerButtons = listOf(binding.buttonAnswer1, binding.buttonAnswer2, binding.buttonAnswer3, binding.buttonAnswer4)
 
         ScoreManager.saveScore(requireContext(), currentWord.text, isCorrect)
 
@@ -149,11 +148,11 @@ class WordQuizFragment : Fragment() {
         } else {
             button.setBackgroundColor(Color.RED)
             wordStatus[currentWord] = GameStatus.INCORRECT
-            answerButtons.find { it.text == correctAnswer }?.setBackgroundColor(Color.GREEN)
         }
 
         updateProgressBar()
 
+        val answerButtons = listOf(binding.buttonAnswer1, binding.buttonAnswer2, binding.buttonAnswer3, binding.buttonAnswer4)
         answerButtons.forEach { it.isEnabled = false }
 
         Handler(Looper.getMainLooper()).postDelayed({

@@ -1,16 +1,17 @@
 package org.oktail.kanjimori.ui.results
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.LinearLayout
 import androidx.fragment.app.Fragment
 import org.oktail.kanjimori.R
-import org.oktail.kanjimori.data.KanjiScore
 import org.oktail.kanjimori.data.ScoreManager
 import org.oktail.kanjimori.databinding.FragmentResultsBinding
 import org.xmlpull.v1.XmlPullParser
-import org.oktail.kanjimori.data.KanjiCategoryProgress
 
 class ResultsFragment : Fragment() {
 
@@ -23,11 +24,49 @@ class ResultsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentResultsBinding.inflate(inflater, container, false)
-        val root: View = binding.root
+        return binding.root
+    }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        setupCollapsibleSections()
         updateAllPercentages()
+    }
 
-        return root
+    private fun setupCollapsibleSections() {
+        // Main Sections
+        setupCollapsibleSection(binding.headerRecognitionMain, binding.arrowRecognitionMain, binding.containerRecognitionMain, "recognition_main_expanded")
+        setupCollapsibleSection(binding.headerReadingMain, binding.arrowReadingMain, binding.containerReadingMain, "reading_main_expanded")
+        setupCollapsibleSection(binding.headerWritingMain, binding.arrowWritingMain, binding.containerWritingMain, "writing_main_expanded")
+
+        // Recognition Sub-sections
+        setupCollapsibleSection(binding.headerRecognitionKanas, binding.arrowRecognitionKanas, binding.containerRecognitionKanas, "recognition_kanas_expanded")
+        setupCollapsibleSection(binding.headerRecognitionJlpt, binding.arrowRecognitionJlpt, binding.containerRecognitionJlpt, "recognition_jlpt_expanded")
+        setupCollapsibleSection(binding.headerRecognitionSchool, binding.arrowRecognitionSchool, binding.containerRecognitionSchool, "recognition_school_expanded")
+
+        // Reading Sub-sections
+        setupCollapsibleSection(binding.headerReadingJlpt, binding.arrowReadingJlpt, binding.containerReadingJlpt, "reading_jlpt_expanded")
+        setupCollapsibleSection(binding.headerReadingFreq, binding.arrowReadingFreq, binding.containerReadingFreq, "reading_freq_expanded")
+    }
+
+    private fun setupCollapsibleSection(header: View, arrow: ImageView, container: ViewGroup, preferenceKey: String) {
+        val sharedPreferences = requireActivity().getPreferences(Context.MODE_PRIVATE)
+        val isExpanded = sharedPreferences.getBoolean(preferenceKey, true)
+
+        container.visibility = if (isExpanded) View.VISIBLE else View.GONE
+        arrow.rotation = if (isExpanded) 0f else -90f
+
+        header.setOnClickListener {
+            val newExpandedState = container.visibility == View.GONE
+            container.visibility = if (newExpandedState) View.VISIBLE else View.GONE
+            arrow.animate().rotation(if (newExpandedState) 0f else -90f).start()
+
+            with(sharedPreferences.edit()) {
+                putBoolean(preferenceKey, newExpandedState)
+                apply()
+            }
+        }
     }
 
     private fun updateAllPercentages() {
@@ -35,9 +74,10 @@ class ResultsFragment : Fragment() {
         val levelInfos = initializeLevelInfos()
 
         for (info in levelInfos) {
-            val charactersForLevel = when (info.xmlName) {
-                "Hiragana" -> loadCharacters(R.xml.hiragana)
-                "Katakana" -> loadCharacters(R.xml.katakana)
+            val charactersForLevel = when {
+                info.xmlName == "Hiragana" -> loadCharacters(R.xml.hiragana)
+                info.xmlName == "Katakana" -> loadCharacters(R.xml.katakana)
+                info.xmlName.startsWith("bccwj_wordlist_") -> loadWordsFromXml(info.xmlName)
                 else -> getKanjiForLevel(info.xmlName, allKanji)
             }
             val masteryPercentage = calculateMasteryPercentage(charactersForLevel)
@@ -61,7 +101,21 @@ class ResultsFragment : Fragment() {
             LevelInfo("Collège", "Grade 7"),
             LevelInfo("Lycée", "Grade 8"),
             LevelInfo("Hiragana", "Hiragana"),
-            LevelInfo("Katakana", "Katakana")
+            LevelInfo("Katakana", "Katakana"),
+            LevelInfo("Reading User", "user_list"),
+            LevelInfo("Reading N5", "reading_n5"),
+            LevelInfo("Reading N4", "reading_n4"),
+            LevelInfo("Reading N3", "reading_n3"),
+            LevelInfo("Reading N2", "reading_n2"),
+            LevelInfo("Reading N1", "reading_n1"),
+            LevelInfo("Reading 1000", "bccwj_wordlist_1000"),
+            LevelInfo("Reading 2000", "bccwj_wordlist_2000"),
+            LevelInfo("Reading 3000", "bccwj_wordlist_3000"),
+            LevelInfo("Reading 4000", "bccwj_wordlist_4000"),
+            LevelInfo("Reading 5000", "bccwj_wordlist_5000"),
+            LevelInfo("Reading 6000", "bccwj_wordlist_6000"),
+            LevelInfo("Reading 7000", "bccwj_wordlist_7000"),
+            LevelInfo("Reading 8000", "bccwj_wordlist_8000")
         )
     }
 
@@ -80,6 +134,26 @@ class ResultsFragment : Fragment() {
             e.printStackTrace()
         }
         return characterList
+    }
+
+    private fun loadWordsFromXml(fileName: String): List<String> {
+        val wordList = mutableListOf<String>()
+        val resourceId = resources.getIdentifier(fileName, "xml", requireContext().packageName)
+        if (resourceId == 0) return emptyList()
+
+        val parser = resources.getXml(resourceId)
+        try {
+            var eventType = parser.eventType
+            while (eventType != XmlPullParser.END_DOCUMENT) {
+                if (eventType == XmlPullParser.START_TAG && parser.name == "word") {
+                    wordList.add(parser.nextText())
+                }
+                eventType = parser.next()
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return wordList
     }
 
     private fun loadAllKanji(): Map<String, String> {
@@ -208,6 +282,62 @@ class ResultsFragment : Fragment() {
             "Lycée" -> {
                 binding.progressRecognitionLycee.progress = percentageInt
                 binding.titleRecognitionLycee.text = getString(R.string.results_high_school, percentageInt)
+            }
+            "Reading User" -> {
+                binding.progressReadingUser.progress = percentageInt
+                binding.titleReadingUser.text = getString(R.string.reading_user_list) + " - $percentageInt%"
+            }
+            "Reading N5" -> {
+                binding.progressReadingN5.progress = percentageInt
+                binding.titleReadingN5.text = getString(R.string.results_jlpt_n5, percentageInt)
+            }
+            "Reading N4" -> {
+                binding.progressReadingN4.progress = percentageInt
+                binding.titleReadingN4.text = getString(R.string.results_jlpt_n4, percentageInt)
+            }
+            "Reading N3" -> {
+                binding.progressReadingN3.progress = percentageInt
+                binding.titleReadingN3.text = getString(R.string.results_jlpt_n3, percentageInt)
+            }
+            "Reading N2" -> {
+                binding.progressReadingN2.progress = percentageInt
+                binding.titleReadingN2.text = getString(R.string.results_jlpt_n2, percentageInt)
+            }
+            "Reading N1" -> {
+                binding.progressReadingN1.progress = percentageInt
+                binding.titleReadingN1.text = getString(R.string.results_jlpt_n1, percentageInt)
+            }
+            "Reading 1000" -> {
+                binding.progressReading1000.progress = percentageInt
+                binding.titleReading1000.text = "1000 mots les plus fréquents - $percentageInt%"
+            }
+            "Reading 2000" -> {
+                binding.progressReading2000.progress = percentageInt
+                binding.titleReading2000.text = "2000 mots les plus fréquents - $percentageInt%"
+            }
+            "Reading 3000" -> {
+                binding.progressReading3000.progress = percentageInt
+                binding.titleReading3000.text = "3000 mots les plus fréquents - $percentageInt%"
+            }
+            "Reading 4000" -> {
+                binding.progressReading4000.progress = percentageInt
+                binding.titleReading4000.text = "4000 mots les plus fréquents - $percentageInt%"
+            }
+            "Reading 5000" -> {
+                binding.progressReading5000.progress = percentageInt
+                binding.titleReading5000.text = "5000 mots les plus fréquents - $percentageInt%"
+            }
+            "Reading 6000" -> {
+                binding.progressReading6000.progress = percentageInt
+                binding.titleReading6000.text = "6000 mots les plus fréquents - $percentageInt%"
+            }
+            "Reading 7000" -> {
+                binding.progressReading7000.progress = percentageInt
+                binding.titleReading7000.text = "7000 mots les plus fréquents - $percentageInt%"
+            }
+            "Reading 8000" -> {
+                binding.progressReading8000.progress = percentageInt
+                binding.titleReading8000.text = "8000 mots les plus fréquents - $percentageInt%"
             }
         }
     }
