@@ -50,6 +50,15 @@
     <string name="game_recap_random_pronunciations">Pelafalan acak</string>
     <string name="game_recap_play">Mainkan</string>
 
+    <!-- Game Writing Screen -->
+    <string name="game_writing_label_meaning">Arti</string>
+    <string name="game_writing_label_reading">Membaca</string>
+    <string name="enter_your_answer">Masukkan jawaban Anda</string>
+    <string name="submit">Kirim</string>
+    <string name="game_writing_correction">Koreksi</string>
+    <string name="game_writing_on">ON</string>
+    <string name="game_writing_kun">KUN</string>
+
     <!-- Recognition Screen -->
     <string name="recognition_title">見覚え</string>
     <string name="recognition_subtitle">Pilih grup kanji dan pelajari cara mengenali arti dasarnya.</string>

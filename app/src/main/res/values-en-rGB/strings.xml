@@ -50,6 +50,15 @@
     <string name="game_recap_random_pronunciations">Random pronunciations</string>
     <string name="game_recap_play">Play</string>
 
+    <!-- Game Writing Screen -->
+    <string name="game_writing_label_meaning">Meaning</string>
+    <string name="game_writing_label_reading">Reading</string>
+    <string name="enter_your_answer">Enter your answer</string>
+    <string name="submit">Submit</string>
+    <string name="game_writing_correction">Correction</string>
+    <string name="game_writing_on">ON</string>
+    <string name="game_writing_kun">KUN</string>
+
     <!-- Recognition Screen -->
     <string name="recognition_title">見覚え</string>
     <string name="recognition_subtitle">Choose a group of kanji and learn to recognize their different basic meanings</string>

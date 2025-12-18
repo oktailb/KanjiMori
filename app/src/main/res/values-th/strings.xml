@@ -50,6 +50,15 @@
     <string name="game_recap_random_pronunciations">การออกเสียงแบบสุ่ม</string>
     <string name="game_recap_play">เล่น</string>
 
+    <!-- Game Writing Screen -->
+    <string name="game_writing_label_meaning">ความหมาย</string>
+    <string name="game_writing_label_reading">การอ่าน</string>
+    <string name="enter_your_answer">ป้อนคำตอบของคุณ</string>
+    <string name="submit">ส่ง</string>
+    <string name="game_writing_correction">การแก้ไข</string>
+    <string name="game_writing_on">ON</string>
+    <string name="game_writing_kun">KUN</string>
+
     <!-- Recognition Screen -->
     <string name="recognition_title">見覚え</string>
     <string name="recognition_subtitle">เลือกกลุ่มของคันจิและเรียนรู้ที่จะจดจำความหมายพื้นฐานที่แตกต่างกัน</string>

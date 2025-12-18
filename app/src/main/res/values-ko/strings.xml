@@ -50,6 +50,15 @@
     <string name="game_recap_random_pronunciations">무작위 발음</string>
     <string name="game_recap_play">플레이</string>
 
+    <!-- Game Writing Screen -->
+    <string name="game_writing_label_meaning">의미</string>
+    <string name="game_writing_label_reading">읽기</string>
+    <string name="enter_your_answer">답을 입력하세요</string>
+    <string name="submit">제출</string>
+    <string name="game_writing_correction">수정</string>
+    <string name="game_writing_on">ON</string>
+    <string name="game_writing_kun">KUN</string>
+
     <!-- Recognition Screen -->
     <string name="recognition_title">見覚え</string>
     <string name="recognition_subtitle">한자 그룹을 선택하고 기본 의미를 인식하는 법을 배웁니다.</string>

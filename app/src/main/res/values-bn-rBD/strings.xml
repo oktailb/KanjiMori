@@ -44,6 +44,15 @@
     <string name="game_recap_random_pronunciations">এলোমেলো উচ্চারণ</string>
     <string name="game_recap_play">খেলুন</string>
 
+    <!-- Game Writing Screen -->
+    <string name="game_writing_label_meaning">অর্থ</string>
+    <string name="game_writing_label_reading">পড়া</string>
+    <string name="enter_your_answer">আপনার উত্তর লিখুন</string>
+    <string name="submit">জমা দিন</string>
+    <string name="game_writing_correction">সংশোধন</string>
+    <string name="game_writing_on">ON</string>
+    <string name="game_writing_kun">KUN</string>
+
     <!-- Recognition Screen -->
     <string name="recognition_title">見覚え</string>
     <string name="recognition_subtitle">কাঞ্জির একটি গ্রুপ চয়ন করুন এবং তাদের বিভিন্ন মৌলিক অর্থ চিনতে শিখুন</string>

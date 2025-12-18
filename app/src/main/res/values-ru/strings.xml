@@ -50,6 +50,15 @@
     <string name="game_recap_random_pronunciations">Случайные произношения</string>
     <string name="game_recap_play">Играть</string>
 
+    <!-- Game Writing Screen -->
+    <string name="game_writing_label_meaning">Значение</string>
+    <string name="game_writing_label_reading">Чтение</string>
+    <string name="enter_your_answer">Введите свой ответ</string>
+    <string name="submit">Отправить</string>
+    <string name="game_writing_correction">Исправление</string>
+    <string name="game_writing_on">ON</string>
+    <string name="game_writing_kun">KUN</string>
+
     <!-- Recognition Screen -->
     <string name="recognition_title">見覚え</string>
     <string name="recognition_subtitle">Выберите группу кандзи и научитесь распознавать их основные значения.</string>

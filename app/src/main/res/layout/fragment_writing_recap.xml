@@ -12,7 +12,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="@string/game_recap_title"
+        android:text="@string/writing_game_recap_title"
         android:textSize="24sp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -84,15 +84,6 @@
                 android:src="@android:drawable/ic_media_next"
                 android:contentDescription="@string/my_image_description" />
         </LinearLayout>
-
-        <TextView
-            android:id="@+id/text_stats"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            tools:text="Nouveau: 0, 1:0, 2:0, 3:0, 4:5, 5:0, 6:10, 7:9, 8:3, 9:23, 10:29"/>
-
-        <!-- RadioGroup removed as per implied context of 'writing' -->
 
         <Button
             android:id="@+id/button_play"

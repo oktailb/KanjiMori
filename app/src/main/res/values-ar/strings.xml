@@ -44,6 +44,15 @@
     <string name="game_recap_random_pronunciations">النطق العشوائي</string>
     <string name="game_recap_play">لعب</string>
 
+    <!-- Game Writing Screen -->
+    <string name="game_writing_label_meaning">المعنى</string>
+    <string name="game_writing_label_reading">القراءة</string>
+    <string name="enter_your_answer">أدخل إجابتك</string>
+    <string name="submit">إرسال</string>
+    <string name="game_writing_correction">تصحيح</string>
+    <string name="game_writing_on">ON</string>
+    <string name="game_writing_kun">KUN</string>
+
     <!-- Recognition Screen -->
     <string name="recognition_title">見覚え</string>
     <string name="recognition_subtitle">اختر مجموعة من الكانجي وتعلم كيفية التعرف على معانيها الأساسية المختلفة</string>

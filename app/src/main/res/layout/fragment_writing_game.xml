@@ -168,7 +168,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Correction"
+                android:text="@string/game_writing_correction"
                 android:textStyle="bold"
                 android:textSize="18sp"
                 android:textColor="@android:color/holo_red_dark"
@@ -205,7 +205,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="ON"
+                        android:text="@string/game_writing_on"
                         android:textStyle="bold"
                         android:textColor="@android:color/holo_red_dark"/>
                     <TextView
@@ -226,7 +226,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="KUN"
+                        android:text="@string/game_writing_kun"
                         android:textStyle="bold"
                         android:textColor="@android:color/holo_red_dark"/>
                     <TextView

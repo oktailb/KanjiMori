@@ -50,6 +50,15 @@
     <string name="game_recap_random_pronunciations">随机发音</string>
     <string name="game_recap_play">玩</string>
 
+    <!-- Game Writing Screen -->
+    <string name="game_writing_label_meaning">意思</string>
+    <string name="game_writing_label_reading">阅读</string>
+    <string name="enter_your_answer">输入你的答案</string>
+    <string name="submit">提交</string>
+    <string name="game_writing_correction">更正</string>
+    <string name="game_writing_on">ON</string>
+    <string name="game_writing_kun">KUN</string>
+
     <!-- Recognition Screen -->
     <string name="recognition_title">見覚え</string>
     <string name="recognition_subtitle">选择一组汉字并学习识别它们的基本含义。</string>

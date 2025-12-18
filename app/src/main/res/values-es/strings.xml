@@ -44,6 +44,15 @@
     <string name="game_recap_random_pronunciations">Pronunciaciones aleatorias</string>
     <string name="game_recap_play">Jugar</string>
 
+    <!-- Game Writing Screen -->
+    <string name="game_writing_label_meaning">Significado</string>
+    <string name="game_writing_label_reading">Lectura</string>
+    <string name="enter_your_answer">Introduce tu respuesta</string>
+    <string name="submit">Enviar</string>
+    <string name="game_writing_correction">Corrección</string>
+    <string name="game_writing_on">ON</string>
+    <string name="game_writing_kun">KUN</string>
+
     <!-- Recognition Screen -->
     <string name="recognition_title">見覚え</string>
     <string name="recognition_subtitle">Elige un grupo de kanji y aprende a reconocer sus diferentes significados básicos</string>
