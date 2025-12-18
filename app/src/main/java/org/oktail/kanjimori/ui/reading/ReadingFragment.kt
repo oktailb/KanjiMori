@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import org.oktail.kanjimori.R
 import org.oktail.kanjimori.databinding.FragmentReadingBinding
+import org.oktail.kanjimori.data.ScoreManager
 
 class ReadingFragment : Fragment() {
 
@@ -38,10 +39,41 @@ class ReadingFragment : Fragment() {
         _binding = FragmentReadingBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
+        return root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        // Recalculate percentages here or in onResume to ensure they are up to date
+        calculateUserListPercentage()
         updateButtonText()
         setupClickListeners()
+    }
+    
+    override fun onResume() {
+        super.onResume()
+        calculateUserListPercentage()
+        updateButtonText()
+    }
 
-        return root
+    private fun calculateUserListPercentage() {
+        val scores = ScoreManager.getAllScores(requireContext())
+        if (scores.isEmpty()) {
+            userListPercentage = 0.0
+            return
+        }
+        // Percentage based on encountered words that are mastered?
+        // Or simple progress? 
+        // Given the requirement: "user list" contains words encountered but not mastered.
+        // Let's display the percentage of mastered words among all encountered words.
+        val totalEncountered = scores.size
+        val mastered = scores.count { (_, score) -> (score.successes - score.failures) >= 10 }
+        
+        userListPercentage = if (totalEncountered > 0) {
+            (mastered.toDouble() / totalEncountered.toDouble()) * 100.0
+        } else {
+            0.0
+        }
     }
 
     private fun updateButtonText() {
@@ -92,6 +124,10 @@ class ReadingFragment : Fragment() {
         }
         binding.buttonWords8000.setOnClickListener {
             val action = ReadingFragmentDirections.actionNavReadingToWordList("bccwj_wordlist_8000")
+            findNavController().navigate(action)
+        }
+        binding.buttonUserList.setOnClickListener {
+            val action = ReadingFragmentDirections.actionNavReadingToWordList("user_custom_list")
             findNavController().navigate(action)
         }
     }

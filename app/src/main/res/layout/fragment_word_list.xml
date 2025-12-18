@@ -63,12 +63,22 @@
         app:layout_constraintTop_toBottomOf="@id/filter_options"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
+        
+    <CheckBox
+        android:id="@+id/checkbox_ignore_known"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:textColor="@color/black"
+        android:text="@string/reading_ignore_known_words"
+        app:layout_constraintTop_toBottomOf="@id/spinner_word_type"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <ScrollView
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_margin="4dp"
-        app:layout_constraintTop_toBottomOf="@id/spinner_word_type"
+        app:layout_constraintTop_toBottomOf="@id/checkbox_ignore_known"
         app:layout_constraintBottom_toTopOf="@+id/bottom_controls"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
@@ -121,13 +131,6 @@
                 android:src="@android:drawable/ic_media_next"
                 android:contentDescription="@string/my_image_description" />
         </LinearLayout>
-
-        <TextView
-            android:id="@+id/text_stats"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            tools:text="Nouveau: 0, 1:0, 2:0, 3:0, 4:5, 5:0, 6:10, 7:9, 8:3, 9:23, 10:29"/>
 
         <Button
             android:id="@+id/button_play"

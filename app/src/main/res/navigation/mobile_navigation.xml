@@ -179,6 +179,10 @@
         <argument
             android:name="wordList"
             app:argType="string" />
+        <argument
+            android:name="ignoreKnownWords"
+            app:argType="boolean"
+            android:defaultValue="false" />
     </fragment>
 
 </navigation>

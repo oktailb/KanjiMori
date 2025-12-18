@@ -24,40 +24,6 @@
             android:layout_marginBottom="16dp"
             android:text="@string/reading_subtitle" />
 
-        <!-- Kanji Tree Section -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="8dp"
-            android:background="@android:drawable/dialog_holo_light_frame">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/writing_kanji_tree" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/reading_kanji_tree_subtitle" />
-
-            <CheckBox
-                android:id="@+id/checkbox_ignore"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@color/black"
-                android:text="@string/writing_kanji_tree_ignore" />
-
-            <CheckBox
-                android:id="@+id/checkbox_include_anyway"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@color/black"
-                android:text="@string/writing_kanji_tree_include" />
-
-        </LinearLayout>
-
         <!-- Japanese Language Proficiency Test -->
         <RelativeLayout
             android:layout_width="match_parent"
@@ -232,7 +198,7 @@
                 android:layout_toStartOf="@+id/button_modify"
                 android:layout_height="wrap_content"
                 android:backgroundTint="@color/leaf_green"
-                android:text="@string/reading_user_list"/>
+                tools:text="Liste de l'utilisateur\n0%" />
 
             <Button
                 android:id="@+id/button_modify"

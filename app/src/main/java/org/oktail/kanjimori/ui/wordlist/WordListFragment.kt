@@ -51,7 +51,11 @@ class WordListFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val wordListName = args.wordList
-        binding.textListTitle.text = wordListName.replace("bccwj_wordlist_", "Common Words ").replace(".xml", "")
+        if (wordListName == "user_custom_list") {
+            binding.textListTitle.text = getString(R.string.reading_user_list)
+        } else {
+            binding.textListTitle.text = wordListName.replace("bccwj_wordlist_", "Common Words ").replace(".xml", "")
+        }
 
         allWords = loadWordsForList(wordListName)
         loadAllKanjiDetails()
@@ -74,7 +78,8 @@ class WordListFragment : Fragment() {
         }
 
         binding.buttonPlay.setOnClickListener {
-            val action = WordListFragmentDirections.actionNavWordListToNavWordQuiz(wordListName)
+            val ignoreKnown = binding.checkboxIgnoreKnown.isChecked
+            val action = WordListFragmentDirections.actionNavWordListToNavWordQuiz(wordListName, ignoreKnown)
             findNavController().navigate(action)
         }
     }
@@ -83,6 +88,14 @@ class WordListFragment : Fragment() {
         binding.checkboxKanjiOnly.setOnCheckedChangeListener { _, _ -> applyFilters() }
         binding.checkboxSimpleWords.setOnCheckedChangeListener { _, _ -> applyFilters() }
         binding.checkboxCompoundWords.setOnCheckedChangeListener { _, _ -> applyFilters() }
+        // We do NOT call applyFilters for the ignore_known checkbox, as it affects the quiz, not the list display?
+        // Or should it also affect the list display?
+        // User request: "qui sur le meme modele que les autres checkboxes filtrera la liste des mots qui apparaitront dans le quizz"
+        // It says "filtrera la liste des mots qui apparaitront dans le quizz". It doesn't explicitly say it should hide them from the list view,
+        // but typically filters affect the view. Let's make it affect the view too for consistency, or at least be available for the 'Play' button.
+        // If I filter them out from displayedWords, they won't be seen.
+        // Let's assume it should behave like other filters and update the list too, so the user sees what they will quiz.
+        binding.checkboxIgnoreKnown.setOnCheckedChangeListener { _, _ -> applyFilters() }
 
         wordTypes.clear()
         wordTypes.add("Tous" to getString(R.string.word_type_all))
@@ -109,8 +122,9 @@ class WordListFragment : Fragment() {
         val kanjiOnly = binding.checkboxKanjiOnly.isChecked
         val simpleWords = binding.checkboxSimpleWords.isChecked
         val compoundWords = binding.checkboxCompoundWords.isChecked
+        val ignoreKnown = binding.checkboxIgnoreKnown.isChecked
         val selectedPosition = binding.spinnerWordType.selectedItemPosition
-        val selectedType = wordTypes[selectedPosition].first
+        val selectedType = if (selectedPosition >= 0 && selectedPosition < wordTypes.size) wordTypes[selectedPosition].first else "Tous"
 
         displayedWords = allWords.filter { word ->
             val kanjiCount = word.text.count { it.isKanji() }
@@ -129,7 +143,14 @@ class WordListFragment : Fragment() {
                 else -> false
             }
 
-            typeFilter && structureFilter
+            val knownFilter = if (ignoreKnown) {
+                val score = ScoreManager.getScore(requireContext(), word.text, ScoreManager.ScoreType.READING)
+                (score.successes - score.failures) < 10
+            } else {
+                true
+            }
+
+            typeFilter && structureFilter && knownFilter
         }
         currentPage = 0
         updateUi()
@@ -137,42 +158,25 @@ class WordListFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
+        if (args.wordList == "user_custom_list") {
+            allWords = loadWordsForList(args.wordList)
+        }
         applyFilters()
     }
 
     private fun updateUi() {
         if (displayedWords.isEmpty()) {
-            binding.textStats.text = ""
             binding.wordsContainer.removeAllViews()
             binding.textPagination.text = "0..0 / 0"
+            binding.buttonPrevPage.isEnabled = false
+            binding.buttonNextPage.isEnabled = false
             return
         }
 
         // --- Process all Words in one go ---
         val scoreBuckets = (0..10).associateWith { 0 }.toMutableMap()
         var newWords = 0
-        val wordScores = displayedWords.map { ScoreManager.getScore(requireContext(), it.text) }
-
-        for (score in wordScores) {
-            if (score.successes == 0 && score.failures == 0) {
-                newWords++
-            } else {
-                val balance = score.successes - score.failures
-                val bucket = balance.coerceIn(0, 10)
-                scoreBuckets[bucket] = (scoreBuckets[bucket] ?: 0) + 1
-            }
-        }
-
-        // --- Update Stats UI ---
-        val statsText = buildString {
-            append("Nouveau: $newWords")
-            scoreBuckets.toSortedMap().forEach { (score, count) ->
-                if (count > 0) {
-                    append(", $score:$count")
-                }
-            }
-        }
-        binding.textStats.text = statsText
+        val wordScores = displayedWords.map { ScoreManager.getScore(requireContext(), it.text, ScoreManager.ScoreType.READING) }
 
         // --- Update Grid UI for the current page ---
         val startIndex = currentPage * pageSize
@@ -207,6 +211,25 @@ class WordListFragment : Fragment() {
     }
 
     private fun loadWordsForList(listName: String): List<WordItem> {
+        if (listName == "user_custom_list") {
+            val scores = ScoreManager.getAllScores(requireContext(), ScoreManager.ScoreType.READING)
+            return scores.mapNotNull { (word, score) ->
+                // For user list, we might want to show everything and let filters do the job,
+                // OR only show what is strictly in the "to learn" pile.
+                // The previous implementation filtered < 10 here.
+                // But if we want to toggle "ignore known", we should probably load everything encountered?
+                // However, the user list definition earlier was "un mot sort de la liste si il atteinds le score maximal".
+                // So strictly speaking, mastered words are NOT in the user list.
+                // So "ignore known" on the user list might be redundant or always true.
+                // Let's keep the definition: words < 10.
+                if ((score.successes - score.failures) < 10) {
+                    WordItem(word, "")
+                } else {
+                    null
+                }
+            }
+        }
+
         val words = mutableListOf<WordItem>()
         val resourceId = resources.getIdentifier(listName, "xml", requireContext().packageName)
         if (resourceId == 0) return emptyList()

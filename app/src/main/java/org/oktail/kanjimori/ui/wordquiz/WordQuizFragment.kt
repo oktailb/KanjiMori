@@ -46,7 +46,8 @@ class WordQuizFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val wordListName = args.wordList
-        loadWords(wordListName)
+        val ignoreKnown = args.ignoreKnownWords
+        loadWords(wordListName, ignoreKnown)
 
         if (allWords.isNotEmpty()) {
             startNewSet()
@@ -81,7 +82,51 @@ class WordQuizFragment : Fragment() {
         displayQuestion()
     }
 
-    private fun loadWords(listName: String) {
+    private fun loadWords(listName: String, ignoreKnown: Boolean) {
+        // Special case for user custom list
+        if (listName == "user_custom_list") {
+             val scores = ScoreManager.getAllScores(requireContext(), ScoreManager.ScoreType.READING)
+             val allKnownWords = mutableMapOf<String, String>()
+             val listsToScan = listOf(
+                 "bccwj_wordlist_1000", "bccwj_wordlist_2000", "bccwj_wordlist_3000", 
+                 "bccwj_wordlist_4000", "bccwj_wordlist_5000", "bccwj_wordlist_6000", 
+                 "bccwj_wordlist_7000", "bccwj_wordlist_8000"
+             )
+             
+             for (list in listsToScan) {
+                 val resourceId = resources.getIdentifier(list, "xml", requireContext().packageName)
+                 if (resourceId != 0) {
+                     val parser = resources.getXml(resourceId)
+                     try {
+                         var eventType = parser.eventType
+                         while (eventType != XmlPullParser.END_DOCUMENT) {
+                            if (eventType == XmlPullParser.START_TAG && parser.name == "word") {
+                                val phonetics = parser.getAttributeValue(null, "phonetics") ?: ""
+                                val text = parser.nextText()
+                                if (phonetics.isNotEmpty()) {
+                                    allKnownWords[text] = phonetics
+                                }
+                            }
+                            eventType = parser.next()
+                         }
+                     } catch (e: Exception) {
+                         // Ignore
+                     }
+                 }
+             }
+             
+             scores.forEach { (wordText, score) ->
+                 if ((score.successes - score.failures) < 10) {
+                     val phonetics = allKnownWords[wordText]
+                     if (phonetics != null) {
+                        allWords.add(Word(wordText, phonetics))
+                     }
+                 }
+             }
+             allWords.shuffle()
+             return
+        }
+
         val resourceId = resources.getIdentifier(listName, "xml", requireContext().packageName)
         if (resourceId == 0) return
 
@@ -93,7 +138,11 @@ class WordQuizFragment : Fragment() {
                     val phonetics = parser.getAttributeValue(null, "phonetics") ?: ""
                     val text = parser.nextText()
                     if (phonetics.isNotEmpty()) {
-                        allWords.add(Word(text, phonetics))
+                        val score = ScoreManager.getScore(requireContext(), text, ScoreManager.ScoreType.READING)
+                        val isKnown = (score.successes - score.failures) >= 10
+                        if (!ignoreKnown || !isKnown) {
+                            allWords.add(Word(text, phonetics))
+                        }
                     }
                 }
                 eventType = parser.next()
@@ -139,7 +188,7 @@ class WordQuizFragment : Fragment() {
     private fun onAnswerClicked(button: Button) {
         val isCorrect = button.text == correctAnswer
 
-        ScoreManager.saveScore(requireContext(), currentWord.text, isCorrect)
+        ScoreManager.saveScore(requireContext(), currentWord.text, isCorrect, ScoreManager.ScoreType.READING)
 
         if (isCorrect) {
             button.setBackgroundColor(Color.GREEN)

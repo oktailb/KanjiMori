@@ -74,14 +74,42 @@ class ResultsFragment : Fragment() {
         val levelInfos = initializeLevelInfos()
 
         for (info in levelInfos) {
+            // Determine score type for calculation
+            val scoreType = if (info.name.startsWith("Reading")) {
+                ScoreManager.ScoreType.READING
+            } else {
+                ScoreManager.ScoreType.RECOGNITION
+            }
+
             val charactersForLevel = when {
                 info.xmlName == "Hiragana" -> loadCharacters(R.xml.hiragana)
                 info.xmlName == "Katakana" -> loadCharacters(R.xml.katakana)
                 info.xmlName.startsWith("bccwj_wordlist_") -> loadWordsFromXml(info.xmlName)
                 else -> getKanjiForLevel(info.xmlName, allKanji)
             }
-            val masteryPercentage = calculateMasteryPercentage(charactersForLevel)
-            updateCategoryUI(info, masteryPercentage)
+            
+            // For user list, we calculate differently: mastered vs encountered
+            val percentage = if (info.xmlName == "user_list") {
+                calculateUserListPercentage()
+            } else {
+                calculateMasteryPercentage(charactersForLevel, scoreType)
+            }
+            
+            updateCategoryUI(info, percentage)
+        }
+    }
+
+    private fun calculateUserListPercentage(): Double {
+        val scores = ScoreManager.getAllScores(requireContext(), ScoreManager.ScoreType.READING)
+        if (scores.isEmpty()) return 0.0
+
+        val totalEncountered = scores.size
+        val mastered = scores.count { (_, score) -> (score.successes - score.failures) >= 10 }
+        
+        return if (totalEncountered > 0) {
+            (mastered.toDouble() / totalEncountered.toDouble()) * 100.0
+        } else {
+            0.0
         }
     }
 
@@ -205,11 +233,11 @@ class ResultsFragment : Fragment() {
         }
     }
 
-    private fun calculateMasteryPercentage(characterList: List<String>): Double {
+    private fun calculateMasteryPercentage(characterList: List<String>, scoreType: ScoreManager.ScoreType): Double {
         if (characterList.isEmpty()) return 0.0
 
         val totalMasteryPoints = characterList.sumOf { character ->
-            val score = ScoreManager.getScore(requireContext(), character)
+            val score = ScoreManager.getScore(requireContext(), character, scoreType)
             val balance = score.successes - score.failures
             balance.coerceIn(0, 10).toDouble()
         }
