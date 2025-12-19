@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/home_background"
+    android:background="?android:attr/windowBackground"
     tools:context=".ui.wordlist.WordListFragment">
 
     <TextView
@@ -33,7 +33,7 @@
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:textColor="@color/black"
+            android:textColor="?android:attr/textColor"
             android:text="@string/reading_kanji_solo" />
 
         <CheckBox
@@ -41,7 +41,7 @@
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:textColor="@color/black"
+            android:textColor="?android:attr/textColor"
             android:text="@string/reading_simple_words" />
 
         <CheckBox
@@ -49,7 +49,7 @@
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:textColor="@color/black"
+            android:textColor="?android:attr/textColor"
             android:text="@string/reading_compound_words" />
     </LinearLayout>
 
@@ -69,7 +69,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:textColor="@color/black"
+        android:textColor="?android:attr/textColor"
         android:text="@string/reading_ignore_known_words"
         app:layout_constraintTop_toBottomOf="@id/spinner_word_type"
         app:layout_constraintStart_toStartOf="parent" />
@@ -139,7 +139,7 @@
             android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
             android:layout_marginTop="8dp"
-            android:backgroundTint="@color/leaf_green"
+            android:backgroundTint="?attr/colorSecondary"
             android:text="@string/game_recap_play" />
 
     </LinearLayout>
