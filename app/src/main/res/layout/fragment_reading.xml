@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/home_background"
+    android:background="?android:attr/windowBackground"
     tools:context=".ui.reading.ReadingFragment">
 
     <LinearLayout
@@ -53,35 +53,35 @@
                 android:layout_width="0dp"
                 android:layout_columnWeight="1"
                 android:layout_gravity="fill"
-                android:backgroundTint="@color/leaf_green"
+                android:backgroundTint="?attr/colorSecondary"
                 tools:text="N5\n0%" />
             <Button
                 android:id="@+id/button_reading_n4"
                 android:layout_width="0dp"
                 android:layout_columnWeight="1"
                 android:layout_gravity="fill"
-                android:backgroundTint="@color/leaf_green"
+                android:backgroundTint="?attr/colorSecondary"
                 tools:text="N4\n0%" />
             <Button
                 android:id="@+id/button_reading_n3"
                 android:layout_width="0dp"
                 android:layout_columnWeight="1"
                 android:layout_gravity="fill"
-                android:backgroundTint="@color/leaf_green"
+                android:backgroundTint="?attr/colorSecondary"
                 tools:text="N3\n0%" />
             <Button
                 android:id="@+id/button_reading_n2"
                 android:layout_width="0dp"
                 android:layout_columnWeight="1"
                 android:layout_gravity="fill"
-                android:backgroundTint="@color/leaf_green"
+                android:backgroundTint="?attr/colorSecondary"
                 tools:text="N2\n0%" />
             <Button
                 android:id="@+id/button_reading_n1"
                 android:layout_width="0dp"
                 android:layout_columnWeight="1"
                 android:layout_gravity="fill"
-                android:backgroundTint="@color/leaf_green"
+                android:backgroundTint="?attr/colorSecondary"
                 tools:text="N1\n0%" />
         </GridLayout>
 
@@ -114,56 +114,56 @@
                 android:layout_width="0dp"
                 android:layout_columnWeight="1"
                 android:layout_gravity="fill"
-                android:backgroundTint="@color/leaf_green"
+                android:backgroundTint="?attr/colorSecondary"
                 tools:text="1000\n0%" />
             <Button
                 android:id="@+id/button_words_2000"
                 android:layout_width="0dp"
                 android:layout_columnWeight="1"
                 android:layout_gravity="fill"
-                android:backgroundTint="@color/leaf_green"
+                android:backgroundTint="?attr/colorSecondary"
                 tools:text="2000\n0%" />
             <Button
                 android:id="@+id/button_words_3000"
                 android:layout_width="0dp"
                 android:layout_columnWeight="1"
                 android:layout_gravity="fill"
-                android:backgroundTint="@color/leaf_green"
+                android:backgroundTint="?attr/colorSecondary"
                 tools:text="3000\n0%" />
             <Button
                 android:id="@+id/button_words_4000"
                 android:layout_width="0dp"
                 android:layout_columnWeight="1"
                 android:layout_gravity="fill"
-                android:backgroundTint="@color/leaf_green"
+                android:backgroundTint="?attr/colorSecondary"
                 tools:text="4000\n0%" />
             <Button
                 android:id="@+id/button_words_5000"
                 android:layout_width="0dp"
                 android:layout_columnWeight="1"
                 android:layout_gravity="fill"
-                android:backgroundTint="@color/leaf_green"
+                android:backgroundTint="?attr/colorSecondary"
                 tools:text="5000\n0%" />
             <Button
                 android:id="@+id/button_words_6000"
                 android:layout_width="0dp"
                 android:layout_columnWeight="1"
                 android:layout_gravity="fill"
-                android:backgroundTint="@color/leaf_green"
+                android:backgroundTint="?attr/colorSecondary"
                 tools:text="6000\n0%" />
             <Button
                 android:id="@+id/button_words_7000"
                 android:layout_width="0dp"
                 android:layout_columnWeight="1"
                 android:layout_gravity="fill"
-                android:backgroundTint="@color/leaf_green"
+                android:backgroundTint="?attr/colorSecondary"
                 tools:text="7000\n0%" />
             <Button
                 android:id="@+id/button_words_8000"
                 android:layout_width="0dp"
                 android:layout_columnWeight="1"
                 android:layout_gravity="fill"
-                android:backgroundTint="@color/leaf_green"
+                android:backgroundTint="?attr/colorSecondary"
                 tools:text="8000\n0%" />
 
         </GridLayout>
@@ -191,7 +191,7 @@
             android:id="@+id/button_user_list"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:backgroundTint="@color/leaf_green"
+            android:backgroundTint="?attr/colorSecondary"
             tools:text="Liste de l'utilisateur\n0%" />
 
     </LinearLayout>

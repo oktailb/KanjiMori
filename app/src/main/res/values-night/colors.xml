@@ -1,11 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Base Palette -->
     <color name="blue_200">#90CAF9</color>
     <color name="blue_700">#1976D2</color>
     <color name="turquoise_200">#80DEEA</color>
     <color name="turquoise_700">#00BCD4</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- Night Theme: "Autumn Night" -->
+    <color name="app_background_night">#011627</color> <!-- Dark Night Blue -->
+    <color name="text_color_night">#D6D6D6</color> <!-- Silvery Grey -->
+    <color name="button_background_night">#FF6D00</color> <!-- Dark Orange -->
+    <color name="button_text_night">@color/text_color_night</color>
+    <color name="card_background_night">@color/white</color>
+    <color name="card_text_night">@color/black</color>
+
+    <!-- Old colors (to be removed or migrated) -->
     <color name="app_background">#121212</color>
     <color name="text_color">@color/black</color>
     <color name="home_background">#E0F7FA</color>

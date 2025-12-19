@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/home_background"
+    android:background="?android:attr/windowBackground"
     tools:context=".ui.writinggame.WritingGameFragment">
 
     <!-- Progress Bar -->
@@ -78,7 +78,7 @@
         android:id="@+id/card_kanji"
         android:layout_width="160dp"
         android:layout_height="160dp"
-        app:cardBackgroundColor="@color/white"
+        app:cardBackgroundColor="@color/card_background_day"
         app:cardCornerRadius="12dp"
         app:cardElevation="8dp"
         app:layout_constraintBottom_toTopOf="@id/input_layout"
@@ -93,7 +93,7 @@
             android:layout_height="match_parent"
             android:gravity="center"
             android:textSize="100sp"
-            android:textColor="@color/black"
+            android:textColor="@color/card_text_day"
             tools:text="天" />
 
     </com.google.android.material.card.MaterialCardView>
@@ -128,7 +128,7 @@
             android:maxLines="1"
             android:imeOptions="actionDone"
             android:textAlignment="center"
-            android:textColor="@color/text_color"/>
+            android:textColor="?android:attr/textColor"/>
 
         <Button
             android:id="@+id/button_submit_answer"
@@ -136,7 +136,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:text="@string/submit"
-            android:backgroundTint="@color/leaf_green"/>
+            android:backgroundTint="?attr/colorSecondary"/>
 
     </LinearLayout>
 
