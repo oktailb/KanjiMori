@@ -22,6 +22,7 @@ import org.oktail.kanjimori.data.ScoreManager
 import org.oktail.kanjimori.data.ScoreManager.ScoreType
 import org.oktail.kanjimori.databinding.FragmentRecognitionGameBinding
 import org.oktail.kanjimori.ui.settings.ANIMATION_SPEED_PREF_KEY
+import org.oktail.kanjimori.ui.settings.PRONUNCIATION_PREF_KEY
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
 import java.io.IOException
@@ -245,6 +246,8 @@ class RecognitionGameFragment : Fragment() {
     }
 
     private fun getFormattedReadings(kanji: KanjiDetail): String {
+        val pronunciationMode = sharedPreferences.getString(PRONUNCIATION_PREF_KEY, "Hiragana")
+        
         val onReadings = kanji.readings.filter { it.type == "on" }
         val kunReadings = kanji.readings.filter { it.type == "kun" }
 
@@ -252,7 +255,7 @@ class RecognitionGameFragment : Fragment() {
             onReadings.sortedByDescending { it.frequency }
         } else {
             onReadings.shuffled()
-        }.take(2).map { it.copy(value = hiraganaToKatakana(it.value)) }
+        }.take(2)
 
         val selectedKun = if (readingMode == "common") {
             kunReadings.sortedByDescending { it.frequency }
@@ -260,7 +263,14 @@ class RecognitionGameFragment : Fragment() {
             kunReadings.shuffled()
         }.take(2)
 
-        return (selectedOn + selectedKun).map { it.value }.joinToString("\n")
+        val onStrings = selectedOn.map { 
+            if (pronunciationMode == "Roman") KanaToRomaji.convert(it.value).uppercase() else hiraganaToKatakana(it.value)
+        }
+        val kunStrings = selectedKun.map { 
+            if (pronunciationMode == "Roman") KanaToRomaji.convert(it.value) else it.value
+        }
+
+        return (onStrings + kunStrings).joinToString("\n")
     }
 
     private fun displayQuestion() {
@@ -293,7 +303,6 @@ class RecognitionGameFragment : Fragment() {
             binding.textKanjiToGuess.text = questionText
             
             // Adjust text size for longer text (Central Text)
-            // Consider both length and number of lines
             val length = questionText.length
             val lineCount = questionText.count { it == '\n' } + 1
             
@@ -341,7 +350,7 @@ class RecognitionGameFragment : Fragment() {
                 correctButtonText = correctKanji.meanings.take(3).joinToString("\n")
             } else { // reading mode
                 correctButtonText = getFormattedReadings(correctKanji)
-                // Ensure correctAnswer matches one of the displayed readings (converted to Katakana if ON)
+                // Ensure correctAnswer matches one of the displayed readings
                 correctAnswer = correctButtonText.lines().firstOrNull() ?: ""
             }
 
@@ -387,7 +396,7 @@ class RecognitionGameFragment : Fragment() {
         // In REVERSE mode, button.text is just one line (Kanji).
         
         val isCorrect = if (currentDirection == QuestionDirection.NORMAL) {
-             selectedAnswers.any { it == correctAnswer }
+             selectedAnswers.any { it.equals(correctAnswer, ignoreCase = true) }
         } else {
              button.text.toString() == correctAnswer
         }
