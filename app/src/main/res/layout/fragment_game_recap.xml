@@ -85,13 +85,6 @@
                 android:contentDescription="@string/my_image_description" />
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/text_stats"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            tools:text="Nouveau: 0, 1:0, 2:0, 3:0, 4:5, 5:0, 6:10, 7:9, 8:3, 9:23, 10:29"/>
-
         <RadioGroup
             android:id="@+id/radio_group_game_mode"
             android:layout_width="match_parent"

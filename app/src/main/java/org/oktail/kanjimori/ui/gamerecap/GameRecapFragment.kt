@@ -85,37 +85,12 @@ class GameRecapFragment : Fragment() {
 
     private fun updateUi() {
         if (kanjiList.isEmpty()) {
-            binding.textStats.text = ""
             binding.gridKanji.removeAllViews()
             binding.textPagination.text = "0..0 / 0"
             return
         }
 
-        // --- Process all Kanjis in one go ---
-        val scoreBuckets = (0..10).associateWith { 0 }.toMutableMap()
-        var newKanjis = 0
         val kanjiScores = kanjiList.map { ScoreManager.getScore(requireContext(), it, ScoreType.RECOGNITION) }
-
-        for (score in kanjiScores) {
-            if (score.successes == 0 && score.failures == 0) {
-                newKanjis++
-            } else {
-                val balance = score.successes - score.failures
-                val bucket = balance.coerceIn(0, 10)
-                scoreBuckets[bucket] = (scoreBuckets[bucket] ?: 0) + 1
-            }
-        }
-
-        // --- Update Stats UI ---
-        val statsText = buildString {
-            append("Nouveau: $newKanjis")
-            scoreBuckets.toSortedMap().forEach { (score, count) ->
-                if (count > 0) {
-                    append(", $score:$count")
-                }
-            }
-        }
-        binding.textStats.text = statsText
 
         // --- Update Grid UI for the current page ---
         val startIndex = currentPage * pageSize
