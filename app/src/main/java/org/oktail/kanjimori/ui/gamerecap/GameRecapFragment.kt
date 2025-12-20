@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -168,10 +169,12 @@ class GameRecapFragment : Fragment() {
         val balance = score.successes - score.failures
         val percentage = (balance.toFloat() / 10.0f).coerceIn(-1.0f, 1.0f)
 
+        val baseColor = ContextCompat.getColor(requireContext(), R.color.recap_grid_base_color)
+
         return when {
-            percentage > 0 -> lerpColor(Color.WHITE, Color.GREEN, percentage)
-            percentage < 0 -> lerpColor(Color.WHITE, Color.RED, -percentage)
-            else -> Color.WHITE
+            percentage > 0 -> lerpColor(baseColor, Color.GREEN, percentage)
+            percentage < 0 -> lerpColor(baseColor, Color.RED, -percentage)
+            else -> baseColor
         }
     }
 
