@@ -1,6 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Theme.KanjiMori" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+    <style name="Theme.NihongoMochi" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <!-- Primary brand color. -->
         <item name="colorPrimary">@color/button_background</item>
         <item name="colorPrimaryVariant">@color/blue_700</item>
@@ -17,12 +17,12 @@
         <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
     </style>
 
-    <style name="Theme.KanjiMori.NoActionBar">
+    <style name="Theme.NihongoMochi.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>
 
-    <style name="Theme.KanjiMori.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+    <style name="Theme.NihongoMochi.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
-    <style name="Theme.KanjiMori.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+    <style name="Theme.NihongoMochi.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 </resources>

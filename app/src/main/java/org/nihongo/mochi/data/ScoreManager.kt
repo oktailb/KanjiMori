@@ -3,14 +3,16 @@ package org.nihongo.mochi.data
 import android.content.Context
 import android.graphics.Color
 import androidx.core.content.ContextCompat
+import org.json.JSONArray
+import org.json.JSONObject
 import org.nihongo.mochi.R
 import org.nihongo.mochi.ui.settings.ADD_WRONG_ANSWERS_PREF_KEY
 import org.nihongo.mochi.ui.settings.REMOVE_GOOD_ANSWERS_PREF_KEY
 
 object ScoreManager {
 
-    private const val PREFS_NAME = "KanjiMoriScores"
-    private const val USER_LIST_PREFS_NAME = "KanjiMoriUserLists"
+    private const val PREFS_NAME = "NihongoMochiScores"
+    private const val USER_LIST_PREFS_NAME = "NihongoMochiUserLists"
 
     enum class ScoreType {
         RECOGNITION, // Default, raw key
@@ -158,5 +160,69 @@ object ScoreManager {
         val b = (startB + fraction * (endB - startB)).toInt()
 
         return Color.argb(a, r, g, b)
+    }
+
+    fun getAllData(context: Context): String {
+        val scoresPrefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val userListsPrefs = context.getSharedPreferences(USER_LIST_PREFS_NAME, Context.MODE_PRIVATE)
+
+        val json = JSONObject()
+
+        val scoresJson = JSONObject()
+        scoresPrefs.all.forEach { (key, value) ->
+            if (value is String) scoresJson.put(key, value)
+        }
+        json.put("scores", scoresJson)
+
+        val userListsJson = JSONObject()
+        userListsPrefs.all.forEach { (key, value) ->
+            if (value is Set<*>) {
+                val array = JSONArray()
+                value.forEach { array.put(it) }
+                userListsJson.put(key, array)
+            }
+        }
+        json.put("user_lists", userListsJson)
+
+        return json.toString()
+    }
+
+    fun restoreData(context: Context, jsonData: String) {
+        try {
+            val json = JSONObject(jsonData)
+
+            // Restore Scores
+            if (json.has("scores")) {
+                val scoresPrefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                val editor = scoresPrefs.edit()
+                val scoresJson = json.getJSONObject("scores")
+                val keys = scoresJson.keys()
+                while (keys.hasNext()) {
+                    val key = keys.next()
+                    editor.putString(key, scoresJson.getString(key))
+                }
+                editor.apply()
+            }
+
+            // Restore User Lists
+            if (json.has("user_lists")) {
+                val userListsPrefs = context.getSharedPreferences(USER_LIST_PREFS_NAME, Context.MODE_PRIVATE)
+                val editor = userListsPrefs.edit()
+                val userListsJson = json.getJSONObject("user_lists")
+                val keys = userListsJson.keys()
+                while (keys.hasNext()) {
+                    val key = keys.next()
+                    val jsonArray = userListsJson.getJSONArray(key)
+                    val set = mutableSetOf<String>()
+                    for (i in 0 until jsonArray.length()) {
+                        set.add(jsonArray.getString(i))
+                    }
+                    editor.putStringSet(key, set)
+                }
+                editor.apply()
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 }

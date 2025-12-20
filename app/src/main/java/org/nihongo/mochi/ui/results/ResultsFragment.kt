@@ -2,21 +2,29 @@ package org.nihongo.mochi.ui.results
 
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
+import android.graphics.Bitmap
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import com.google.android.gms.games.AchievementsClient
 import com.google.android.gms.games.GamesSignInClient
 import com.google.android.gms.games.PlayGames
+import com.google.android.gms.games.SnapshotsClient
+import com.google.android.gms.games.snapshot.Snapshot
+import com.google.android.gms.games.snapshot.SnapshotMetadataChange
+import com.google.android.gms.tasks.Task
 import org.nihongo.mochi.R
 import org.nihongo.mochi.data.ScoreManager
 import org.nihongo.mochi.databinding.FragmentResultsBinding
 import org.xmlpull.v1.XmlPullParser
+import java.io.IOException
 
 class ResultsFragment : Fragment() {
 
@@ -25,12 +33,35 @@ class ResultsFragment : Fragment() {
 
     private lateinit var gamesSignInClient: GamesSignInClient
     private lateinit var achievementsClient: AchievementsClient
+    private lateinit var snapshotsClient: SnapshotsClient
+
+    private val RC_SAVED_GAMES = 9009
+    private var mCurrentSaveName = "NihongoMochiSnapshot"
 
     private val achievementsLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             Log.d("ResultsFragment", "Achievements activity returned OK.")
         } else {
             Log.d("ResultsFragment", "Achievements activity returned with code: ${result.resultCode}")
+        }
+    }
+
+    private val savedGamesLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK && result.data != null) {
+            val intent = result.data!!
+            if (intent.hasExtra(SnapshotsClient.EXTRA_SNAPSHOT_METADATA)) {
+                // Load a snapshot.
+                val snapshotMetadata = intent.getParcelableExtra<com.google.android.gms.games.snapshot.SnapshotMetadata>(SnapshotsClient.EXTRA_SNAPSHOT_METADATA)
+                if (snapshotMetadata != null) {
+                    mCurrentSaveName = snapshotMetadata.uniqueName
+                    loadSnapshot()
+                }
+            } else if (intent.hasExtra(SnapshotsClient.EXTRA_SNAPSHOT_NEW)) {
+                // Create a new snapshot named with a unique string
+                val unique = java.math.BigInteger(281, java.util.Random()).toString(13)
+                mCurrentSaveName = "NihongoMochiSnapshot-$unique"
+                saveSnapshot()
+            }
         }
     }
 
@@ -48,12 +79,15 @@ class ResultsFragment : Fragment() {
 
         gamesSignInClient = PlayGames.getGamesSignInClient(requireActivity())
         achievementsClient = PlayGames.getAchievementsClient(requireActivity())
+        snapshotsClient = PlayGames.getSnapshotsClient(requireActivity())
 
         setupCollapsibleSections()
         updateAllPercentages()
 
         binding.buttonSignIn.setOnClickListener { signInManually() }
         binding.buttonAchievements.setOnClickListener { showAchievements() }
+        binding.buttonBackup.setOnClickListener { showSavedGamesUI() }
+        binding.buttonRestore.setOnClickListener { showSavedGamesUI() }
     }
 
     override fun onResume() {
@@ -72,19 +106,31 @@ class ResultsFragment : Fragment() {
         if (isSignedIn) {
             binding.buttonSignIn.visibility = View.GONE
             binding.buttonAchievements.visibility = View.VISIBLE
+            binding.buttonBackup.visibility = View.VISIBLE
+            binding.buttonRestore.visibility = View.VISIBLE
         } else {
             binding.buttonSignIn.visibility = View.VISIBLE
             binding.buttonAchievements.visibility = View.GONE
+            binding.buttonBackup.visibility = View.GONE
+            binding.buttonRestore.visibility = View.GONE
         }
     }
 
     private fun signInManually() {
-        gamesSignInClient.signIn().addOnCompleteListener {
-            if (it.isSuccessful) {
-                Log.d("ResultsFragment", "Manual sign-in successful")
-                updateSignInUI(it.result.isAuthenticated)
+        gamesSignInClient.signIn().addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val result = task.result
+                if (result.isAuthenticated) {
+                    Log.d("ResultsFragment", "Manual sign-in successful")
+                    updateSignInUI(true)
+                } else {
+                    Log.d("ResultsFragment", "Manual sign-in returned, but not authenticated")
+                    Toast.makeText(requireContext(), "Connexion annulée ou non aboutie", Toast.LENGTH_SHORT).show()
+                    updateSignInUI(false)
+                }
             } else {
-                Log.e("ResultsFragment", "Manual sign-in failed", it.exception)
+                Log.e("ResultsFragment", "Manual sign-in failed", task.exception)
+                Toast.makeText(requireContext(), "Erreur de connexion : ${task.exception?.localizedMessage}", Toast.LENGTH_LONG).show()
                 updateSignInUI(false)
             }
         }
@@ -94,6 +140,75 @@ class ResultsFragment : Fragment() {
         achievementsClient.achievementsIntent.addOnSuccessListener { intent ->
             achievementsLauncher.launch(intent)
         }
+    }
+
+    private fun showSavedGamesUI() {
+        val maxNumberOfSavedGamesToShow = 5
+        snapshotsClient.getSelectSnapshotIntent("Sauvegardes", true, true, maxNumberOfSavedGamesToShow)
+            .addOnSuccessListener { intent ->
+                savedGamesLauncher.launch(intent)
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(requireContext(), "Impossible d'ouvrir l'interface de sauvegarde: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+    private fun saveSnapshot() {
+        val data = ScoreManager.getAllData(requireContext()).toByteArray()
+        val desc = "Backup " + java.text.SimpleDateFormat.getDateTimeInstance().format(java.util.Date())
+
+        snapshotsClient.open(mCurrentSaveName, true, SnapshotsClient.RESOLUTION_POLICY_MOST_RECENTLY_MODIFIED)
+            .addOnFailureListener { e ->
+                 Log.e("ResultsFragment", "Error opening snapshot", e)
+                 Toast.makeText(requireContext(), "Erreur lors de l'ouverture de la sauvegarde", Toast.LENGTH_SHORT).show()
+            }
+            .continueWithTask { task ->
+                val snapshot = task.result.data!!
+                snapshot.snapshotContents.writeBytes(data)
+
+                val metadataChange = SnapshotMetadataChange.Builder()
+                    .setDescription(desc)
+                    .build()
+                
+                snapshotsClient.commitAndClose(snapshot, metadataChange)
+            }
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    Toast.makeText(requireContext(), "Sauvegarde effectuée avec succès", Toast.LENGTH_SHORT).show()
+                } else {
+                    Log.e("ResultsFragment", "Error saving snapshot", task.exception)
+                    Toast.makeText(requireContext(), "Erreur lors de la sauvegarde", Toast.LENGTH_SHORT).show()
+                }
+            }
+    }
+
+    private fun loadSnapshot() {
+         snapshotsClient.open(mCurrentSaveName, true, SnapshotsClient.RESOLUTION_POLICY_MOST_RECENTLY_MODIFIED)
+            .addOnFailureListener { e ->
+                Log.e("ResultsFragment", "Error opening snapshot", e)
+                Toast.makeText(requireContext(), "Erreur lors de l'ouverture de la sauvegarde", Toast.LENGTH_SHORT).show()
+            }
+            .continueWith { task ->
+                val snapshot = task.result.data!!
+                try {
+                    val data = snapshot.snapshotContents.readFully()
+                    if (data != null) {
+                        val jsonString = String(data)
+                        ScoreManager.restoreData(requireContext(), jsonString)
+                    }
+                } catch (e: IOException) {
+                    Log.e("ResultsFragment", "Error reading snapshot", e)
+                }
+            }
+            .addOnCompleteListener { task ->
+                 if (task.isSuccessful) {
+                     updateAllPercentages()
+                     Toast.makeText(requireContext(), "Données restaurées avec succès", Toast.LENGTH_SHORT).show()
+                 } else {
+                     Log.e("ResultsFragment", "Error loading snapshot", task.exception)
+                     Toast.makeText(requireContext(), "Erreur lors de la restauration", Toast.LENGTH_SHORT).show()
+                 }
+            }
     }
 
     private fun setupCollapsibleSections() {

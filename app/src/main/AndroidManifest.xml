@@ -10,7 +10,7 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/nihongomochi"
         android:supportsRtl="true"
-        android:theme="@style/Theme.KanjiMori">
+        android:theme="@style/Theme.NihongoMochi">
         
         <meta-data android:name="com.google.android.gms.games.APP_ID"
             android:value="@string/game_services_project_id" />
@@ -20,7 +20,7 @@
             android:exported="true"
             android:label="@string/app_name"
             android:resizeableActivity="true"
-            android:theme="@style/Theme.KanjiMori.NoActionBar"
+            android:theme="@style/Theme.NihongoMochi.NoActionBar"
             android:windowSoftInputMode="adjustResize"
             tools:targetApi="24">
             <intent-filter>

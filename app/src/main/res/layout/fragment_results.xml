@@ -693,6 +693,28 @@
             app:icon="@android:drawable/btn_star"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_marginStart="4dp"/>
+            
+        <Button
+            android:id="@+id/button_backup"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/results_backup"
+            android:visibility="gone"
+            app:icon="@android:drawable/ic_menu_save"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_marginStart="4dp"/>
+            
+        <Button
+            android:id="@+id/button_restore"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/results_restore"
+            android:visibility="gone"
+            app:icon="@android:drawable/ic_menu_upload"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_marginStart="4dp"/>
 
     </LinearLayout>
 
