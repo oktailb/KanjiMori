@@ -12,7 +12,6 @@ import androidx.annotation.XmlRes
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import org.oktail.kanjimori.R
-import org.oktail.kanjimori.data.KanjiScore
 import org.oktail.kanjimori.data.ScoreManager
 import org.oktail.kanjimori.databinding.FragmentKanaBinding
 import org.xmlpull.v1.XmlPullParser
@@ -57,7 +56,7 @@ abstract class BaseKanaFragment : Fragment() {
                     textSize = 24f
                     textAlignment = View.TEXT_ALIGNMENT_CENTER
                     setTextColor(Color.BLACK)
-                    setBackgroundColor(calculateColor(score))
+                    setBackgroundColor(ScoreManager.getScoreColor(requireContext(), score))
                     val params = GridLayout.LayoutParams().apply {
                         width = 0
                         height = GridLayout.LayoutParams.WRAP_CONTENT
@@ -103,36 +102,6 @@ abstract class BaseKanaFragment : Fragment() {
             e.printStackTrace()
         }
         return kanaList
-    }
-
-    private fun calculateColor(score: KanjiScore): Int {
-        val balance = score.successes - score.failures
-        val percentage = (balance.toFloat() / 10.0f).coerceIn(-1.0f, 1.0f)
-
-        return when {
-            percentage > 0 -> lerpColor(Color.WHITE, Color.GREEN, percentage)
-            percentage < 0 -> lerpColor(Color.WHITE, Color.RED, -percentage)
-            else -> Color.WHITE
-        }
-    }
-
-    private fun lerpColor(startColor: Int, endColor: Int, fraction: Float): Int {
-        val startA = Color.alpha(startColor)
-        val startR = Color.red(startColor)
-        val startG = Color.green(startColor)
-        val startB = Color.blue(startColor)
-
-        val endA = Color.alpha(endColor)
-        val endR = Color.red(endColor)
-        val endG = Color.green(endColor)
-        val endB = Color.blue(endColor)
-
-        val a = (startA + fraction * (endA - startA)).toInt()
-        val r = (startR + fraction * (endR - startR)).toInt()
-        val g = (startG + fraction * (endG - startG)).toInt()
-        val b = (startB + fraction * (endB - startB)).toInt()
-
-        return Color.argb(a, r, g, b)
     }
 
     override fun onDestroyView() {

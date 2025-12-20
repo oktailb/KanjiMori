@@ -10,7 +10,6 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import org.oktail.kanjimori.R
-import org.oktail.kanjimori.data.KanjiScore
 import org.oktail.kanjimori.data.ScoreManager
 import org.oktail.kanjimori.databinding.FragmentWritingRecapBinding
 import org.xmlpull.v1.XmlPullParser
@@ -69,7 +68,6 @@ class WritingRecapFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        // Refresh the list in case mastery has changed
         kanjiList = loadKanjiForLevel(args.level)
         updateUi()
     }
@@ -86,7 +84,6 @@ class WritingRecapFragment : Fragment() {
 
         val kanjiScores = kanjiList.map { ScoreManager.getScore(requireContext(), it, ScoreManager.ScoreType.WRITING) }
 
-        // --- Update Grid UI for the current page ---
         val startIndex = currentPage * pageSize
         val endIndex = (startIndex + pageSize).coerceAtMost(kanjiList.size)
 
@@ -99,8 +96,8 @@ class WritingRecapFragment : Fragment() {
                 text = kanjiCharacter
                 textSize = 24f
                 textAlignment = View.TEXT_ALIGNMENT_CENTER
-                setTextColor(Color.BLACK) // Force black text for readability
-                setBackgroundColor(calculateColor(score))
+                setTextColor(Color.BLACK)
+                setBackgroundColor(ScoreManager.getScoreColor(requireContext(), score))
                 val params = android.widget.GridLayout.LayoutParams().apply {
                     width = 0
                     height = android.widget.GridLayout.LayoutParams.WRAP_CONTENT
@@ -112,7 +109,6 @@ class WritingRecapFragment : Fragment() {
             binding.gridKanji.addView(textView)
         }
 
-        // --- Update Pagination UI ---
         binding.textPagination.text = "${startIndex + 1}..${endIndex} / ${kanjiList.size}"
         binding.buttonPrevPage.isEnabled = currentPage > 0
         binding.buttonPrevPage.alpha = if (currentPage > 0) 1.0f else 0.5f
@@ -165,36 +161,6 @@ class WritingRecapFragment : Fragment() {
             }
             eventType = parser.next()
         }
-    }
-
-    private fun calculateColor(score: KanjiScore): Int {
-        val balance = score.successes - score.failures
-        val percentage = (balance.toFloat() / 10.0f).coerceIn(-1.0f, 1.0f)
-
-        return when {
-            percentage > 0 -> lerpColor(Color.WHITE, Color.GREEN, percentage)
-            percentage < 0 -> lerpColor(Color.WHITE, Color.RED, -percentage)
-            else -> Color.WHITE
-        }
-    }
-
-    private fun lerpColor(startColor: Int, endColor: Int, fraction: Float): Int {
-        val startA = Color.alpha(startColor)
-        val startR = Color.red(startColor)
-        val startG = Color.green(startColor)
-        val startB = Color.blue(startColor)
-
-        val endA = Color.alpha(endColor)
-        val endR = Color.red(endColor)
-        val endG = Color.green(endColor)
-        val endB = Color.blue(endColor)
-
-        val a = (startA + fraction * (endA - startA)).toInt()
-        val r = (startR + fraction * (endR - startR)).toInt()
-        val g = (startG + fraction * (endG - startG)).toInt()
-        val b = (startB + fraction * (endB - startB)).toInt()
-
-        return Color.argb(a, r, g, b)
     }
 
     override fun onDestroyView() {

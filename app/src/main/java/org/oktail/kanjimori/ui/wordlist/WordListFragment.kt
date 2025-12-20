@@ -166,12 +166,8 @@ class WordListFragment : Fragment() {
             return
         }
 
-        // --- Process all Words in one go ---
-        val scoreBuckets = (0..10).associateWith { 0 }.toMutableMap()
-        var newWords = 0
         val wordScores = displayedWords.map { ScoreManager.getScore(requireContext(), it.text, ScoreManager.ScoreType.READING) }
 
-        // --- Update Grid UI for the current page ---
         val startIndex = currentPage * pageSize
         val endIndex = (startIndex + pageSize).coerceAtMost(displayedWords.size)
 
@@ -184,7 +180,7 @@ class WordListFragment : Fragment() {
             val chip = Chip(context).apply {
                 text = word.text
                 textSize = 18f
-                chipBackgroundColor = android.content.res.ColorStateList.valueOf(calculateColor(score))
+                chipBackgroundColor = android.content.res.ColorStateList.valueOf(ScoreManager.getScoreColor(requireContext(), score))
                 setTextColor(Color.BLACK)
 
                 if (kanjiDetail != null && kanjiDetail.meanings.isEmpty()) {
@@ -195,7 +191,6 @@ class WordListFragment : Fragment() {
             binding.wordsContainer.addView(chip)
         }
 
-        // --- Update Pagination UI ---
         binding.textPagination.text = "${startIndex + 1}..${endIndex} / ${displayedWords.size}"
         binding.buttonPrevPage.isEnabled = currentPage > 0
         binding.buttonPrevPage.alpha = if (currentPage > 0) 1.0f else 0.5f
@@ -207,7 +202,6 @@ class WordListFragment : Fragment() {
         if (listName == "user_custom_list") {
             val scores = ScoreManager.getAllScores(requireContext(), ScoreManager.ScoreType.READING)
             return scores.mapNotNull { (word, score) ->
-                // For user list, we always load words. Filtering is done in applyFilters.
                 WordItem(word, "")
             }
         }
@@ -308,36 +302,6 @@ class WordListFragment : Fragment() {
             Log.e("WordListFragment", "IO error reading meanings.xml", e)
         }
         return meaningsMap
-    }
-
-    private fun calculateColor(score: KanjiScore): Int {
-        val balance = score.successes - score.failures
-        val percentage = (balance.toFloat() / 10.0f).coerceIn(-1.0f, 1.0f)
-
-        return when {
-            percentage > 0 -> lerpColor(Color.WHITE, Color.GREEN, percentage)
-            percentage < 0 -> lerpColor(Color.WHITE, Color.RED, -percentage)
-            else -> Color.WHITE
-        }
-    }
-
-    private fun lerpColor(startColor: Int, endColor: Int, fraction: Float): Int {
-        val startA = Color.alpha(startColor)
-        val startR = Color.red(startColor)
-        val startG = Color.green(startColor)
-        val startB = Color.blue(startColor)
-
-        val endA = Color.alpha(endColor)
-        val endR = Color.red(endColor)
-        val endG = Color.green(endColor)
-        val endB = Color.blue(endColor)
-
-        val a = (startA + fraction * (endA - startA)).toInt()
-        val r = (startR + fraction * (endR - startR)).toInt()
-        val g = (startG + fraction * (endG - startG)).toInt()
-        val b = (startB + fraction * (endB - startB)).toInt()
-
-        return Color.argb(a, r, g, b)
     }
 
     override fun onDestroyView() {

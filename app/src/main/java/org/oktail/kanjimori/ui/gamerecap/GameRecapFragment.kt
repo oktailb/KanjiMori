@@ -6,13 +6,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import org.oktail.kanjimori.R
-import org.oktail.kanjimori.data.KanjiScore
 import org.oktail.kanjimori.data.ScoreManager
 import org.oktail.kanjimori.data.ScoreManager.ScoreType
 import org.oktail.kanjimori.databinding.FragmentGameRecapBinding
@@ -93,7 +91,6 @@ class GameRecapFragment : Fragment() {
 
         val kanjiScores = kanjiList.map { ScoreManager.getScore(requireContext(), it, ScoreType.RECOGNITION) }
 
-        // --- Update Grid UI for the current page ---
         val startIndex = currentPage * pageSize
         val endIndex = (startIndex + pageSize).coerceAtMost(kanjiList.size)
 
@@ -106,8 +103,8 @@ class GameRecapFragment : Fragment() {
                 text = kanjiCharacter
                 textSize = 24f
                 textAlignment = View.TEXT_ALIGNMENT_CENTER
-                setTextColor(Color.BLACK) // Force black text for readability on light backgrounds
-                setBackgroundColor(calculateColor(score))
+                setTextColor(Color.BLACK)
+                setBackgroundColor(ScoreManager.getScoreColor(requireContext(), score))
                 val params = android.widget.GridLayout.LayoutParams().apply {
                     width = 0
                     height = android.widget.GridLayout.LayoutParams.WRAP_CONTENT
@@ -119,7 +116,6 @@ class GameRecapFragment : Fragment() {
             binding.gridKanji.addView(textView)
         }
 
-        // --- Update Pagination UI ---
         binding.textPagination.text = "${startIndex + 1}..${endIndex} / ${kanjiList.size}"
         binding.buttonPrevPage.isEnabled = currentPage > 0
         binding.buttonPrevPage.alpha = if (currentPage > 0) 1.0f else 0.5f
@@ -163,38 +159,6 @@ class GameRecapFragment : Fragment() {
             }
             eventType = parser.next()
         }
-    }
-
-    private fun calculateColor(score: KanjiScore): Int {
-        val balance = score.successes - score.failures
-        val percentage = (balance.toFloat() / 10.0f).coerceIn(-1.0f, 1.0f)
-
-        val baseColor = ContextCompat.getColor(requireContext(), R.color.recap_grid_base_color)
-
-        return when {
-            percentage > 0 -> lerpColor(baseColor, Color.GREEN, percentage)
-            percentage < 0 -> lerpColor(baseColor, Color.RED, -percentage)
-            else -> baseColor
-        }
-    }
-
-    private fun lerpColor(startColor: Int, endColor: Int, fraction: Float): Int {
-        val startA = Color.alpha(startColor)
-        val startR = Color.red(startColor)
-        val startG = Color.green(startColor)
-        val startB = Color.blue(startColor)
-
-        val endA = Color.alpha(endColor)
-        val endR = Color.red(endColor)
-        val endG = Color.green(endColor)
-        val endB = Color.blue(endColor)
-
-        val a = (startA + fraction * (endA - startA)).toInt()
-        val r = (startR + fraction * (endR - startR)).toInt()
-        val g = (startG + fraction * (endG - startG)).toInt()
-        val b = (startB + fraction * (endB - startB)).toInt()
-
-        return Color.argb(a, r, g, b)
     }
 
     override fun onDestroyView() {
