@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?android:attr/windowBackground"
-    tools:context=".ui.gojuon.HiraganaQuizFragment">
+    tools:context=".ui.gojuon.BaseKanaQuizFragment">
 
     <!-- Progress Bar -->
     <LinearLayout
@@ -83,7 +83,7 @@
     </LinearLayout>
 
     <com.google.android.material.card.MaterialCardView
-        android:id="@+id/card_hiragana"
+        android:id="@+id/card_kana"
         android:layout_width="200dp"
         android:layout_height="200dp"
         app:cardCornerRadius="12dp"
@@ -95,7 +95,7 @@
         app:layout_constraintTop_toBottomOf="@id/progress_bar_game">
 
         <TextView
-            android:id="@+id/text_hiragana_character"
+            android:id="@+id/text_kana_character"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center"
@@ -105,7 +105,7 @@
             app:autoSizeMaxTextSize="120sp"
             app:autoSizeStepGranularity="2sp"
             android:textColor="@color/card_text"
-            tools:text="ぎゃ" />
+            tools:text="Kana" />
 
     </com.google.android.material.card.MaterialCardView>
 

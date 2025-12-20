@@ -5,30 +5,30 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?android:attr/windowBackground"
-    tools:context=".ui.gojuon.KatakanaFragment">
+    tools:context=".ui.gojuon.BaseKanaFragment">
 
     <TextView
         android:id="@+id/text_level_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="@string/level_katakana"
         android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Kana Title" />
 
     <ScrollView
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_margin="16dp"
-        app:layout_constraintBottom_toTopOf="@+id/button_play_katakana_quiz"
+        app:layout_constraintBottom_toTopOf="@+id/button_play_quiz"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/text_level_title">
 
         <GridLayout
-            android:id="@+id/grid_katakana"
+            android:id="@+id/grid_kana"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:columnCount="5" />
@@ -36,7 +36,7 @@
     </ScrollView>
 
     <Button
-        android:id="@+id/button_play_katakana_quiz"
+        android:id="@+id/button_play_quiz"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
