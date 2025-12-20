@@ -23,6 +23,8 @@ class GameRecapFragment : Fragment() {
     private val args: GameRecapFragmentArgs by navArgs()
 
     private var kanjiList: List<String> = emptyList()
+    // Map character -> ID for navigation
+    private var kanjiIdMap: MutableMap<String, String> = mutableMapOf()
     private var currentPage = 0
     private val pageSize = 80 // 8 columns * 10 rows
 
@@ -112,6 +114,15 @@ class GameRecapFragment : Fragment() {
                     setMargins(4, 4, 4, 4)
                 }
                 layoutParams = params
+                
+                // Add click listener
+                setOnClickListener {
+                    val id = kanjiIdMap[kanjiCharacter]
+                    if (id != null) {
+                        val action = GameRecapFragmentDirections.actionGameRecapToKanjiDetail(id)
+                        findNavController().navigate(action)
+                    }
+                }
             }
             binding.gridKanji.addView(textView)
         }
@@ -127,6 +138,7 @@ class GameRecapFragment : Fragment() {
         val allKanji = mutableMapOf<String, String>()
         val levelKanjiIds = mutableListOf<String>()
         val parser = resources.getXml(R.xml.kanji_levels)
+        kanjiIdMap.clear()
 
         try {
             var eventType = parser.eventType
@@ -137,6 +149,7 @@ class GameRecapFragment : Fragment() {
                         val character = parser.nextText()
                         if (id != null) {
                             allKanji[id] = character
+                            kanjiIdMap[character] = id
                         }
                     } else if (parser.name == "level" && parser.getAttributeValue(null, "name") == levelName) {
                         parseKanjiIdsForLevel(parser, levelKanjiIds)

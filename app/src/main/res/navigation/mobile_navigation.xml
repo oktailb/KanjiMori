@@ -150,6 +150,9 @@
         <action
             android:id="@+id/action_game_recap_to_recognition_game"
             app:destination="@id/nav_recognition_game" />
+        <action
+            android:id="@+id/action_game_recap_to_kanji_detail"
+            app:destination="@id/nav_kanji_detail" />
     </fragment>
 
     <fragment
@@ -163,6 +166,9 @@
         <action
             android:id="@+id/action_writing_recap_to_writing_game"
             app:destination="@id/nav_writing_game" />
+        <action
+            android:id="@+id/action_writing_recap_to_kanji_detail"
+            app:destination="@id/nav_kanji_detail" />
     </fragment>
 
     <fragment

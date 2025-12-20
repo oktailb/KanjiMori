@@ -196,15 +196,18 @@ class DictionaryFragment : Fragment() {
     }
 
     private fun performSearch() {
-        val query = binding.editSearch.text.toString().trim().lowercase()
+        val rawQuery = binding.editSearch.text.toString().trim().lowercase()
         val strokeStr = binding.editStrokeCount.text.toString().trim()
         val exactMatch = binding.checkExactMatch.isChecked
         
         // If query and strokes are empty, do nothing or clear list
-        if (query.isEmpty() && strokeStr.isEmpty()) {
+        if (rawQuery.isEmpty() && strokeStr.isEmpty()) {
             adapter.submitList(emptyList())
             return
         }
+
+        // Clean query by removing periods/dots to handle readings like "hito.tsu" matched by "hitotsu"
+        val cleanQuery = rawQuery.replace(".", "")
 
         val strokeCount = strokeStr.toIntOrNull()
 
@@ -213,13 +216,17 @@ class DictionaryFragment : Fragment() {
             val matchStroke = if (strokeCount == null) true else item.strokeCount == strokeCount
             
             // Text filter
-            val matchQuery = if (query.isEmpty()) true else {
+            val matchQuery = if (cleanQuery.isEmpty()) true else {
                 if (exactMatch) {
-                     item.character == query
+                     item.character == rawQuery
                 } else {
-                     item.character.contains(query, ignoreCase = true) ||
-                     item.readings.any { it.contains(query, ignoreCase = true) } ||
-                     item.meanings.any { it.contains(query, ignoreCase = true) }
+                     item.character.contains(rawQuery, ignoreCase = true) ||
+                     item.readings.any { 
+                         // Check reading with and without dots
+                         val cleanReading = it.replace(".", "").lowercase()
+                         cleanReading.contains(cleanQuery)
+                     } ||
+                     item.meanings.any { it.contains(rawQuery, ignoreCase = true) }
                 }
             }
             

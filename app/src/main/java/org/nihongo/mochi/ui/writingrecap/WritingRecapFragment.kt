@@ -21,6 +21,8 @@ class WritingRecapFragment : Fragment() {
     private val args: WritingRecapFragmentArgs by navArgs()
 
     private var kanjiList: List<String> = emptyList()
+    // Map character -> ID for navigation
+    private var kanjiIdMap: MutableMap<String, String> = mutableMapOf()
     private var currentPage = 0
     private val pageSize = 80 // 8 columns * 10 rows
 
@@ -105,6 +107,15 @@ class WritingRecapFragment : Fragment() {
                     setMargins(4, 4, 4, 4)
                 }
                 layoutParams = params
+                
+                // Add click listener
+                setOnClickListener {
+                    val id = kanjiIdMap[kanjiCharacter]
+                    if (id != null) {
+                        val action = WritingRecapFragmentDirections.actionWritingRecapToKanjiDetail(id)
+                        findNavController().navigate(action)
+                    }
+                }
             }
             binding.gridKanji.addView(textView)
         }
@@ -124,6 +135,7 @@ class WritingRecapFragment : Fragment() {
         val allKanji = mutableMapOf<String, String>()
         val levelKanjiIds = mutableListOf<String>()
         val parser = resources.getXml(R.xml.kanji_levels)
+        kanjiIdMap.clear()
 
         try {
             var eventType = parser.eventType
@@ -134,6 +146,7 @@ class WritingRecapFragment : Fragment() {
                         val character = parser.nextText()
                         if (id != null) {
                             allKanji[id] = character
+                            kanjiIdMap[character] = id
                         }
                     } else if (parser.name == "level" && parser.getAttributeValue(null, "name") == levelName) {
                         parseKanjiIdsForLevel(parser, levelKanjiIds)
@@ -149,8 +162,32 @@ class WritingRecapFragment : Fragment() {
     }
 
     private fun loadUserListKanji(): List<String> {
+        // Need to populate kanjiIdMap for user custom list too
+        // We'll reload the full map first efficiently
+        populateFullKanjiMap()
+        
         val scores = ScoreManager.getAllScores(requireContext(), ScoreManager.ScoreType.WRITING)
         return scores.filter { (_, score) -> (score.successes - score.failures) < 10 }.keys.toList()
+    }
+    
+    private fun populateFullKanjiMap() {
+        if (kanjiIdMap.isNotEmpty()) return // Already populated? 
+        // Note: loadKanjiForLevel clears it. If we are in user_custom_list mode, we need to populate it differently.
+        
+        val parser = resources.getXml(R.xml.kanji_levels)
+        try {
+            var eventType = parser.eventType
+            while (eventType != XmlPullParser.END_DOCUMENT) {
+                if (eventType == XmlPullParser.START_TAG && parser.name == "kanji") {
+                    val id = parser.getAttributeValue(null, "id")
+                    val character = parser.nextText()
+                    if (id != null) {
+                        kanjiIdMap[character] = id
+                    }
+                }
+                eventType = parser.next()
+            }
+        } catch (e: Exception) { e.printStackTrace() }
     }
 
     private fun parseKanjiIdsForLevel(parser: XmlPullParser, levelKanjiIds: MutableList<String>) {
