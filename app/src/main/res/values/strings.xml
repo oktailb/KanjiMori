@@ -6,12 +6,12 @@
     <string name="nav_header_title">Android Studio</string>
     <string name="nav_header_subtitle">android.studio@android.com</string>
     <string name="nav_header_desc">Navigation header</string>
-    <string name="action_settings">Settings</string>
+    <string name="action_settings">Paramètres</string>
 
     <string name="menu_transform">Transform</string>
     <string name="menu_reflow">Reflow</string>
     <string name="menu_slideshow">Slideshow</string>
-    <string name="menu_settings">Settings</string>
+    <string name="menu_settings">Paramètres</string>
 
     <string name="lorem_ipsum_title">Lorem Ipsum</string>
     <string name="lorem_ipsum">Lorem Ipsum is simply placeholder text of the printing and
@@ -19,13 +19,15 @@
         since the 1500s, when an unknown printer took a galley of type and scrambled it to make a
         type specimen book.
     </string>
-    <string name="fab_content_description">Represents a view to invoke an action</string>
-    <string name="image_view_item_transform_content_description">Represents an image view in the
-        item
+    <string name="fab_content_description">Représente une vue pour invoquer une action</string>
+    <string name="image_view_item_transform_content_description">Représente une vue d\'image dans l\'élément
     </string>
 
     <!-- Settings Screen -->
     <string name="settings_title">Options</string>
+    <string name="settings_category_general">Général</string>
+    <string name="settings_category_learning">Apprentissage</string>
+    <string name="settings_category_interface">Interface</string>
     <string name="settings_language">Langue</string>
     <string name="settings_pronunciation">Prononciation</string>
     <string name="settings_pronunciation_roman">Alphabet romain</string>
@@ -59,7 +61,7 @@
     <!-- Recognition Screen -->
     <string name="recognition_title">見覚え</string>
     <string name="recognition_subtitle">Choisis un groupe de kanji et apprends à reconnaître leurs différentes significations de base</string>
-    <string name="recognition_fundamentals">Fundamentals</string>
+    <string name="recognition_fundamentals">Fondamentaux</string>
     <string name="recognition_jlpt">Japanese Language Proficiency Test</string>
     <string name="recognition_primary_school">Ecole primaire (Jōyō 1..1006)</string>
     <string name="recognition_high_school">Lycée (Jōyō 1007..2136)</string>
@@ -75,7 +77,7 @@
     <string name="writing_find_words">Trouver des mots</string>
     <string name="writing_most_used_words">Mots les plus utilisés</string>
     <string name="writing_find_kanji">Trouver un Kanji</string>
-    <string name="writing_lists">Lists</string>
+    <string name="writing_lists">Listes</string>
     <string name="writing_user_lists">Liste de l\'utilisateurs / listes d\'étude</string>
 
     <!-- Reading Screen -->
@@ -126,10 +128,16 @@
     <string name="title_game_recap">Récapitulatif du jeu</string>
 
     <!-- About Screen -->
+    <string name="about_category_informations">Informations</string>
+    <string name="about_category_credits">Crédits</string>
+    <string name="about_category_resources">Ressources</string>
+    <string name="about_design_dev">Design &amp; Développement</string>
+    <string name="about_pedagogical">Contenu Pédagogique</string>
+    <string name="about_coming_soon">(À venir)</string>
     <string name="about_retribution">Rétribution</string>
     <string name="about_patreon">Soutenez-moi sur Patreon</string>
     <string name="about_tipeee">Faire un don sur Tipeee</string>
-    <string name="my_image_description">Next page button</string>
+    <string name="my_image_description">Bouton page suivante</string>
     <string name="about_version_info">Information de la version</string>
     <string name="about_version_label">Version :</string>
     <string name="about_date_label">Date :</string>
@@ -137,9 +145,10 @@
     <string name="about_credits">Crédits</string>
     <string name="about_author_name">LECOQ Vincent</string>
     <string name="about_author_role">Design, programming, etc.</string>
-    <string name="about_pedagogical_content">Japanese pedagogical content</string>
+    <string name="about_pedagogical_content">Contenu pédagogique japonais</string>
     <string name="about_kanji_data_credit">Données Kanji: David Gouveia</string>
     <string name="about_header_picture_credit">Photo: Charles Knowles</string>
+    <string name="about_rate_app">Noter l\'application</string>
 
     <!-- Results Screen -->
     <string name="results_title">Résultats</string>

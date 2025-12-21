@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?android:attr/windowBackground"
+    android:clipToPadding="false"
+    android:paddingBottom="16dp"
     tools:context=".ui.recognition.RecognitionFragment">
 
     <LinearLayout
@@ -17,248 +19,420 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/recognition_title"
-            android:textSize="34sp" />
+            android:textSize="34sp"
+            android:textStyle="bold"
+            android:textColor="?attr/colorPrimary"
+            android:layout_marginBottom="4dp"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:text="@string/recognition_subtitle" />
+            android:layout_marginBottom="24dp"
+            android:text="@string/recognition_subtitle"
+            android:textColor="?android:attr/textColorSecondary"
+            android:textSize="16sp" />
 
         <!-- Fundamentals -->
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/recognition_fundamentals"
-                android:textSize="18sp" />
-
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:src="@android:drawable/ic_dialog_info" />
-        </RelativeLayout>
-
-        <GridLayout
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:columnCount="2">
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="2dp"
+            app:contentPadding="16dp">
 
-            <Button
-                android:id="@+id/button_hiragana"
-                android:layout_width="0dp"
-                android:layout_columnWeight="1"
-                android:layout_gravity="fill"
-                android:backgroundTint="?attr/colorSecondary"
-                tools:text="Hiragana" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:clipChildren="false"
+                android:clipToPadding="false">
 
-            <Button
-                android:id="@+id/button_katakana"
-                android:layout_width="0dp"
-                android:layout_columnWeight="1"
-                android:layout_gravity="fill"
-                android:backgroundTint="?attr/colorSecondary"
-                tools:text="Katakana" />
-        </GridLayout>
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/recognition_fundamentals"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:layout_centerVertical="true"/>
+
+                </RelativeLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:clipChildren="false"
+                    android:clipToPadding="false">
+
+                    <Button
+                        android:id="@+id/button_hiragana"
+                        style="@style/Widget.MaterialComponents.Button"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="4dp"
+                        app:elevation="6dp"
+                        android:textColor="?attr/colorOnSecondary"
+                        android:backgroundTint="?attr/colorSecondary"
+                        app:strokeColor="?attr/colorPrimaryVariant"
+                        app:strokeWidth="0dp"
+                        tools:text="Hiragana" />
+
+                    <Button
+                        android:id="@+id/button_katakana"
+                        style="@style/Widget.MaterialComponents.Button"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        app:elevation="6dp"
+                        android:textColor="?attr/colorOnSecondary"
+                        android:backgroundTint="?attr/colorSecondary"
+                        app:strokeColor="?attr/colorPrimaryVariant"
+                        app:strokeWidth="0dp"
+                        tools:text="Katakana" />
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
         <!-- Japanese Language Proficiency Test -->
-        <RelativeLayout
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp">
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="2dp"
+            app:contentPadding="16dp">
 
-            <TextView
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/recognition_jlpt"
-                android:textSize="18sp" />
+                android:orientation="vertical"
+                android:clipChildren="false"
+                android:clipToPadding="false">
 
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:src="@android:drawable/ic_dialog_info" />
-        </RelativeLayout>
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp">
 
-        <GridLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:columnCount="5">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/recognition_jlpt"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:layout_centerVertical="true"/>
 
-            <Button
-                android:id="@+id/button_n5"
-                android:layout_width="0dp"
-                android:layout_columnWeight="1"
-                android:layout_gravity="fill"
-                android:backgroundTint="?attr/colorSecondary"
-                tools:text="N5\n0%" />
+                </RelativeLayout>
 
-            <Button
-                android:id="@+id/button_n4"
-                android:layout_width="0dp"
-                android:layout_columnWeight="1"
-                android:layout_gravity="fill"
-                android:backgroundTint="?attr/colorSecondary"
-                tools:text="N4\n0%" />
+                <GridLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:columnCount="3"
+                    android:clipChildren="false"
+                    android:clipToPadding="false">
 
-            <Button
-                android:id="@+id/button_n3"
-                android:layout_width="0dp"
-                android:layout_columnWeight="1"
-                android:layout_gravity="fill"
-                android:backgroundTint="?attr/colorSecondary"
-                tools:text="N3\n0%" />
+                    <Button
+                        android:id="@+id/button_n5"
+                        style="@style/Widget.MaterialComponents.Button"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_columnWeight="1"
+                        android:layout_margin="4dp"
+                        app:elevation="6dp"
+                        android:textColor="?attr/colorOnSecondary"
+                        android:backgroundTint="?attr/colorSecondary"
+                        app:strokeColor="?attr/colorPrimaryVariant"
+                        app:strokeWidth="0dp"
+                        tools:text="N5\n0%" />
 
-            <Button
-                android:id="@+id/button_n2"
-                android:layout_width="0dp"
-                android:layout_columnWeight="1"
-                android:layout_gravity="fill"
-                android:backgroundTint="?attr/colorSecondary"
-                tools:text="N2\n0%" />
+                    <Button
+                        android:id="@+id/button_n4"
+                        style="@style/Widget.MaterialComponents.Button"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_columnWeight="1"
+                        android:layout_margin="4dp"
+                        app:elevation="6dp"
+                        android:textColor="?attr/colorOnSecondary"
+                        android:backgroundTint="?attr/colorSecondary"
+                        app:strokeColor="?attr/colorPrimaryVariant"
+                        app:strokeWidth="0dp"
+                        tools:text="N4\n0%" />
 
-            <Button
-                android:id="@+id/button_n1"
-                android:layout_width="0dp"
-                android:layout_columnWeight="1"
-                android:layout_gravity="fill"
-                android:backgroundTint="?attr/colorSecondary"
-                tools:text="N1\n0%" />
-        </GridLayout>
+                    <Button
+                        android:id="@+id/button_n3"
+                        style="@style/Widget.MaterialComponents.Button"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_columnWeight="1"
+                        android:layout_margin="4dp"
+                        app:elevation="6dp"
+                        android:textColor="?attr/colorOnSecondary"
+                        android:backgroundTint="?attr/colorSecondary"
+                        app:strokeColor="?attr/colorPrimaryVariant"
+                        app:strokeWidth="0dp"
+                        tools:text="N3\n0%" />
+
+                    <Button
+                        android:id="@+id/button_n2"
+                        style="@style/Widget.MaterialComponents.Button"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_columnWeight="1"
+                        android:layout_margin="4dp"
+                        app:elevation="6dp"
+                        android:textColor="?attr/colorOnSecondary"
+                        android:backgroundTint="?attr/colorSecondary"
+                        app:strokeColor="?attr/colorPrimaryVariant"
+                        app:strokeWidth="0dp"
+                        tools:text="N2\n0%" />
+
+                    <Button
+                        android:id="@+id/button_n1"
+                        style="@style/Widget.MaterialComponents.Button"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_columnWeight="1"
+                        android:layout_margin="4dp"
+                        app:elevation="6dp"
+                        android:textColor="?attr/colorOnSecondary"
+                        android:backgroundTint="?attr/colorSecondary"
+                        app:strokeColor="?attr/colorPrimaryVariant"
+                        app:strokeWidth="0dp"
+                        tools:text="N1\n0%" />
+                </GridLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
         <!-- Ecole primaire -->
-        <RelativeLayout
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp">
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="2dp"
+            app:contentPadding="16dp">
 
-            <TextView
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/recognition_primary_school"
-                android:textSize="18sp" />
+                android:orientation="vertical"
+                android:clipChildren="false"
+                android:clipToPadding="false">
 
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:src="@android:drawable/ic_dialog_info" />
-        </RelativeLayout>
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp">
 
-        <GridLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:columnCount="3">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/recognition_primary_school"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:layout_centerVertical="true"/>
 
-            <Button
-                android:id="@+id/button_class1"
-                android:layout_width="0dp"
-                android:layout_columnWeight="1"
-                android:layout_gravity="fill"
-                android:backgroundTint="?attr/colorSecondary"
-                tools:text="Classe 1\n0%" />
+                </RelativeLayout>
 
-            <Button
-                android:id="@+id/button_class2"
-                android:layout_width="0dp"
-                android:layout_columnWeight="1"
-                android:layout_gravity="fill"
-                android:backgroundTint="?attr/colorSecondary"
-                tools:text="Classe 2\n0%" />
+                <GridLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:columnCount="2"
+                    android:clipChildren="false"
+                    android:clipToPadding="false">
 
-            <Button
-                android:id="@+id/button_class3"
-                android:layout_width="0dp"
-                android:layout_columnWeight="1"
-                android:layout_gravity="fill"
-                android:backgroundTint="?attr/colorSecondary"
-                tools:text="Classe 3\n0%" />
+                    <Button
+                        android:id="@+id/button_class1"
+                        style="@style/Widget.MaterialComponents.Button"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_columnWeight="1"
+                        android:layout_margin="4dp"
+                        app:elevation="6dp"
+                        android:textColor="?attr/colorOnSecondary"
+                        android:backgroundTint="?attr/colorSecondary"
+                        app:strokeColor="?attr/colorPrimaryVariant"
+                        app:strokeWidth="0dp"
+                        tools:text="Classe 1\n0%" />
 
-            <Button
-                android:id="@+id/button_class4"
-                android:layout_width="0dp"
-                android:layout_columnWeight="1"
-                android:layout_gravity="fill"
-                android:backgroundTint="?attr/colorSecondary"
-                tools:text="Classe 4\n0%" />
+                    <Button
+                        android:id="@+id/button_class2"
+                        style="@style/Widget.MaterialComponents.Button"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_columnWeight="1"
+                        android:layout_margin="4dp"
+                        app:elevation="6dp"
+                        android:textColor="?attr/colorOnSecondary"
+                        android:backgroundTint="?attr/colorSecondary"
+                        app:strokeColor="?attr/colorPrimaryVariant"
+                        app:strokeWidth="0dp"
+                        tools:text="Classe 2\n0%" />
 
-            <Button
-                android:id="@+id/button_class5"
-                android:layout_width="0dp"
-                android:layout_columnWeight="1"
-                android:layout_gravity="fill"
-                android:backgroundTint="?attr/colorSecondary"
-                tools:text="Classe 5\n0%" />
+                    <Button
+                        android:id="@+id/button_class3"
+                        style="@style/Widget.MaterialComponents.Button"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_columnWeight="1"
+                        android:layout_margin="4dp"
+                        app:elevation="6dp"
+                        android:textColor="?attr/colorOnSecondary"
+                        android:backgroundTint="?attr/colorSecondary"
+                        app:strokeColor="?attr/colorPrimaryVariant"
+                        app:strokeWidth="0dp"
+                        tools:text="Classe 3\n0%" />
 
-            <Button
-                android:id="@+id/button_class6"
-                android:layout_width="0dp"
-                android:layout_columnWeight="1"
-                android:layout_gravity="fill"
-                android:backgroundTint="?attr/colorSecondary"
-                tools:text="Classe 6\n0%" />
-        </GridLayout>
+                    <Button
+                        android:id="@+id/button_class4"
+                        style="@style/Widget.MaterialComponents.Button"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_columnWeight="1"
+                        android:layout_margin="4dp"
+                        app:elevation="6dp"
+                        android:textColor="?attr/colorOnSecondary"
+                        android:backgroundTint="?attr/colorSecondary"
+                        app:strokeColor="?attr/colorPrimaryVariant"
+                        app:strokeWidth="0dp"
+                        tools:text="Classe 4\n0%" />
+
+                    <Button
+                        android:id="@+id/button_class5"
+                        style="@style/Widget.MaterialComponents.Button"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_columnWeight="1"
+                        android:layout_margin="4dp"
+                        app:elevation="6dp"
+                        android:textColor="?attr/colorOnSecondary"
+                        android:backgroundTint="?attr/colorSecondary"
+                        app:strokeColor="?attr/colorPrimaryVariant"
+                        app:strokeWidth="0dp"
+                        tools:text="Classe 5\n0%" />
+
+                    <Button
+                        android:id="@+id/button_class6"
+                        style="@style/Widget.MaterialComponents.Button"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_columnWeight="1"
+                        android:layout_margin="4dp"
+                        app:elevation="6dp"
+                        android:textColor="?attr/colorOnSecondary"
+                        android:backgroundTint="?attr/colorSecondary"
+                        app:strokeColor="?attr/colorPrimaryVariant"
+                        app:strokeWidth="0dp"
+                        tools:text="Classe 6\n0%" />
+                </GridLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
         <!-- Lycée -->
-        <RelativeLayout
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp">
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="2dp"
+            app:contentPadding="16dp">
 
-            <TextView
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/recognition_high_school"
-                android:textSize="18sp" />
+                android:orientation="vertical"
+                android:clipChildren="false"
+                android:clipToPadding="false">
 
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:src="@android:drawable/ic_dialog_info" />
-        </RelativeLayout>
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp">
 
-        <GridLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:columnCount="4">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/recognition_high_school"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:layout_centerVertical="true"/>
 
-            <Button
-                android:id="@+id/button_test4"
-                android:layout_width="0dp"
-                android:layout_columnWeight="1"
-                android:layout_gravity="fill"
-                android:backgroundTint="?attr/colorSecondary"
-                tools:text="Test 4\n0%" />
+                </RelativeLayout>
 
-            <Button
-                android:id="@+id/button_test3"
-                android:layout_width="0dp"
-                android:layout_columnWeight="1"
-                android:layout_gravity="fill"
-                android:backgroundTint="?attr/colorSecondary"
-                tools:text="Test 3\n0%" />
+                <GridLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:columnCount="2"
+                    android:clipChildren="false"
+                    android:clipToPadding="false">
 
-            <Button
-                android:id="@+id/button_test_pre2"
-                android:layout_width="0dp"
-                android:layout_columnWeight="1"
-                android:layout_gravity="fill"
-                android:backgroundTint="?attr/colorSecondary"
-                tools:text="Test Pre-2\n0%" />
+                    <Button
+                        android:id="@+id/button_test4"
+                        style="@style/Widget.MaterialComponents.Button"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_columnWeight="1"
+                        android:layout_margin="4dp"
+                        app:elevation="6dp"
+                        android:textColor="?attr/colorOnSecondary"
+                        android:backgroundTint="?attr/colorSecondary"
+                        app:strokeColor="?attr/colorPrimaryVariant"
+                        app:strokeWidth="0dp"
+                        tools:text="Test 4\n0%" />
 
-            <Button
-                android:id="@+id/button_test2"
-                android:layout_width="0dp"
-                android:layout_columnWeight="1"
-                android:layout_gravity="fill"
-                android:backgroundTint="?attr/colorSecondary"
-                tools:text="Test 2\n0%" />
-        </GridLayout>
+                    <Button
+                        android:id="@+id/button_test3"
+                        style="@style/Widget.MaterialComponents.Button"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_columnWeight="1"
+                        android:layout_margin="4dp"
+                        app:elevation="6dp"
+                        android:textColor="?attr/colorOnSecondary"
+                        android:backgroundTint="?attr/colorSecondary"
+                        app:strokeColor="?attr/colorPrimaryVariant"
+                        app:strokeWidth="0dp"
+                        tools:text="Test 3\n0%" />
+
+                    <Button
+                        android:id="@+id/button_test_pre2"
+                        style="@style/Widget.MaterialComponents.Button"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_columnWeight="1"
+                        android:layout_margin="4dp"
+                        app:elevation="6dp"
+                        android:textColor="?attr/colorOnSecondary"
+                        android:backgroundTint="?attr/colorSecondary"
+                        app:strokeColor="?attr/colorPrimaryVariant"
+                        app:strokeWidth="0dp"
+                        tools:text="Test Pre-2\n0%" />
+
+                    <Button
+                        android:id="@+id/button_test2"
+                        style="@style/Widget.MaterialComponents.Button"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_columnWeight="1"
+                        android:layout_margin="4dp"
+                        app:elevation="6dp"
+                        android:textColor="?attr/colorOnSecondary"
+                        android:backgroundTint="?attr/colorSecondary"
+                        app:strokeColor="?attr/colorPrimaryVariant"
+                        app:strokeWidth="0dp"
+                        tools:text="Test 2\n0%" />
+                </GridLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
     </LinearLayout>
-</ScrollView>
+</androidx.core.widget.NestedScrollView>

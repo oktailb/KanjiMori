@@ -57,8 +57,8 @@ class AboutFragment : Fragment() {
             startActivity(intent)
         }
 
-        binding.layoutHeaderPicture.setOnClickListener {
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.flickr.com/photos/theknowlesgallery/"))
+        binding.layoutRateApp.setOnClickListener {
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=${requireContext().packageName}"))
             startActivity(intent)
         }
     }

@@ -54,8 +54,8 @@ class SettingsFragment : Fragment() {
 
     private fun setupLanguageSpinner() {
         languages = listOf(
-            LanguageItem("fr_FR", getString(R.string.language_fr_fr), R.drawable.flag_fr_fr),
             LanguageItem("en_GB", getString(R.string.language_en_gb), R.drawable.flag_en_gb),
+            LanguageItem("fr_FR", getString(R.string.language_fr_fr), R.drawable.flag_fr_fr),
             LanguageItem("it_IT", getString(R.string.language_it_it), R.drawable.flag_it),
             LanguageItem("de_DE", getString(R.string.language_de_de), R.drawable.flag_de),
             LanguageItem("es_SP", getString(R.string.language_es_sp), R.drawable.flag_es),
@@ -181,7 +181,7 @@ class SettingsFragment : Fragment() {
     }
 
     private fun getCurrentAppLocale(): String {
-        return sharedPreferences.getString("AppLocale", "fr_FR")!!
+        return sharedPreferences.getString("AppLocale", "en_GB")!!
     }
 
     private fun setAppLocale(localeCode: String) {

@@ -1,8 +1,11 @@
 package org.nihongo.mochi
 
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.os.LocaleListCompat
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
@@ -19,6 +22,24 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        // Ensure default language is applied on first launch if not set
+        val sharedPreferences = getSharedPreferences("AppSettings", Context.MODE_PRIVATE)
+        if (!sharedPreferences.contains("AppLocale")) {
+            val defaultLocale = "en_GB"
+            sharedPreferences.edit().putString("AppLocale", defaultLocale).apply()
+            val localeTag = defaultLocale.replace('_', '-')
+            val appLocale = LocaleListCompat.forLanguageTags(localeTag)
+            AppCompatDelegate.setApplicationLocales(appLocale)
+        } else {
+             // Apply stored locale
+             val savedLocale = sharedPreferences.getString("AppLocale", "en_GB")!!
+             val localeTag = savedLocale.replace('_', '-')
+             if (AppCompatDelegate.getApplicationLocales().toLanguageTags() != localeTag) {
+                  val appLocale = LocaleListCompat.forLanguageTags(localeTag)
+                  AppCompatDelegate.setApplicationLocales(appLocale)
+             }
+        }
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)

@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?android:attr/windowBackground"
+    android:clipToPadding="false"
+    android:paddingBottom="16dp"
     tools:context=".ui.about.AboutFragment">
 
     <LinearLayout
@@ -13,208 +15,267 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="63dp"
-            android:orientation="horizontal">
-
-            <ImageView
-                android:id="@+id/imageView4"
-                android:layout_width="96dp"
-                android:layout_height="match_parent"
-                android:src="@mipmap/nihongomochi"
-                android:contentDescription="@string/app_name" />
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/menu_about"
-                android:textSize="34sp" />
+                android:textSize="34sp"
+                android:textStyle="bold"
+                android:textColor="?attr/colorPrimary"
+                android:layout_centerVertical="true"/>
 
-        </LinearLayout>
+            <ImageView
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@mipmap/nihongomochi"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:contentDescription="@string/app_name"/>
+        </RelativeLayout>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginBottom="24dp"
             android:text="@string/about_version_info"
-            android:textSize="22sp" />
+            android:textColor="?android:attr/textColorSecondary"
+            android:textSize="16sp" />
 
-        <TableLayout
+        <!-- Infos & Bugs -->
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp">
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="2dp"
+            app:contentPadding="16dp">
 
-            <TableRow>
-                <TextView android:text="@string/about_version_label" android:paddingEnd="8dp"/>
-                <TextView android:id="@+id/text_version" tools:text="@string/about_version_number" />
-            </TableRow>
-            <TableRow>
-                <TextView android:text="@string/about_date_label" android:paddingEnd="8dp"/>
-                <TextView android:id="@+id/text_date" tools:text="2023-10-27" />
-            </TableRow>
-        </TableLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
-        <RelativeLayout
-            android:id="@+id/layout_issue_tracker"
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/about_category_informations"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:layout_centerVertical="true"/>
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:src="@android:drawable/ic_dialog_info"
+                        app:tint="?attr/colorPrimary"
+                        android:contentDescription="@null"/>
+                </RelativeLayout>
+
+                <TableLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp">
+
+                    <TableRow android:paddingBottom="8dp">
+                        <TextView android:text="@string/about_version_label" android:textStyle="bold" android:paddingEnd="16dp"/>
+                        <TextView android:id="@+id/text_version" tools:text="@string/about_version_number" />
+                    </TableRow>
+                    <TableRow>
+                        <TextView android:text="@string/about_date_label" android:textStyle="bold" android:paddingEnd="16dp"/>
+                        <TextView android:id="@+id/text_date" tools:text="2023-10-27" />
+                    </TableRow>
+                </TableLayout>
+
+                <Button
+                    android:id="@+id/layout_issue_tracker"
+                    style="@style/Widget.MaterialComponents.Button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:elevation="6dp"
+                    android:text="@string/about_issue_tracker"
+                    android:textColor="?attr/colorOnSecondary"
+                    android:backgroundTint="?attr/colorSecondary"
+                    app:strokeWidth="0dp"
+                    app:icon="@android:drawable/ic_menu_send"
+                    app:iconTint="?attr/colorOnSecondary"
+                    app:iconGravity="textEnd"
+                    android:layout_marginBottom="4dp"/>
+
+                <Button
+                    android:id="@+id/layout_rate_app"
+                    style="@style/Widget.MaterialComponents.Button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:elevation="6dp"
+                    android:text="@string/about_rate_app"
+                    android:textColor="?attr/colorOnSecondary"
+                    android:backgroundTint="?attr/colorSecondary"
+                    app:strokeWidth="0dp"
+                    app:icon="@android:drawable/star_off"
+                    app:iconTint="?attr/colorOnSecondary"
+                    app:iconGravity="textEnd"/>
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Crédits -->
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:background="?android:attr/selectableItemBackground">
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="2dp"
+            app:contentPadding="16dp">
 
-            <TextView
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/about_issue_tracker"
-                android:textSize="18sp" />
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@android:drawable/ic_menu_send"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:contentDescription="@null"/>
-        </RelativeLayout>
+                android:orientation="vertical">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="@string/about_credits"
-            android:textSize="22sp" />
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp">
 
-        <!-- Patreon -->
-        <LinearLayout
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/about_category_credits"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:layout_centerVertical="true"/>
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:src="@android:drawable/ic_menu_info_details"
+                        app:tint="?attr/colorPrimary"
+                        android:contentDescription="@null"/>
+                </RelativeLayout>
+
+                <!-- Design / Dev -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/about_design_dev"
+                    android:textStyle="bold"
+                    android:textColor="?attr/colorPrimary"
+                    android:layout_marginBottom="4dp"/>
+                
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="LECOQ Vincent"
+                    android:textSize="16sp"
+                    android:layout_marginBottom="8dp"/>
+
+                <Button
+                    android:id="@+id/layout_patreon"
+                    style="@style/Widget.MaterialComponents.Button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:elevation="6dp"
+                    android:text="@string/about_patreon"
+                    android:textColor="?attr/colorOnSecondary"
+                    android:backgroundTint="?attr/colorSecondary"
+                    app:strokeWidth="0dp"
+                    android:layout_marginBottom="4dp"/>
+
+                <Button
+                    android:id="@+id/layout_tipeee"
+                    style="@style/Widget.MaterialComponents.Button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:elevation="6dp"
+                    android:text="@string/about_tipeee"
+                    android:textColor="?attr/colorOnSecondary"
+                    android:backgroundTint="?attr/colorSecondary"
+                    app:strokeWidth="0dp"
+                    android:layout_marginBottom="16dp"/>
+
+                <!-- Contenu Pédagogique -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/about_pedagogical"
+                    android:textStyle="bold"
+                    android:textColor="?attr/colorPrimary"
+                    android:layout_marginBottom="4dp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/about_coming_soon"
+                    android:textSize="16sp"
+                    android:layout_marginBottom="8dp"/>
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Ressources Tiers -->
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="2dp"
+            app:contentPadding="16dp">
 
-            <TextView
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/about_author_name"
-                android:textSize="18sp" />
+                android:orientation="vertical">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/about_author_role" />
-        </LinearLayout>
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp">
 
-        <RelativeLayout
-            android:id="@+id/layout_patreon"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:background="?android:attr/selectableItemBackground">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/about_patreon"
-                android:textSize="18sp"
-                android:layout_centerVertical="true"
-                android:layout_toStartOf="@+id/icon_patreon"/>
-            <ImageView
-                android:id="@+id/icon_patreon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@android:drawable/ic_menu_send"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:contentDescription="@null"/>
-        </RelativeLayout>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/about_category_resources"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:layout_centerVertical="true"/>
 
-        <!-- Tipeee -->
-        <RelativeLayout
-            android:id="@+id/layout_tipeee"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:background="?android:attr/selectableItemBackground">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/about_tipeee"
-                android:textSize="18sp"
-                android:layout_centerVertical="true"
-                android:layout_toStartOf="@+id/icon_tipeee"/>
-            <ImageView
-                android:id="@+id/icon_tipeee"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@android:drawable/ic_menu_send"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:contentDescription="@null"/>
-        </RelativeLayout>
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:src="@android:drawable/ic_menu_gallery"
+                        app:tint="?attr/colorPrimary"
+                        android:contentDescription="@null"/>
+                </RelativeLayout>
 
-        <!-- LECOQ Vincent -->
+                 <Button
+                    android:id="@+id/layout_kanji_data"
+                    style="@style/Widget.MaterialComponents.Button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:elevation="6dp"
+                    android:text="@string/about_kanji_data_credit"
+                    android:textColor="?attr/colorOnSecondary"
+                    android:backgroundTint="?attr/colorSecondary"
+                    app:strokeWidth="0dp"/>
 
-        <!-- Kanji data -->
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/about_pedagogical_content"
-                android:layout_marginTop="16dp" />
-        </LinearLayout>
-
-        <RelativeLayout
-            android:id="@+id/layout_kanji_data"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:background="?android:attr/selectableItemBackground">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/about_kanji_data_credit"
-                android:textSize="18sp" />
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@android:drawable/ic_menu_send"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:contentDescription="@null"/>
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:id="@+id/layout_header_picture"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:background="?android:attr/selectableItemBackground"
-            android:clickable="true"
-            android:focusable="true">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/about_header_picture_credit"
-                android:textSize="18sp" />
-
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:src="@android:drawable/ic_menu_send"
-                android:contentDescription="@null"/>
-        </RelativeLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
     </LinearLayout>
-</ScrollView>
+</androidx.core.widget.NestedScrollView>
