@@ -201,4 +201,16 @@
     <string name="language_ko_kr">한국어</string>
     <string name="language_vi_vn">Tiếng Việt</string>
 
+    <!-- Dictionary Screen -->
+    <string name="dictionary_search_hint_text">텍스트 검색</string>
+    <string name="dictionary_search_by_drawing_desc">그리기로 검색</string>
+    <string name="dictionary_mode_reading">읽기 (카나)</string>
+    <string name="dictionary_mode_meaning">의미 (로마자)</string>
+    <string name="dictionary_search_hint_strokes">획수</string>
+    <string name="dictionary_match_exact">정확히</string>
+    <string name="dictionary_clear_drawing_desc">그리기 필터 지우기</string>
+    <string name="dictionary_search_button">검색</string>
+    <string name="dictionary_results_count_format">%1$d 결과</string>
+    <string name="dictionary_reading_on">On:</string>
+    <string name="dictionary_reading_kun">Kun:</string>
 </resources>

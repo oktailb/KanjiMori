@@ -80,7 +80,7 @@ class DictionaryFragment : Fragment() {
         )
         adapter.submitList(viewModel.lastResults)
         updateDrawingThumbnail()
-        binding.textResultCount.text = "${viewModel.lastResults.size} résultats"
+        binding.textResultCount.text = getString(R.string.dictionary_results_count_format, viewModel.lastResults.size)
     }
 
     private fun setupFilterListeners() {
@@ -184,7 +184,7 @@ class DictionaryFragment : Fragment() {
         // Update UI
         viewModel.lastResults = filteredList
         adapter.submitList(filteredList)
-        binding.textResultCount.text = "${filteredList.size} résultats"
+        binding.textResultCount.text = getString(R.string.dictionary_results_count_format, filteredList.size)
         updateDrawingThumbnail()
     }
     
@@ -379,11 +379,11 @@ class DictionaryFragment : Fragment() {
             
             val sb = StringBuilder()
             if (onReadings.isNotEmpty()) {
-                sb.append("On: ").append(onReadings.joinToString(", "))
+                sb.append(binding.root.context.getString(R.string.dictionary_reading_on)).append(" ").append(onReadings.joinToString(", "))
             }
             if (kunReadings.isNotEmpty()) {
                 if (sb.isNotEmpty()) sb.append("  ")
-                sb.append("Kun: ").append(kunReadings.joinToString(", "))
+                sb.append(binding.root.context.getString(R.string.dictionary_reading_kun)).append(" ").append(kunReadings.joinToString(", "))
             }
             binding.textReading.text = sb.toString()
             

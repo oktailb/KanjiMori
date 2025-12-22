@@ -27,7 +27,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
-                android:hint="Recherche texte">
+                android:hint="@string/dictionary_search_hint_text">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/edit_search"
@@ -42,7 +42,7 @@
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:layout_marginStart="8dp"
-                android:contentDescription="Rechercher par dessin"
+                android:contentDescription="@string/dictionary_search_by_drawing_desc"
                 android:src="@android:drawable/ic_menu_edit" />
         </LinearLayout>
         
@@ -56,14 +56,14 @@
                 android:id="@+id/radio_mode_reading"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Lecture (Kanas)"
+                android:text="@string/dictionary_mode_reading"
                 android:checked="true"/>
             <RadioButton
                 android:id="@+id/radio_mode_meaning"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
-                android:text="Sens (Romaji)"/>
+                android:text="@string/dictionary_mode_meaning"/>
         </RadioGroup>
 
         <!-- Stroke and Drawing Thumbnail -->
@@ -78,7 +78,7 @@
                 android:layout_width="100dp"
                 android:layout_height="wrap_content"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
-                android:hint="Traits">
+                android:hint="@string/dictionary_search_hint_strokes">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/edit_stroke_count"
@@ -92,7 +92,7 @@
                 android:id="@+id/check_exact_match"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Exact"
+                android:text="@string/dictionary_match_exact"
                 android:layout_marginStart="16dp"/>
 
             <View
@@ -120,7 +120,7 @@
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:src="@android:drawable/ic_menu_close_clear_cancel"
-                android:contentDescription="Effacer le filtre de dessin"
+                android:contentDescription="@string/dictionary_clear_drawing_desc"
                 android:visibility="gone"
                 tools:visibility="visible"/>
 
@@ -131,7 +131,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Rechercher"/>
+            android:text="@string/dictionary_search_button"/>
 
     </LinearLayout>
 

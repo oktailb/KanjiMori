@@ -193,4 +193,17 @@
     <string name="language_ar_ar">Arabian (Saudi Arabia)</string>
     <string name="language_pt_br">Português (Portugal)</string>
     <string name="language_vi_vn">Tiếng Việt</string>
+
+    <!-- Dictionary Screen -->
+    <string name="dictionary_search_hint_text">Buscar texto</string>
+    <string name="dictionary_search_by_drawing_desc">Buscar por dibujo</string>
+    <string name="dictionary_mode_reading">Lectura (Kanas)</string>
+    <string name="dictionary_mode_meaning">Significado (Romaji)</string>
+    <string name="dictionary_search_hint_strokes">Trazos</string>
+    <string name="dictionary_match_exact">Exacto</string>
+    <string name="dictionary_clear_drawing_desc">Borrar filtro de dibujo</string>
+    <string name="dictionary_search_button">Buscar</string>
+    <string name="dictionary_results_count_format">%1$d resultados</string>
+    <string name="dictionary_reading_on">On:</string>
+    <string name="dictionary_reading_kun">Kun:</string>
 </resources>

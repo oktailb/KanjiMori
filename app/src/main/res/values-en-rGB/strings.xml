@@ -193,4 +193,18 @@
     <string name="language_in_id">Bahasa Indonesia</string>
     <string name="language_zh_cn">简体中文</string>
     <string name="language_vi_vn">Tiếng Việt</string>
+
+    <!-- Dictionary Screen -->
+    <string name="dictionary_search_hint_text">Text search</string>
+    <string name="dictionary_search_by_drawing_desc">Search by drawing</string>
+    <string name="dictionary_mode_reading">Reading (Kanas)</string>
+    <string name="dictionary_mode_meaning">Meaning (Romaji)</string>
+    <string name="dictionary_search_hint_strokes">Strokes</string>
+    <string name="dictionary_match_exact">Exact</string>
+    <string name="dictionary_clear_drawing_desc">Clear drawing filter</string>
+    <string name="dictionary_search_button">Search</string>
+    <string name="dictionary_results_count_format">%1$d results</string>
+    <string name="dictionary_reading_on">On:</string>
+    <string name="dictionary_reading_kun">Kun:</string>
+
 </resources>

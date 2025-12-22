@@ -195,4 +195,17 @@
     <string name="language_ar_ar">العربية (المملكة العربية السعودية)</string>
     <string name="language_pt_br">Português (Portugal)</string>
     <string name="language_vi_vn">Tiếng Việt</string>
+
+    <!-- Dictionary Screen -->
+    <string name="dictionary_search_hint_text">البحث النصي</string>
+    <string name="dictionary_search_by_drawing_desc">البحث بالرسم</string>
+    <string name="dictionary_mode_reading">القراءة (كانا)</string>
+    <string name="dictionary_mode_meaning">المعنى (روماجي)</string>
+    <string name="dictionary_search_hint_strokes">الضربات</string>
+    <string name="dictionary_match_exact">دقيق</string>
+    <string name="dictionary_clear_drawing_desc">مسح عامل تصفية الرسم</string>
+    <string name="dictionary_search_button">بحث</string>
+    <string name="dictionary_results_count_format">%1$d النتائج</string>
+    <string name="dictionary_reading_on">On:</string>
+    <string name="dictionary_reading_kun">Kun:</string>
 </resources>

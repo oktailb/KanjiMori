@@ -199,4 +199,17 @@
     <string name="language_ar_ar">Arabian (Saudi Arabia)</string>
     <string name="language_pt_br">Português (Portugal)</string>
     <string name="language_vi_vn">Tiếng Việt</string>
+
+    <!-- Dictionary Screen -->
+    <string name="dictionary_search_hint_text">ค้นหาข้อความ</string>
+    <string name="dictionary_search_by_drawing_desc">ค้นหาโดยการวาด</string>
+    <string name="dictionary_mode_reading">การอ่าน (Kanas)</string>
+    <string name="dictionary_mode_meaning">ความหมาย (Romaji)</string>
+    <string name="dictionary_search_hint_strokes">จังหวะ</string>
+    <string name="dictionary_match_exact">แน่นอน</string>
+    <string name="dictionary_clear_drawing_desc">ล้างตัวกรองการวาด</string>
+    <string name="dictionary_search_button">ค้นหา</string>
+    <string name="dictionary_results_count_format">%1$d ผลลัพธ์</string>
+    <string name="dictionary_reading_on">On:</string>
+    <string name="dictionary_reading_kun">Kun:</string>
 </resources>

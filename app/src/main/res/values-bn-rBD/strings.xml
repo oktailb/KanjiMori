@@ -195,4 +195,17 @@
     <string name="language_ar_ar">Arabian (Saudi Arabia)</string>
     <string name="language_pt_br">Português (Portugal)</string>
     <string name="language_vi_vn">Tiếng Việt</string>
+
+    <!-- Dictionary Screen -->
+    <string name="dictionary_search_hint_text">পাঠ্য অনুসন্ধান</string>
+    <string name="dictionary_search_by_drawing_desc">অঙ্কন করে অনুসন্ধান</string>
+    <string name="dictionary_mode_reading">পড়া (কানাস)</string>
+    <string name="dictionary_mode_meaning">অর্থ (রোমাজি)</string>
+    <string name="dictionary_search_hint_strokes">স্ট্রোক</string>
+    <string name="dictionary_match_exact">সঠিক</string>
+    <string name="dictionary_clear_drawing_desc">অঙ্কন ফিল্টার মুছুন</string>
+    <string name="dictionary_search_button">অনুসন্ধান</string>
+    <string name="dictionary_results_count_format">%1$d ফলাফল</string>
+    <string name="dictionary_reading_on">On:</string>
+    <string name="dictionary_reading_kun">Kun:</string>
 </resources>

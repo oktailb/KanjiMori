@@ -203,4 +203,17 @@
     <string name="language_zh_cn">简体中文</string>
     <string name="language_vi_vn">Tiếng Việt</string>
 
+    <!-- Dictionary Screen -->
+    <string name="dictionary_search_hint_text">Recherche texte</string>
+    <string name="dictionary_search_by_drawing_desc">Rechercher par dessin</string>
+    <string name="dictionary_mode_reading">Lecture (Kanas)</string>
+    <string name="dictionary_mode_meaning">Sens (Romaji)</string>
+    <string name="dictionary_search_hint_strokes">Traits</string>
+    <string name="dictionary_match_exact">Exact</string>
+    <string name="dictionary_clear_drawing_desc">Effacer le filtre de dessin</string>
+    <string name="dictionary_search_button">Rechercher</string>
+    <string name="dictionary_results_count_format">%1$d résultats</string>
+    <string name="dictionary_reading_on">On :</string>
+    <string name="dictionary_reading_kun">Kun :</string>
+
 </resources>

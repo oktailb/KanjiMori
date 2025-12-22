@@ -200,4 +200,17 @@
     <string name="language_pt_br">Português (Portugal)</string>
     <string name="language_in_id">Bahasa Indonesia</string>
     <string name="language_vi_vn">Tiếng Việt</string>
+
+    <!-- Dictionary Screen -->
+    <string name="dictionary_search_hint_text">Cari teks</string>
+    <string name="dictionary_search_by_drawing_desc">Cari dengan menggambar</string>
+    <string name="dictionary_mode_reading">Membaca (Kanas)</string>
+    <string name="dictionary_mode_meaning">Arti (Romaji)</string>
+    <string name="dictionary_search_hint_strokes">Goresan</string>
+    <string name="dictionary_match_exact">Tepat</string>
+    <string name="dictionary_clear_drawing_desc">Hapus filter gambar</string>
+    <string name="dictionary_search_button">Cari</string>
+    <string name="dictionary_results_count_format">%1$d hasil</string>
+    <string name="dictionary_reading_on">On:</string>
+    <string name="dictionary_reading_kun">Kun:</string>
 </resources>

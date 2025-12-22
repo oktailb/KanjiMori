@@ -198,6 +198,21 @@
     <string name="language_th">Thai</string>
     <string name="language_ar_ar">Arabian (Saudi Arabia)</string>
     <string name="language_pt_br">Português (Portugal)</string>
+    <string name="language_ko_kr">한국어</string>
     <string name="language_ru_ru">Русский</string>
     <string name="language_vi_vn">Tiếng Việt</string>
+
+    <!-- Dictionary Screen -->
+    <string name="dictionary_search_hint_text">Текстовый поиск</string>
+    <string name="dictionary_search_by_drawing_desc">Поиск по рисунку</string>
+    <string name="dictionary_mode_reading">Чтение (Кана)</string>
+    <string name="dictionary_mode_meaning">Значение (Ромадзи)</string>
+    <string name="dictionary_search_hint_strokes">Черты</string>
+    <string name="dictionary_match_exact">Точный</string>
+    <string name="dictionary_clear_drawing_desc">Очистить фильтр рисунка</string>
+    <string name="dictionary_search_button">Поиск</string>
+    <string name="dictionary_results_count_format">%1$d результатов</string>
+    <string name="dictionary_reading_on">On:</string>
+    <string name="dictionary_reading_kun">Kun:</string>
+
 </resources>
