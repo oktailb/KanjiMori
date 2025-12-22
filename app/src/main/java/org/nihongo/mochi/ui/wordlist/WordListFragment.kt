@@ -16,8 +16,8 @@ import com.google.android.material.chip.Chip
 import org.nihongo.mochi.R
 import org.nihongo.mochi.data.ScoreManager
 import org.nihongo.mochi.databinding.FragmentWordListBinding
-import org.nihongo.mochi.ui.recognitiongame.KanjiDetail
-import org.nihongo.mochi.ui.recognitiongame.Reading
+import org.nihongo.mochi.ui.game.KanjiDetail
+import org.nihongo.mochi.ui.game.Reading
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
 import java.io.IOException

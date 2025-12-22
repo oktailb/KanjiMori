@@ -1,11 +1,12 @@
 package org.nihongo.mochi.ui.writingrecap
 
-import android.graphics.Color
 import android.os.Bundle
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -98,8 +99,20 @@ class WritingRecapFragment : Fragment() {
                 text = kanjiCharacter
                 textSize = 24f
                 textAlignment = View.TEXT_ALIGNMENT_CENTER
-                setTextColor(Color.BLACK)
+                
+                // Use default text color from theme (usually handled by attribute, but here explicitly using attribute is complex programmatically)
+                // A safe bet is using standard color resource or obtaining from theme.
+                // Assuming R.color.primary_text or similar exists or we can resolve ?android:attr/textColorPrimary
+                val typedValue = TypedValue()
+                context.theme.resolveAttribute(android.R.attr.textColorPrimary, typedValue, true)
+                setTextColor(ContextCompat.getColor(context, typedValue.resourceId))
+
+                // Using ScoreManager color logic but ensuring it matches theme somewhat?
+                // Actually score colors are semantic (Red/Green/Orange/Gray).
+                // Let's assume ScoreManager returns appropriate colors, or use resources if needed.
+                // For background, we use the score color.
                 setBackgroundColor(ScoreManager.getScoreColor(requireContext(), score))
+                
                 val params = android.widget.GridLayout.LayoutParams().apply {
                     width = 0
                     height = android.widget.GridLayout.LayoutParams.WRAP_CONTENT
@@ -162,17 +175,13 @@ class WritingRecapFragment : Fragment() {
     }
 
     private fun loadUserListKanji(): List<String> {
-        // Need to populate kanjiIdMap for user custom list too
-        // We'll reload the full map first efficiently
         populateFullKanjiMap()
-        
         val scores = ScoreManager.getAllScores(requireContext(), ScoreManager.ScoreType.WRITING)
         return scores.filter { (_, score) -> (score.successes - score.failures) < 10 }.keys.toList()
     }
     
     private fun populateFullKanjiMap() {
-        if (kanjiIdMap.isNotEmpty()) return // Already populated? 
-        // Note: loadKanjiForLevel clears it. If we are in user_custom_list mode, we need to populate it differently.
+        if (kanjiIdMap.isNotEmpty()) return 
         
         val parser = resources.getXml(R.xml.kanji_levels)
         try {

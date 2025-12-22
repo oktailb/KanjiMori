@@ -16,12 +16,16 @@ import android.view.inputmethod.EditorInfo
 import android.widget.ImageView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import org.nihongo.mochi.R
 import org.nihongo.mochi.data.ScoreManager
 import org.nihongo.mochi.data.ScoreManager.ScoreType
 import org.nihongo.mochi.databinding.FragmentWritingGameBinding
+import org.nihongo.mochi.ui.game.GameStatus
+import org.nihongo.mochi.ui.game.KanjiDetail
+import org.nihongo.mochi.ui.game.Reading
 import org.nihongo.mochi.ui.settings.ANIMATION_SPEED_PREF_KEY
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
@@ -29,28 +33,13 @@ import java.io.IOException
 import java.text.Normalizer
 import kotlin.math.max
 
-data class Reading(val value: String, val type: String, val frequency: Int)
-data class KanjiDetail(val id: String, val character: String, val meanings: List<String>, val readings: List<Reading>)
-data class KanjiProgress(var meaningSolved: Boolean = false, var readingSolved: Boolean = false)
-enum class GameStatus { NOT_ANSWERED, PARTIAL, CORRECT, INCORRECT }
-enum class QuestionType { MEANING, READING }
-
 class WritingGameFragment : Fragment() {
 
     private var _binding: FragmentWritingGameBinding? = null
     private val binding get() = _binding!!
     private val args: WritingGameFragmentArgs by navArgs()
+    private val viewModel: WritingGameViewModel by viewModels()
 
-    private val allKanjiDetailsXml = mutableListOf<KanjiDetail>()
-    private val allKanjiDetails = mutableListOf<KanjiDetail>()
-    private var currentKanjiSet = mutableListOf<KanjiDetail>()
-    private var revisionList = mutableListOf<KanjiDetail>()
-    private val kanjiStatus = mutableMapOf<KanjiDetail, GameStatus>()
-    private val kanjiProgress = mutableMapOf<KanjiDetail, KanjiProgress>()
-    private var kanjiListPosition = 0
-    private lateinit var currentKanji: KanjiDetail
-    private var currentQuestionType: QuestionType = QuestionType.MEANING
-    private var isAnswerProcessing = false
     private lateinit var sharedPreferences: SharedPreferences
 
     private val textWatcher = object : TextWatcher {
@@ -61,7 +50,7 @@ class WritingGameFragment : Fragment() {
         override fun afterTextChanged(s: Editable?) {
             if (s == null) return
             // Only convert to kana if we are in READING mode
-            if (currentQuestionType == QuestionType.READING) {
+            if (viewModel.currentQuestionType == QuestionType.READING) {
                 val input = s.toString()
                 val replacement = RomajiToKana.checkReplacement(input)
                 if (replacement != null) {
@@ -90,22 +79,12 @@ class WritingGameFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        val level = args.level ?: ""
-
-        loadAllKanjiDetails()
-        val kanjiForLevel = loadKanjiForLevel(level)
-
-        allKanjiDetails.clear()
-        allKanjiDetails.addAll(allKanjiDetailsXml.filter { kanjiForLevel.contains(it.character) })
-        allKanjiDetails.shuffle()
-        kanjiListPosition = 0
-
-        if (allKanjiDetails.isNotEmpty()) {
-            startNewSet()
+        
+        if (!viewModel.isGameInitialized) {
+            initializeGame()
+            viewModel.isGameInitialized = true
         } else {
-            Log.e("WritingGameFragment", "No kanji loaded for level: $level. Check XML files.")
-            findNavController().popBackStack()
+             restoreUI()
         }
 
         binding.buttonSubmitAnswer.setOnClickListener { checkAnswer() }
@@ -120,26 +99,97 @@ class WritingGameFragment : Fragment() {
         
         binding.editTextAnswer.addTextChangedListener(textWatcher)
     }
+    
+    private fun initializeGame() {
+        val level = args.level ?: ""
+
+        loadAllKanjiDetails()
+        val kanjiForLevel = loadKanjiForLevel(level)
+
+        viewModel.allKanjiDetails.clear()
+        viewModel.allKanjiDetails.addAll(viewModel.allKanjiDetailsXml.filter { kanjiForLevel.contains(it.character) })
+        viewModel.allKanjiDetails.shuffle()
+        viewModel.kanjiListPosition = 0
+
+        if (viewModel.allKanjiDetails.isNotEmpty()) {
+            startNewSet()
+        } else {
+            Log.e("WritingGameFragment", "No kanji loaded for level: $level. Check XML files.")
+            findNavController().popBackStack()
+        }
+    }
+    
+    private fun restoreUI() {
+        if (viewModel.allKanjiDetails.isEmpty()) return
+        
+        // Restore Question Display
+        binding.textKanjiToGuess.text = viewModel.currentKanji.character
+        binding.textQuestionLabel.text = if (viewModel.currentQuestionType == QuestionType.MEANING) {
+            getString(R.string.game_writing_label_meaning)
+        } else {
+            getString(R.string.game_writing_label_reading)
+        }
+        
+        // Restore Button State
+        if (viewModel.isAnswerProcessing) {
+             binding.buttonSubmitAnswer.isEnabled = false
+             if (viewModel.lastAnswerStatus == true) {
+                 binding.buttonSubmitAnswer.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.answer_correct))
+             } else if (viewModel.lastAnswerStatus == false) {
+                 binding.buttonSubmitAnswer.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.answer_incorrect))
+             } else {
+                 binding.buttonSubmitAnswer.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.answer_neutral))
+             }
+        } else {
+             binding.buttonSubmitAnswer.isEnabled = true
+             binding.buttonSubmitAnswer.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.leaf_green))
+        }
+
+        // Restore Feedback
+        if (viewModel.showCorrectionFeedback) {
+             showCorrectionFeedbackUI()
+             // If we are still in the delay period, we might need to repost the runnable
+             // However, handling precise timing across rotation is complex.
+             // Simplification: if restored during feedback, just show feedback and wait for user to maybe proceed manually or just wait.
+             // But since we rely on Handler, we need to restart the timer if we want it to auto-advance.
+             // For now, let's just make sure the UI state is correct. 
+             // Ideally, ViewModel should track remaining time, but for this fix, we will just ensure UI shows up.
+             
+             // If restored and waiting, we might need to trigger the next question manually if the handler was lost.
+             // A simple way is to re-post the delay if we know we are waiting.
+             if (viewModel.correctionDelayPending) {
+                  // Re-trigger the advance after a short delay so user can see context
+                  Handler(Looper.getMainLooper()).postDelayed({
+                      displayQuestion()
+                  }, 2000)
+                  viewModel.correctionDelayPending = false 
+             }
+        } else {
+            binding.layoutCorrectionFeedback.visibility = View.INVISIBLE
+        }
+        
+        updateProgressBar()
+    }
 
     private fun startNewSet() {
-        revisionList.clear()
-        kanjiStatus.clear()
-        kanjiProgress.clear()
+        viewModel.revisionList.clear()
+        viewModel.kanjiStatus.clear()
+        viewModel.kanjiProgress.clear()
 
-        if (kanjiListPosition >= allKanjiDetails.size) {
+        if (viewModel.kanjiListPosition >= viewModel.allKanjiDetails.size) {
             findNavController().popBackStack()
             return
         }
 
-        val nextSet = allKanjiDetails.drop(kanjiListPosition).take(10)
-        kanjiListPosition += nextSet.size
+        val nextSet = viewModel.allKanjiDetails.drop(viewModel.kanjiListPosition).take(10)
+        viewModel.kanjiListPosition += nextSet.size
 
-        currentKanjiSet.clear()
-        currentKanjiSet.addAll(nextSet)
-        revisionList.addAll(nextSet)
-        currentKanjiSet.forEach {
-            kanjiStatus[it] = GameStatus.NOT_ANSWERED
-            kanjiProgress[it] = KanjiProgress()
+        viewModel.currentKanjiSet.clear()
+        viewModel.currentKanjiSet.addAll(nextSet)
+        viewModel.revisionList.addAll(nextSet)
+        viewModel.currentKanjiSet.forEach {
+            viewModel.kanjiStatus[it] = GameStatus.NOT_ANSWERED
+            viewModel.kanjiProgress[it] = KanjiProgress()
         }
 
         updateProgressBar()
@@ -147,14 +197,18 @@ class WritingGameFragment : Fragment() {
     }
 
     private fun displayQuestion() {
-        if (revisionList.isEmpty()) {
+        if (viewModel.revisionList.isEmpty()) {
             startNewSet()
             return
         }
 
-        isAnswerProcessing = false
-        currentKanji = revisionList.random()
-        binding.textKanjiToGuess.text = currentKanji.character
+        viewModel.isAnswerProcessing = false
+        viewModel.lastAnswerStatus = null
+        viewModel.showCorrectionFeedback = false
+        viewModel.correctionDelayPending = false
+        
+        viewModel.currentKanji = viewModel.revisionList.random()
+        binding.textKanjiToGuess.text = viewModel.currentKanji.character
         binding.editTextAnswer.text.clear()
         // Ensure editable state
         binding.editTextAnswer.isEnabled = true
@@ -163,14 +217,14 @@ class WritingGameFragment : Fragment() {
         binding.layoutCorrectionFeedback.visibility = View.INVISIBLE
 
         // Determine question type based on what is missing
-        val progress = kanjiProgress[currentKanji]!!
-        currentQuestionType = when {
+        val progress = viewModel.kanjiProgress[viewModel.currentKanji]!!
+        viewModel.currentQuestionType = when {
             !progress.meaningSolved && !progress.readingSolved -> if (Math.random() < 0.5) QuestionType.MEANING else QuestionType.READING
             !progress.meaningSolved -> QuestionType.MEANING
             else -> QuestionType.READING // reading not solved
         }
 
-        binding.textQuestionLabel.text = if (currentQuestionType == QuestionType.MEANING) {
+        binding.textQuestionLabel.text = if (viewModel.currentQuestionType == QuestionType.MEANING) {
             getString(R.string.game_writing_label_meaning)
         } else {
             getString(R.string.game_writing_label_reading)
@@ -181,91 +235,102 @@ class WritingGameFragment : Fragment() {
     }
 
     private fun checkAnswer() {
-        if (isAnswerProcessing) return
-        isAnswerProcessing = true
+        if (viewModel.isAnswerProcessing) return
+        viewModel.isAnswerProcessing = true
 
         val userAnswer = binding.editTextAnswer.text.toString()
-        val isCorrect = if (currentQuestionType == QuestionType.MEANING) {
+        val isCorrect = if (viewModel.currentQuestionType == QuestionType.MEANING) {
             checkMeaning(userAnswer)
         } else {
             checkReading(userAnswer)
         }
 
-        ScoreManager.saveScore(requireContext(), currentKanji.character, isCorrect, ScoreType.WRITING)
+        ScoreManager.saveScore(requireContext(), viewModel.currentKanji.character, isCorrect, ScoreType.WRITING)
 
         // Do NOT disable editTextAnswer to keep keyboard open
         binding.buttonSubmitAnswer.isEnabled = false
 
         if (isCorrect) {
-            val progress = kanjiProgress[currentKanji]!!
-            if (currentQuestionType == QuestionType.MEANING) progress.meaningSolved = true
+            val progress = viewModel.kanjiProgress[viewModel.currentKanji]!!
+            if (viewModel.currentQuestionType == QuestionType.MEANING) progress.meaningSolved = true
             else progress.readingSolved = true
 
             if (progress.meaningSolved && progress.readingSolved) {
                 // Fully solved
                 binding.buttonSubmitAnswer.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.answer_correct))
-                kanjiStatus[currentKanji] = GameStatus.CORRECT
-                revisionList.remove(currentKanji)
+                viewModel.kanjiStatus[viewModel.currentKanji] = GameStatus.CORRECT
+                viewModel.revisionList.remove(viewModel.currentKanji)
+                viewModel.lastAnswerStatus = true
             } else {
                 // Partially solved
                 binding.buttonSubmitAnswer.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.answer_neutral))
-                kanjiStatus[currentKanji] = GameStatus.PARTIAL
+                viewModel.kanjiStatus[viewModel.currentKanji] = GameStatus.PARTIAL
+                viewModel.lastAnswerStatus = null
             }
 
             val animationSpeed = sharedPreferences.getFloat(ANIMATION_SPEED_PREF_KEY, 1.0f)
             val delay = (1000 * animationSpeed).toLong()
             
+            viewModel.correctionDelayPending = true
             Handler(Looper.getMainLooper()).postDelayed({
-                displayQuestion()
+                if (isAdded) displayQuestion() // Check isAdded to avoid crash if fragment destroyed
             }, delay)
 
         } else {
             binding.buttonSubmitAnswer.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.answer_incorrect))
-            kanjiStatus[currentKanji] = GameStatus.INCORRECT
+            viewModel.kanjiStatus[viewModel.currentKanji] = GameStatus.INCORRECT
+            viewModel.lastAnswerStatus = false
+            viewModel.showCorrectionFeedback = true
 
             // Setup Correction Feedback
-            var delayMs = 3000L
-            
-            if (currentQuestionType == QuestionType.MEANING) {
-                // Show simple meaning text
-                binding.textCorrectionSimple.visibility = View.VISIBLE
-                binding.layoutReadingsColumns.visibility = View.GONE
-                
-                val meaningsText = currentKanji.meanings.joinToString(", ")
-                binding.textCorrectionSimple.text = meaningsText
-                
-                // Calculate delay based on length
-                delayMs = max(2000L, meaningsText.length * 100L)
-            } else {
-                // Show Readings Columns
-                binding.textCorrectionSimple.visibility = View.GONE
-                binding.layoutReadingsColumns.visibility = View.VISIBLE
-                
-                val onReadings = currentKanji.readings.filter { it.type == "on" }.joinToString("\n") { hiraganaToKatakana(it.value) }
-                val kunReadings = currentKanji.readings.filter { it.type == "kun" }.joinToString("\n") { it.value }
-                
-                binding.textReadingsOn.text = if (onReadings.isNotEmpty()) onReadings else "-"
-                binding.textReadingsKun.text = if (kunReadings.isNotEmpty()) kunReadings else "-"
-                
-                // Calculate delay
-                val totalLength = onReadings.length + kunReadings.length
-                delayMs = max(2000L, totalLength * 150L)
-            }
+            var delayMs = showCorrectionFeedbackUI()
             
             // Limit max delay to avoid waiting too long (e.g., 6 seconds max)
             delayMs = delayMs.coerceAtMost(6000L)
-            
-            binding.layoutCorrectionFeedback.visibility = View.VISIBLE
 
             val animationSpeed = sharedPreferences.getFloat(ANIMATION_SPEED_PREF_KEY, 1.0f)
             val finalDelay = (delayMs * animationSpeed).toLong()
-
+            
+            viewModel.correctionDelayPending = true
             Handler(Looper.getMainLooper()).postDelayed({
-                displayQuestion()
+                if (isAdded) displayQuestion()
             }, finalDelay)
         }
 
         updateProgressBar()
+    }
+    
+    private fun showCorrectionFeedbackUI(): Long {
+        var delayMs = 3000L
+        
+        binding.layoutCorrectionFeedback.visibility = View.VISIBLE
+        
+        if (viewModel.currentQuestionType == QuestionType.MEANING) {
+            // Show simple meaning text
+            binding.textCorrectionSimple.visibility = View.VISIBLE
+            binding.layoutReadingsColumns.visibility = View.GONE
+            
+            val meaningsText = viewModel.currentKanji.meanings.joinToString(", ")
+            binding.textCorrectionSimple.text = meaningsText
+            
+            // Calculate delay based on length
+            delayMs = max(2000L, meaningsText.length * 100L)
+        } else {
+            // Show Readings Columns
+            binding.textCorrectionSimple.visibility = View.GONE
+            binding.layoutReadingsColumns.visibility = View.VISIBLE
+            
+            val onReadings = viewModel.currentKanji.readings.filter { it.type == "on" }.joinToString("\n") { hiraganaToKatakana(it.value) }
+            val kunReadings = viewModel.currentKanji.readings.filter { it.type == "kun" }.joinToString("\n") { it.value }
+            
+            binding.textReadingsOn.text = if (onReadings.isNotEmpty()) onReadings else "-"
+            binding.textReadingsKun.text = if (kunReadings.isNotEmpty()) kunReadings else "-"
+            
+            // Calculate delay
+            val totalLength = onReadings.length + kunReadings.length
+            delayMs = max(2000L, totalLength * 150L)
+        }
+        return delayMs
     }
 
     private fun normalizeForComparison(input: String, isReading: Boolean): String {
@@ -288,7 +353,7 @@ class WritingGameFragment : Fragment() {
 
     private fun checkMeaning(answer: String): Boolean {
         val normalizedAnswer = normalizeForComparison(answer, isReading = false)
-        return currentKanji.meanings.any { normalizeForComparison(it, isReading = false) == normalizedAnswer }
+        return viewModel.currentKanji.meanings.any { normalizeForComparison(it, isReading = false) == normalizedAnswer }
     }
     
     // Converts hiragana characters to katakana
@@ -315,7 +380,7 @@ class WritingGameFragment : Fragment() {
 
     private fun checkReading(answer: String): Boolean {
         val normalizedAnswer = normalizeForComparison(answer, isReading = true)
-        return currentKanji.readings.any { normalizeForComparison(it.value, isReading = true) == normalizedAnswer }
+        return viewModel.currentKanji.readings.any { normalizeForComparison(it.value, isReading = true) == normalizedAnswer }
     }
 
     private fun updateProgressBar() {
@@ -324,9 +389,9 @@ class WritingGameFragment : Fragment() {
         }
 
         for (i in 0 until 10) {
-            if (i < currentKanjiSet.size) {
-                val kanji = currentKanjiSet[i]
-                val status = kanjiStatus[kanji]
+            if (i < viewModel.currentKanjiSet.size) {
+                val kanji = viewModel.currentKanjiSet[i]
+                val status = viewModel.kanjiStatus[kanji]
                 val indicator = progressIndicators[i]
                 indicator.visibility = View.VISIBLE
                 
@@ -442,7 +507,7 @@ class WritingGameFragment : Fragment() {
                             if (id != null && character != null) {
                                 val kanjiMeanings = meanings[id] ?: emptyList()
                                 currentKanjiDetail = KanjiDetail(id, character, kanjiMeanings, mutableListOf())
-                                allKanjiDetailsXml.add(currentKanjiDetail)
+                                viewModel.allKanjiDetailsXml.add(currentKanjiDetail)
                             }
                         } else if (parser.name == "reading" && currentKanjiDetail != null) {
                             val type = parser.getAttributeValue(null, "type")

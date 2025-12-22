@@ -11,37 +11,31 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
-import androidx.annotation.XmlRes
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import org.nihongo.mochi.R
 import org.nihongo.mochi.data.ScoreManager
 import org.nihongo.mochi.databinding.FragmentKanaQuizBinding
+import org.nihongo.mochi.ui.game.GameStatus
+import org.nihongo.mochi.ui.game.KanaCharacter
+import org.nihongo.mochi.ui.game.KanaProgress
+import org.nihongo.mochi.ui.game.KanaQuestionDirection
 import org.nihongo.mochi.ui.settings.ANIMATION_SPEED_PREF_KEY
 import org.xmlpull.v1.XmlPullParser
-
-enum class KanaQuizGameStatus { NOT_ANSWERED, PARTIAL, CORRECT, INCORRECT }
-enum class KanaQuestionDirection { NORMAL, REVERSE } // NORMAL: Kana -> Romaji, REVERSE: Romaji -> Kana
-data class KanaProgress(var normalSolved: Boolean = false, var reverseSolved: Boolean = false)
 
 abstract class BaseKanaQuizFragment : Fragment() {
 
     private var _binding: FragmentKanaQuizBinding? = null
     protected val binding get() = _binding!!
+    protected val viewModel: KanaQuizViewModel by viewModels()
 
-    abstract val quizType: QuizType
+    protected lateinit var sharedPreferences: SharedPreferences
 
-    private lateinit var allKana: List<KanaCharacter>
-    private var currentKanaSet = mutableListOf<KanaCharacter>()
-    private var revisionList = mutableListOf<KanaCharacter>()
-    private val kanaStatus = mutableMapOf<KanaCharacter, KanaQuizGameStatus>()
-    private val kanaProgress = mutableMapOf<KanaCharacter, KanaProgress>()
-    private var kanaListPosition = 0
-    private lateinit var currentQuestion: KanaCharacter
-    private val answerButtons: MutableList<Button> = mutableListOf()
-    private val progressIndicators: MutableList<ImageView> = mutableListOf()
-    private var currentDirection: KanaQuestionDirection = KanaQuestionDirection.NORMAL
-    private lateinit var sharedPreferences: SharedPreferences
+    abstract fun getXmlResourceId(): Int
+    abstract fun getQuizModeArgument(): String
+    abstract fun getLevelArgument(): String
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -56,151 +50,136 @@ abstract class BaseKanaQuizFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        answerButtons.addAll(listOf(
-            binding.buttonAnswer1,
-            binding.buttonAnswer2,
-            binding.buttonAnswer3,
-            binding.buttonAnswer4
-        ))
-
-        val progressBar = binding.progressBarGame
-        for (i in 0 until progressBar.childCount) {
-            (progressBar.getChildAt(i) as? ImageView)?.let { progressIndicators.add(it) }
+        if (!viewModel.isGameInitialized) {
+            initializeGame()
         }
 
-        allKana = loadKana(quizType.xmlResId).shuffled()
-        startNewSet()
+        setupUI()
 
+        val answerButtons = listOf(binding.buttonAnswer1, binding.buttonAnswer2, binding.buttonAnswer3, binding.buttonAnswer4)
         answerButtons.forEach { button ->
-            button.setOnClickListener { onAnswerSelected(button) }
+            button.setOnClickListener { onAnswerClicked(button) }
+        }
+    }
+
+    private fun initializeGame() {
+        viewModel.resetState()
+        val modeArg = getQuizModeArgument()
+        viewModel.quizMode = if (modeArg == "Kana -> Romaji") QuizMode.KANA_TO_ROMAJI else QuizMode.ROMAJI_TO_KANA
+
+        val allCharacters = loadKanaFromXml(getXmlResourceId())
+        val level = getLevelArgument()
+        viewModel.allKana = filterCharactersForLevel(allCharacters, level).shuffled()
+
+        if (viewModel.allKana.isNotEmpty()) {
+            startNewSet()
+            viewModel.isGameInitialized = true
+        } else {
+            findNavController().popBackStack()
         }
     }
 
     private fun startNewSet() {
-        revisionList.clear()
-        kanaStatus.clear()
-        kanaProgress.clear()
+        viewModel.revisionList.clear()
+        viewModel.kanaStatus.clear()
+        viewModel.kanaProgress.clear()
 
-        if (kanaListPosition >= allKana.size) {
-            parentFragmentManager.popBackStack()
+        if (viewModel.kanaListPosition >= viewModel.allKana.size) {
+            findNavController().popBackStack()
             return
         }
 
-        val nextSet = allKana.drop(kanaListPosition).take(10)
-        kanaListPosition += nextSet.size
+        val nextSet = viewModel.allKana.drop(viewModel.kanaListPosition).take(10)
+        viewModel.kanaListPosition += nextSet.size
 
-        currentKanaSet.clear()
-        currentKanaSet.addAll(nextSet)
-        revisionList.addAll(nextSet)
-        currentKanaSet.forEach {
-            kanaStatus[it] = KanaQuizGameStatus.NOT_ANSWERED
-            kanaProgress[it] = KanaProgress()
+        viewModel.currentKanaSet.clear()
+        viewModel.currentKanaSet.addAll(nextSet)
+        viewModel.revisionList.addAll(nextSet)
+        viewModel.currentKanaSet.forEach {
+            viewModel.kanaStatus[it] = GameStatus.NOT_ANSWERED
+            viewModel.kanaProgress[it] = KanaProgress()
         }
 
         updateProgressBar()
         displayQuestion()
     }
 
-    private fun displayQuestion() {
-        if (revisionList.isEmpty()) {
-            startNewSet()
-            return
+    private fun loadKanaFromXml(resourceId: Int): List<KanaCharacter> {
+        val kanaList = mutableListOf<KanaCharacter>()
+        val parser = resources.getXml(resourceId)
+        try {
+            var eventType = parser.eventType
+            while (eventType != XmlPullParser.END_DOCUMENT) {
+                if (eventType == XmlPullParser.START_TAG && parser.name == "character") {
+                    val romaji = parser.getAttributeValue(null, "phonetics") ?: ""
+                    val category = parser.getAttributeValue(null, "type") ?: "gojuon"
+                    val kana = parser.nextText()
+                    kanaList.add(KanaCharacter(kana, romaji, category))
+                }
+                eventType = parser.next()
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
+        return kanaList
+    }
 
-        currentQuestion = revisionList.random()
-        val progress = kanaProgress[currentQuestion]!!
-
-        currentDirection = when {
-            !progress.normalSolved && !progress.reverseSolved -> if (Math.random() < 0.5) KanaQuestionDirection.NORMAL else KanaQuestionDirection.REVERSE
-            !progress.normalSolved -> KanaQuestionDirection.NORMAL
-            else -> KanaQuestionDirection.REVERSE
+    private fun filterCharactersForLevel(allCharacters: List<KanaCharacter>, level: String): List<KanaCharacter> {
+        return when (level) {
+            "Gojūon" -> allCharacters.filter { it.category == "gojuon" }
+            "Dakuon" -> allCharacters.filter { it.category == "dakuon" || it.category == "handakuon" }
+            "Yōon" -> allCharacters.filter { it.category == "yoon" }
+            else -> allCharacters
         }
+    }
 
-        if (currentDirection == KanaQuestionDirection.NORMAL) {
-            binding.textKanaCharacter.text = currentQuestion.value
-            binding.textKanaCharacter.setTextSize(TypedValue.COMPLEX_UNIT_SP, 120f)
-        } else {
-            binding.textKanaCharacter.text = currentQuestion.phonetics
-            binding.textKanaCharacter.setTextSize(TypedValue.COMPLEX_UNIT_SP, 80f)
-        }
+    private fun setupUI() {
+        if (viewModel.allKana.isEmpty()) return
 
-        val answerOptions = generateAnswerOptions(currentQuestion)
+        displayQuestionText()
 
-        answerButtons.zip(answerOptions).forEach { (button, answerText) ->
-            button.text = answerText
-            button.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.button_background))
-            button.isEnabled = true
-
-            if (currentDirection == KanaQuestionDirection.REVERSE) {
+        val answerButtons = listOf(binding.buttonAnswer1, binding.buttonAnswer2, binding.buttonAnswer3, binding.buttonAnswer4)
+        answerButtons.forEachIndexed { index, button ->
+            if (viewModel.currentAnswers.size > index) {
+                button.text = viewModel.currentAnswers[index]
+            }
+            if (viewModel.buttonColors.size > index) {
+                val colorRes = viewModel.buttonColors[index]
+                if (colorRes != 0) {
+                    button.setBackgroundColor(ContextCompat.getColor(requireContext(), colorRes))
+                } else {
+                    button.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.button_background))
+                }
+            }
+            
+            // Restore text size based on direction
+            if (viewModel.currentDirection == KanaQuestionDirection.REVERSE) {
                 button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 40f)
             } else {
                 button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 24f)
             }
         }
-    }
-
-    private fun generateAnswerOptions(correct: KanaCharacter): List<String> {
-        val isNormal = currentDirection == KanaQuestionDirection.NORMAL
-        val correctAnswer = if (isNormal) correct.phonetics else correct.value
-        val incorrectAnswers = allKana
-            .map { if (isNormal) it.phonetics else it.value }
-            .distinct()
-            .filter { it != correctAnswer }
-            .shuffled()
-            .take(3)
-        return (incorrectAnswers + correctAnswer).shuffled()
-    }
-
-    private fun onAnswerSelected(selectedButton: Button) {
-        val selectedAnswer = selectedButton.text.toString()
-        val isCorrect = if (currentDirection == KanaQuestionDirection.NORMAL) {
-            selectedAnswer == currentQuestion.phonetics
-        } else {
-            selectedAnswer == currentQuestion.value
-        }
-
-        ScoreManager.saveScore(requireContext(), currentQuestion.value, isCorrect, ScoreManager.ScoreType.RECOGNITION)
-
-        if (isCorrect) {
-            selectedButton.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.answer_correct))
-            
-            val progress = kanaProgress[currentQuestion]!!
-            if (currentDirection == KanaQuestionDirection.NORMAL) progress.normalSolved = true
-            else progress.reverseSolved = true
-
-            if (progress.normalSolved && progress.reverseSolved) {
-                kanaStatus[currentQuestion] = KanaQuizGameStatus.CORRECT
-                revisionList.remove(currentQuestion)
-            } else {
-                kanaStatus[currentQuestion] = KanaQuizGameStatus.PARTIAL
-                selectedButton.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.answer_neutral))
-            }
-        } else {
-            selectedButton.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.answer_incorrect))
-            kanaStatus[currentQuestion] = KanaQuizGameStatus.INCORRECT
-        }
+        answerButtons.forEach { it.isEnabled = viewModel.areButtonsEnabled }
 
         updateProgressBar()
-        answerButtons.forEach { it.isEnabled = false }
-
-        val animationSpeed = sharedPreferences.getFloat(ANIMATION_SPEED_PREF_KEY, 1.0f)
-        val delay = (1000 * animationSpeed).toLong()
-
-        Handler(Looper.getMainLooper()).postDelayed({ displayQuestion() }, delay)
     }
 
     private fun updateProgressBar() {
+        val progressIndicators = (0 until binding.progressBarGame.childCount).map {
+            binding.progressBarGame.getChildAt(it) as ImageView
+        }
+
         for (i in 0 until 10) {
-            if (i < currentKanaSet.size) {
-                val kana = currentKanaSet[i]
-                val status = kanaStatus[kana]
+            if (i < viewModel.currentKanaSet.size) {
+                val kana = viewModel.currentKanaSet[i]
+                val status = viewModel.kanaStatus[kana]
                 val indicator = progressIndicators[i]
                 indicator.visibility = View.VISIBLE
                 indicator.clearColorFilter()
                 when (status) {
-                    KanaQuizGameStatus.CORRECT -> indicator.setImageResource(android.R.drawable.presence_online)
-                    KanaQuizGameStatus.INCORRECT -> indicator.setImageResource(android.R.drawable.ic_delete)
-                    KanaQuizGameStatus.PARTIAL -> {
+                    GameStatus.CORRECT -> indicator.setImageResource(android.R.drawable.presence_online)
+                    GameStatus.INCORRECT -> indicator.setImageResource(android.R.drawable.ic_delete)
+                    GameStatus.PARTIAL -> {
                         indicator.setImageResource(android.R.drawable.ic_menu_recent_history)
                         indicator.setColorFilter(ContextCompat.getColor(requireContext(), R.color.answer_neutral))
                     }
@@ -212,33 +191,119 @@ abstract class BaseKanaQuizFragment : Fragment() {
         }
     }
 
-    private fun loadKana(@XmlRes xmlResId: Int): List<KanaCharacter> {
-        val kanaList = mutableListOf<KanaCharacter>()
-        val parser = resources.getXml(xmlResId)
-        try {
-            var eventType = parser.eventType
-            while (eventType != XmlPullParser.END_DOCUMENT) {
-                if (eventType == XmlPullParser.START_TAG && parser.name == "character") {
-                    val line = parser.getAttributeValue(null, "line").toInt()
-                    val phonetics = parser.getAttributeValue(null, "phonetics")
-                    val value = parser.nextText()
-                    kanaList.add(KanaCharacter(value, line, phonetics))
-                }
-                eventType = parser.next()
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
+    private fun displayQuestion() {
+        if (viewModel.revisionList.isEmpty()) {
+            startNewSet()
+            return
         }
-        return kanaList
+
+        viewModel.currentQuestion = viewModel.revisionList.random()
+        val progress = viewModel.kanaProgress[viewModel.currentQuestion]!!
+
+        viewModel.currentDirection = when {
+            !progress.normalSolved && !progress.reverseSolved -> if (Math.random() < 0.5) KanaQuestionDirection.NORMAL else KanaQuestionDirection.REVERSE
+            !progress.normalSolved -> KanaQuestionDirection.NORMAL
+            else -> KanaQuestionDirection.REVERSE
+        }
+
+        displayQuestionText()
+
+        val answers = generateAnswers(viewModel.currentQuestion)
+        viewModel.currentAnswers = answers
+        val answerButtons = listOf(binding.buttonAnswer1, binding.buttonAnswer2, binding.buttonAnswer3, binding.buttonAnswer4)
+
+        viewModel.buttonColors.clear()
+        repeat(4) { viewModel.buttonColors.add(R.color.button_background) }
+
+        answerButtons.zip(answers).forEach { (button, answerText) ->
+            button.text = answerText
+            button.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.button_background))
+
+            if (viewModel.currentDirection == KanaQuestionDirection.REVERSE) {
+                button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 40f)
+            } else {
+                button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 24f)
+            }
+        }
+        viewModel.areButtonsEnabled = true
+        answerButtons.forEach { it.isEnabled = true }
+    }
+
+    private fun displayQuestionText() {
+        if (!::sharedPreferences.isInitialized) return // Guard against uninitialized state during rotation
+        if (!viewModel.isGameInitialized) return
+        
+        if (viewModel.currentDirection == KanaQuestionDirection.NORMAL) {
+            binding.textKanaCharacter.text = viewModel.currentQuestion.kana
+            binding.textKanaCharacter.setTextSize(TypedValue.COMPLEX_UNIT_SP, 120f)
+        } else {
+            binding.textKanaCharacter.text = viewModel.currentQuestion.romaji
+            binding.textKanaCharacter.setTextSize(TypedValue.COMPLEX_UNIT_SP, 80f)
+        }
+    }
+
+    private fun generateAnswers(correctChar: KanaCharacter): List<String> {
+        val isNormal = viewModel.currentDirection == KanaQuestionDirection.NORMAL
+        val correctAnswer = if (isNormal) correctChar.romaji else correctChar.kana
+        val incorrectAnswers = viewModel.allKana
+            .asSequence()
+            .map { if (isNormal) it.romaji else it.kana }
+            .distinct()
+            .filter { it != correctAnswer }
+            .shuffled()
+            .take(3)
+            .toList()
+        return (incorrectAnswers + correctAnswer).shuffled()
+    }
+
+    private fun onAnswerClicked(button: Button) {
+        val selectedAnswer = button.text.toString()
+        val isNormal = viewModel.currentDirection == KanaQuestionDirection.NORMAL
+        val correctAnswerText = if (isNormal) viewModel.currentQuestion.romaji else viewModel.currentQuestion.kana
+        val isCorrect = selectedAnswer == correctAnswerText
+
+        ScoreManager.saveScore(requireContext(), viewModel.currentQuestion.kana, isCorrect, ScoreManager.ScoreType.RECOGNITION)
+
+        val answerButtons = listOf(binding.buttonAnswer1, binding.buttonAnswer2, binding.buttonAnswer3, binding.buttonAnswer4)
+        val buttonIndex = answerButtons.indexOf(button)
+
+        if (isCorrect) {
+            val progress = viewModel.kanaProgress[viewModel.currentQuestion]!!
+            if (isNormal) progress.normalSolved = true else progress.reverseSolved = true
+
+            if (progress.normalSolved && progress.reverseSolved) {
+                viewModel.kanaStatus[viewModel.currentQuestion] = GameStatus.CORRECT
+                viewModel.revisionList.remove(viewModel.currentQuestion)
+                viewModel.buttonColors[buttonIndex] = R.color.answer_correct
+            } else {
+                viewModel.kanaStatus[viewModel.currentQuestion] = GameStatus.PARTIAL
+                viewModel.buttonColors[buttonIndex] = R.color.answer_neutral
+            }
+        } else {
+            viewModel.kanaStatus[viewModel.currentQuestion] = GameStatus.INCORRECT
+            viewModel.buttonColors[buttonIndex] = R.color.answer_incorrect
+            // Highlight correct answer
+            val correctButtonIndex = answerButtons.indexOfFirst { it.text == correctAnswerText }
+            if (correctButtonIndex != -1) {
+                answerButtons[correctButtonIndex].setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.answer_correct))
+            }
+        }
+        button.setBackgroundColor(ContextCompat.getColor(requireContext(), viewModel.buttonColors[buttonIndex]))
+
+        // Immediate update of progress bar
+        updateProgressBar()
+
+        viewModel.areButtonsEnabled = false
+        answerButtons.forEach { it.isEnabled = false }
+
+        val animationSpeed = sharedPreferences.getFloat(ANIMATION_SPEED_PREF_KEY, 1.0f)
+        val delay = (1000 * animationSpeed).toLong()
+
+        Handler(Looper.getMainLooper()).postDelayed({ displayQuestion() }, delay)
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
-}
-
-enum class QuizType(@XmlRes val xmlResId: Int, val title: String) {
-    HIRAGANA(R.xml.hiragana, "Hiragana Quiz"),
-    KATAKANA(R.xml.katakana, "Katakana Quiz")
 }
