@@ -1,0 +1,11 @@
+Bug Fixes:
+  - quiz seems reset when orientation change
+
+Ideas:
+  - Japanese translation -> allows japanese to learn another language ?
+  - 2 translations areas : interface and meanings
+
+Games:
+  - Tetris : achieve words from selected level in Kana to make blocks disappear
+  - Simon : enforce kanji remembering by sequence
+  - cross words generator
