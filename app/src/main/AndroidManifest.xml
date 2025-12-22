@@ -16,16 +16,13 @@
             android:value="@string/game_services_project_id" />
             
         <activity
-            android:name=".MainActivity"
+            android:name="org.nihongo.mochi.MainActivity"
             android:exported="true"
-            android:label="@string/app_name"
             android:resizeableActivity="true"
             android:theme="@style/Theme.NihongoMochi.NoActionBar"
-            android:windowSoftInputMode="adjustResize"
-            tools:targetApi="24">
+            android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
