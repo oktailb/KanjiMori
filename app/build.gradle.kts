@@ -33,8 +33,8 @@ android {
         applicationId = "org.nihongo.mochi"
         minSdk = 28
         targetSdk = 36
-        versionCode = 1
-        versionName = "0.4.2"
+        versionCode = 2
+        versionName = "0.5.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -57,12 +57,14 @@ android {
     }
     
     // Reduce APK size for debug builds by only including necessary native libs
-    splits {
-        abi {
-            isEnable = true
-            reset()
-            include("x86_64", "arm64-v8a") // For modern emulators and phones
-            isUniversalApk = false
+    if (!gradle.startParameter.taskNames.any { it.contains("bundleRelease", ignoreCase = true) }) {
+        splits {
+            abi {
+                isEnable = true
+                reset()
+                include("x86_64", "arm64-v8a") // For modern emulators and phones
+                isUniversalApk = false
+            }
         }
     }
     
