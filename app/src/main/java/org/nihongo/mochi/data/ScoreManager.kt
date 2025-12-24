@@ -29,8 +29,9 @@ object ScoreManager {
 
         val newSuccesses = currentScore.successes + if (wasCorrect) 1 else 0
         val newFailures = currentScore.failures + if (!wasCorrect) 1 else 0
+        val currentTime = System.currentTimeMillis()
 
-        editor.putString(actualKey, "$newSuccesses-$newFailures")
+        editor.putString(actualKey, "$newSuccesses-$newFailures-$currentTime")
         editor.apply()
 
         // Handle user list based on settings
@@ -76,15 +77,16 @@ object ScoreManager {
 
     private fun getScoreInternal(context: Context, actualKey: String): KanjiScore {
         val sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        val scoreString = sharedPreferences.getString(actualKey, "0-0") ?: "0-0"
+        val scoreString = sharedPreferences.getString(actualKey, "0-0-0") ?: "0-0-0"
 
         return try {
             val parts = scoreString.split("-")
             val successes = parts[0].toInt()
             val failures = parts[1].toInt()
-            KanjiScore(successes, failures)
+            val lastDate = if (parts.size > 2) parts[2].toLong() else 0L
+            KanjiScore(successes, failures, lastDate)
         } catch (e: Exception) {
-            KanjiScore(0, 0)
+            KanjiScore(0, 0, 0L)
         }
     }
 
@@ -118,7 +120,8 @@ object ScoreManager {
                         val parts = value.split("-")
                         val successes = parts[0].toInt()
                         val failures = parts[1].toInt()
-                        cleanKey to KanjiScore(successes, failures)
+                        val lastDate = if (parts.size > 2) parts[2].toLong() else 0L
+                        cleanKey to KanjiScore(successes, failures, lastDate)
                     } catch (e: Exception) {
                         null
                     }
@@ -160,6 +163,42 @@ object ScoreManager {
         val b = (startB + fraction * (endB - startB)).toInt()
 
         return Color.argb(a, r, g, b)
+    }
+
+    fun decayScores(context: Context) {
+        val sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        val currentTime = System.currentTimeMillis()
+        val ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000L
+
+        sharedPreferences.all.forEach { (key, value) ->
+            if (value is String) {
+                try {
+                    val parts = value.split("-")
+                    var successes = parts[0].toInt()
+                    val failures = parts[1].toInt()
+                    val lastDate = if (parts.size > 2) parts[2].toLong() else 0L
+
+                    // Check if a week has passed since last update
+                    // Actually, we want to decay if it's been a week since last DECAY or interaction?
+                    // The prompt says "diviser les scores par 2 chaque semaine".
+                    // If we just check `lastDate`, an active user won't get decayed on items they use.
+                    // But maybe that's what we want? If you practice, you don't lose score.
+                    // If you don't practice, you lose score.
+                    // Let's assume decay applies to items not reviewed recently.
+                    
+                    if (currentTime - lastDate > ONE_WEEK_MS && successes > 0) {
+                        successes /= 2
+                        // Update the timestamp so we don't decay again immediately, 
+                        // effectively marking it as "decay processed"
+                        editor.putString(key, "$successes-$failures-$currentTime")
+                    }
+                } catch (e: Exception) {
+                    // Ignore
+                }
+            }
+        }
+        editor.apply()
     }
 
     fun getAllData(context: Context): String {

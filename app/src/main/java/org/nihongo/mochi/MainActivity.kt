@@ -10,9 +10,14 @@ import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
 import com.google.android.gms.games.GamesSignInClient
 import com.google.android.gms.games.PlayGames
 import org.nihongo.mochi.databinding.ActivityMainBinding
+import org.nihongo.mochi.workers.DecayWorker
+import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity() {
 
@@ -51,6 +56,24 @@ class MainActivity : AppCompatActivity() {
         appBarConfiguration = AppBarConfiguration(navController.graph)
 
         gamesSignInClient = PlayGames.getGamesSignInClient(this)
+        
+        setupWorkers()
+    }
+    
+    private fun setupWorkers() {
+        // Run the decay check periodically (e.g., every day to check if a week has passed for any item)
+        // Minimum interval for PeriodicWorkRequest is 15 minutes.
+        // We can run it once a day. The worker logic checks the timestamps.
+        
+        val decayWorkRequest = PeriodicWorkRequestBuilder<DecayWorker>(1, TimeUnit.DAYS)
+            .setInitialDelay(1, TimeUnit.DAYS) // Don't run immediately on first install
+            .build()
+
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+            "MochiDecayWork",
+            ExistingPeriodicWorkPolicy.KEEP, // Keep the existing schedule if already set
+            decayWorkRequest
+        )
     }
 
     override fun onResume() {
