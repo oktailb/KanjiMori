@@ -23,6 +23,9 @@ import com.google.android.gms.tasks.Task
 import org.nihongo.mochi.R
 import org.nihongo.mochi.data.ScoreManager
 import org.nihongo.mochi.databinding.FragmentResultsBinding
+import org.nihongo.mochi.domain.kana.AndroidResourceLoader
+import org.nihongo.mochi.domain.kana.KanaRepository
+import org.nihongo.mochi.domain.kana.KanaType
 import org.xmlpull.v1.XmlPullParser
 import java.io.IOException
 
@@ -37,6 +40,11 @@ class ResultsFragment : Fragment() {
 
     private val RC_SAVED_GAMES = 9009
     private var mCurrentSaveName = "NihongoMochiSnapshot"
+    
+    // Lazy init of repository
+    private val kanaRepository by lazy {
+        KanaRepository(AndroidResourceLoader(requireContext()))
+    }
 
     private val achievementsLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
@@ -263,8 +271,8 @@ class ResultsFragment : Fragment() {
             }
 
             val charactersForLevel = when {
-                info.xmlName == "Hiragana" -> loadCharacters(R.xml.hiragana)
-                info.xmlName == "Katakana" -> loadCharacters(R.xml.katakana)
+                info.xmlName == "Hiragana" -> loadKanaCharacters(KanaType.HIRAGANA)
+                info.xmlName == "Katakana" -> loadKanaCharacters(KanaType.KATAKANA)
                 info.xmlName.startsWith("bccwj_wordlist_") -> loadWordsFromXml(info.xmlName)
                 else -> getKanjiForLevel(info.xmlName, allKanji)
             }
@@ -278,6 +286,10 @@ class ResultsFragment : Fragment() {
 
             updateCategoryUI(info, percentage)
         }
+    }
+    
+    private fun loadKanaCharacters(type: KanaType): List<String> {
+        return kanaRepository.getKanaEntries(type).map { it.character }
     }
 
     private fun calculateUserListPercentage(scoreType: ScoreManager.ScoreType): Double {

@@ -6,10 +6,8 @@ plugins {
 
 kotlin {
     androidTarget {
-        compilations.all {
-            kotlinOptions {
-                jvmTarget = "1.8"
-            }
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_1_8)
         }
     }
     
@@ -35,10 +33,28 @@ kotlin {
     }
 }
 
+// Task to copy common resources to a generated assets directory for Android
+val copyCommonResources = tasks.register<Copy>("copyCommonResources") {
+    from("src/commonMain/resources")
+    into(layout.buildDirectory.dir("generated/assets/common"))
+}
+
+// Ensure the copy happens before Android resources are processed
+tasks.named("preBuild").configure {
+    dependsOn(copyCommonResources)
+}
+
 android {
     namespace = "org.nihongo.mochi.shared"
     compileSdk = 36
     defaultConfig {
         minSdk = 24
+    }
+    
+    sourceSets {
+        getByName("main") {
+            // Register the output folder of the task as an asset source
+            assets.srcDir(copyCommonResources.map { it.destinationDir })
+        }
     }
 }

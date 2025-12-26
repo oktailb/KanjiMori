@@ -2,10 +2,13 @@ package org.nihongo.mochi.domain.kana
 
 object RomajiToKana {
     private val m = HashMap<String, String>()
+    private var isInitialized = false
 
-    init {
+    fun init(repository: KanaRepository) {
+        if (isInitialized) return
+        
         // Load Hiragana from repository
-        KanaRepository.getKanaEntries(KanaType.HIRAGANA).forEach { entry ->
+        repository.getKanaEntries(KanaType.HIRAGANA).forEach { entry ->
             m[entry.romaji] = entry.character
         }
         
@@ -47,6 +50,8 @@ object RomajiToKana {
         // Yoon shortcuts
         m["jya"] = "じゃ"; m["jyu"] = "じゅ"; m["jyo"] = "じょ"
         // Others are likely covered by standard repository data (kya, sha, cha, etc.)
+        
+        isInitialized = true
     }
 
     // Returns a Pair<Int, String> where Int is the number of characters at the end of text to replace,

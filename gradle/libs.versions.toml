@@ -19,6 +19,7 @@ multiplatformSettings = "1.3.0"
 kotlinxSerialization = "1.7.3"
 kotlinTest = "2.0.21"
 kotlinxDatetime = "0.6.1"
+mokoResources = "0.24.5"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -39,6 +40,8 @@ multiplatform-settings = { group = "com.russhwolf", name = "multiplatform-settin
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
 kotlin-test = { group = "org.jetbrains.kotlin", name = "kotlin-test", version.ref = "kotlinTest" }
 kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "kotlinxDatetime" }
+moko-resources = { group = "dev.icerock.moko", name = "resources", version.ref = "mokoResources" }
+moko-resources-generator = { group = "dev.icerock.moko", name = "resources-generator", version.ref = "mokoResources" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -46,3 +49,4 @@ android-library = { id = "com.android.library", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+moko-resources = { id = "dev.icerock.mobile.multiplatform-resources", version.ref = "mokoResources" }

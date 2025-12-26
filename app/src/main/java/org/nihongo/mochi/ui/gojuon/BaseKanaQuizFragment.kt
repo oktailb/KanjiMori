@@ -18,12 +18,13 @@ import androidx.navigation.fragment.findNavController
 import org.nihongo.mochi.R
 import org.nihongo.mochi.data.ScoreManager
 import org.nihongo.mochi.databinding.FragmentKanaQuizBinding
+import org.nihongo.mochi.domain.kana.AndroidResourceLoader
+import org.nihongo.mochi.domain.kana.KanaRepository
 import org.nihongo.mochi.settings.ANIMATION_SPEED_PREF_KEY
 import org.nihongo.mochi.ui.game.GameStatus
 import org.nihongo.mochi.ui.game.KanaCharacter
 import org.nihongo.mochi.ui.game.KanaProgress
 import org.nihongo.mochi.ui.game.KanaQuestionDirection
-import org.xmlpull.v1.XmlPullParser
 
 abstract class BaseKanaQuizFragment : Fragment() {
 
@@ -33,9 +34,16 @@ abstract class BaseKanaQuizFragment : Fragment() {
 
     protected lateinit var sharedPreferences: SharedPreferences
 
-    abstract fun getXmlResourceId(): Int
+    // Abstract property to specify Kana Type (Hiragana or Katakana)
+    abstract val kanaType: org.nihongo.mochi.domain.kana.KanaType
+
     abstract fun getQuizModeArgument(): String
     abstract fun getLevelArgument(): String
+
+    // Lazy init of repository
+    private val kanaRepository by lazy {
+        KanaRepository(AndroidResourceLoader(requireContext()))
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -67,7 +75,7 @@ abstract class BaseKanaQuizFragment : Fragment() {
         val modeArg = getQuizModeArgument()
         viewModel.quizMode = if (modeArg == "Kana -> Romaji") QuizMode.KANA_TO_ROMAJI else QuizMode.ROMAJI_TO_KANA
 
-        val allCharacters = loadKanaFromXml(getXmlResourceId())
+        val allCharacters = loadKana(kanaType)
         val level = getLevelArgument()
         viewModel.allKana = filterCharactersForLevel(allCharacters, level).shuffled()
 
@@ -104,24 +112,34 @@ abstract class BaseKanaQuizFragment : Fragment() {
         displayQuestion()
     }
 
-    private fun loadKanaFromXml(resourceId: Int): List<KanaCharacter> {
-        val kanaList = mutableListOf<KanaCharacter>()
-        val parser = resources.getXml(resourceId)
-        try {
-            var eventType = parser.eventType
-            while (eventType != XmlPullParser.END_DOCUMENT) {
-                if (eventType == XmlPullParser.START_TAG && parser.name == "character") {
-                    val romaji = parser.getAttributeValue(null, "phonetics") ?: ""
-                    val category = parser.getAttributeValue(null, "type") ?: "gojuon"
-                    val kana = parser.nextText()
-                    kanaList.add(KanaCharacter(kana, romaji, category))
-                }
-                eventType = parser.next()
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
+    private fun loadKana(type: org.nihongo.mochi.domain.kana.KanaType): List<KanaCharacter> {
+        return kanaRepository.getKanaEntries(type).map { entry ->
+            // Map shared KanaEntry to local KanaCharacter
+            // Note: KanaEntry has 'type' field which is HIRAGANA/KATAKANA, 
+            // but here we need 'category' (gojuon, dakuon, yoon) which was previously in XML.
+            // We need to infer category from line number or character properties, or update JSON to include category.
+            // For now, let's infer category based on line number or content.
+            
+            // Assuming the JSON structure doesn't have 'category' yet, we can try to deduce it or default to 'gojuon'.
+            // Actually, the previous XML parser logic read "type" attribute as category (gojuon, dakuon, handakuon, yoon).
+            // The JSON I generated earlier only has "type": "HIRAGANA"/"KATAKANA".
+            // We need to enrich the JSON or deduce category.
+            
+            val category = deduceCategory(entry.line, entry.romaji)
+            KanaCharacter(entry.character, entry.romaji, category)
         }
-        return kanaList
+    }
+    
+    private fun deduceCategory(line: Int, romaji: String): String {
+        // Simple heuristic based on line number from standard gojuon tables
+        // Lines 1-10 (a, ka, sa, ta, na, ha, ma, ya, ra, wa) + n are Gojuon
+        // Lines 12-16 (ga, za, da, ba, pa) are Dakuon/Handakuon
+        // Lines 17+ (kya, etc) are Yoon
+        return when {
+            line <= 11 -> "gojuon"
+            line <= 16 -> if (romaji.startsWith("p")) "handakuon" else "dakuon"
+            else -> "yoon"
+        }
     }
 
     private fun filterCharactersForLevel(allCharacters: List<KanaCharacter>, level: String): List<KanaCharacter> {

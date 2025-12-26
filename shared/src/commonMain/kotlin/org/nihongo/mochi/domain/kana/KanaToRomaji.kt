@@ -2,18 +2,22 @@ package org.nihongo.mochi.domain.kana
 
 object KanaToRomaji {
     private val kanaMap = HashMap<String, String>()
+    private var isInitialized = false
 
-    init {
+    fun init(repository: KanaRepository) {
+        if (isInitialized) return
+        
         // Load from repository
-        KanaRepository.getKanaEntries(KanaType.HIRAGANA).forEach { entry ->
+        repository.getKanaEntries(KanaType.HIRAGANA).forEach { entry ->
             kanaMap[entry.character] = entry.romaji
         }
-        KanaRepository.getKanaEntries(KanaType.KATAKANA).forEach { entry ->
+        repository.getKanaEntries(KanaType.KATAKANA).forEach { entry ->
             kanaMap[entry.character] = entry.romaji
         }
         
         // Add special symbol mapping that might not be in the XML/JSON if it was hardcoded before
         kanaMap["ー"] = "-"
+        isInitialized = true
     }
 
     fun convert(text: String): String {

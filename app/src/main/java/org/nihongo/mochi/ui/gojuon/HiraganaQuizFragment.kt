@@ -1,12 +1,10 @@
 package org.nihongo.mochi.ui.gojuon
 
-import org.nihongo.mochi.R
+import org.nihongo.mochi.domain.kana.KanaType
 
 class HiraganaQuizFragment : BaseKanaQuizFragment() {
 
-    override fun getXmlResourceId(): Int {
-        return R.xml.hiragana
-    }
+    override val kanaType: KanaType = KanaType.HIRAGANA
 
     override fun getQuizModeArgument(): String {
         return arguments?.getString("quizMode") ?: "Romaji -> Kana"

@@ -11,6 +11,9 @@ import org.nihongo.mochi.R
 import org.nihongo.mochi.data.ScoreManager
 import org.nihongo.mochi.data.ScoreManager.ScoreType
 import org.nihongo.mochi.databinding.FragmentRecognitionBinding
+import org.nihongo.mochi.domain.kana.AndroidResourceLoader
+import org.nihongo.mochi.domain.kana.KanaRepository
+import org.nihongo.mochi.domain.kana.KanaType
 import org.xmlpull.v1.XmlPullParser
 
 data class LevelInfo(val button: Button, val xmlName: String, val stringResId: Int)
@@ -21,6 +24,11 @@ class RecognitionFragment : Fragment() {
     private val binding get() = _binding!!
 
     private lateinit var levelInfos: List<LevelInfo>
+    
+    // Lazy init of repository
+    private val kanaRepository by lazy {
+        KanaRepository(AndroidResourceLoader(requireContext()))
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -69,16 +77,23 @@ class RecognitionFragment : Fragment() {
 
         for (info in levelInfos) {
             val charactersForLevel = when (info.xmlName) {
-                "Hiragana" -> loadCharacters(R.xml.hiragana)
-                "Katakana" -> loadCharacters(R.xml.katakana)
+                "Hiragana" -> loadKanaCharacters(KanaType.HIRAGANA)
+                "Katakana" -> loadKanaCharacters(KanaType.KATAKANA)
                 else -> getKanjiForLevel(info.xmlName, allKanji)
             }
             val masteryPercentage = calculateMasteryPercentage(charactersForLevel)
             updateButtonText(info, masteryPercentage)
         }
     }
+    
+    private fun loadKanaCharacters(type: KanaType): List<String> {
+        return kanaRepository.getKanaEntries(type).map { it.character }
+    }
 
+    // Keep XML loader only for Kanji until they are migrated
     private fun loadCharacters(resourceId: Int): List<String> {
+        // This method is now only for legacy calls if any, or can be removed if unused.
+        // But since we removed R.xml.hiragana, we should not use this for kana.
         val characterList = mutableListOf<String>()
         val parser = resources.getXml(resourceId)
         try {

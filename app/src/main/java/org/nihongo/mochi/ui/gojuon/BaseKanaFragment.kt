@@ -9,26 +9,31 @@ import android.view.ViewGroup
 import android.widget.GridLayout
 import android.widget.Space
 import android.widget.TextView
-import androidx.annotation.XmlRes
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import org.nihongo.mochi.R
 import org.nihongo.mochi.data.ScoreManager
 import org.nihongo.mochi.databinding.FragmentKanaBinding
+import org.nihongo.mochi.domain.kana.AndroidResourceLoader
+import org.nihongo.mochi.domain.kana.KanaRepository
 import org.nihongo.mochi.ui.ScoreUiUtils
-import org.xmlpull.v1.XmlPullParser
 
 abstract class BaseKanaFragment : Fragment() {
 
     private var _binding: FragmentKanaBinding? = null
     protected val binding get() = _binding!!
 
-    abstract val kanaType: KanaType
+    abstract val kanaType: KanaFragmentType
 
     private var charactersByLine: Map<Int, List<KanaCharacter>> = emptyMap()
     private var lineKeys: List<Int> = emptyList()
     private var currentPage = 0
     private var pageSize = 16 // Default to portrait
+    
+    // Lazy init of repository
+    private val kanaRepository by lazy { 
+        KanaRepository(AndroidResourceLoader(requireContext()))
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -47,7 +52,7 @@ abstract class BaseKanaFragment : Fragment() {
         val orientation = resources.configuration.orientation
         pageSize = if (orientation == Configuration.ORIENTATION_LANDSCAPE) 8 else 16
 
-        val allCharacters = loadKana(kanaType.xmlResId)
+        val allCharacters = loadKana(kanaType.domainType)
         charactersByLine = allCharacters.groupBy { it.line }.toSortedMap()
         lineKeys = charactersByLine.keys.toList()
 
@@ -141,24 +146,10 @@ abstract class BaseKanaFragment : Fragment() {
         binding.buttonNextPage.alpha = if (currentPage < totalPages - 1) 1.0f else 0.5f
     }
 
-    private fun loadKana(@XmlRes xmlResId: Int): List<KanaCharacter> {
-        val kanaList = mutableListOf<KanaCharacter>()
-        val parser = resources.getXml(xmlResId)
-        try {
-            var eventType = parser.eventType
-            while (eventType != XmlPullParser.END_DOCUMENT) {
-                if (eventType == XmlPullParser.START_TAG && parser.name == "character") {
-                    val line = parser.getAttributeValue(null, "line").toInt()
-                    val phonetics = parser.getAttributeValue(null, "phonetics")
-                    val value = parser.nextText()
-                    kanaList.add(KanaCharacter(value, line, phonetics))
-                }
-                eventType = parser.next()
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
+    private fun loadKana(type: org.nihongo.mochi.domain.kana.KanaType): List<KanaCharacter> {
+        return kanaRepository.getKanaEntries(type).map { entry ->
+            KanaCharacter(entry.character, entry.line, entry.romaji)
         }
-        return kanaList
     }
 
     override fun onDestroyView() {
@@ -167,9 +158,9 @@ abstract class BaseKanaFragment : Fragment() {
     }
 }
 
-enum class KanaType(@XmlRes val xmlResId: Int, val titleRes: Int, val navigationActionId: Int) {
-    HIRAGANA(R.xml.hiragana, R.string.level_hiragana, R.id.action_nav_hiragana_to_hiragana_quiz),
-    KATAKANA(R.xml.katakana, R.string.level_katakana, R.id.action_nav_katakana_to_katakana_quiz)
+enum class KanaFragmentType(val domainType: org.nihongo.mochi.domain.kana.KanaType, val titleRes: Int, val navigationActionId: Int) {
+    HIRAGANA(org.nihongo.mochi.domain.kana.KanaType.HIRAGANA, R.string.level_hiragana, R.id.action_nav_hiragana_to_hiragana_quiz),
+    KATAKANA(org.nihongo.mochi.domain.kana.KanaType.KATAKANA, R.string.level_katakana, R.id.action_nav_katakana_to_katakana_quiz)
 }
 
 data class KanaCharacter(val value: String, val line: Int, val phonetics: String)
