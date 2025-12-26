@@ -14,6 +14,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import org.nihongo.mochi.MochiApplication
 import org.nihongo.mochi.R
 import org.nihongo.mochi.data.ScoreManager
 import org.nihongo.mochi.databinding.FragmentWordQuizBinding
@@ -109,37 +110,11 @@ class WordQuizFragment : Fragment() {
         
         viewModel.allWords.clear()
 
-        // Build a temporary map of all known words to their phonetics
-        val allKnownWords = mutableMapOf<String, String>()
-        val listsToScan = listOf(
-            "bccwj_wordlist_1000", "bccwj_wordlist_2000", "bccwj_wordlist_3000", 
-            "bccwj_wordlist_4000", "bccwj_wordlist_5000", "bccwj_wordlist_6000", 
-            "bccwj_wordlist_7000", "bccwj_wordlist_8000"
-        )
-        
-        for (list in listsToScan) {
-            val resourceId = resources.getIdentifier(list, "xml", requireContext().packageName)
-            if (resourceId != 0) {
-                val parser = resources.getXml(resourceId)
-                try {
-                    var eventType = parser.eventType
-                    while (eventType != XmlPullParser.END_DOCUMENT) {
-                       if (eventType == XmlPullParser.START_TAG && parser.name == "word") {
-                           val phonetics = parser.getAttributeValue(null, "phonetics") ?: ""
-                           val text = parser.nextText()
-                           if (phonetics.isNotEmpty()) {
-                               allKnownWords[text] = phonetics
-                           }
-                       }
-                       eventType = parser.next()
-                    }
-                } catch (e: Exception) {
-                    // Ignore
-                }
-            }
-        }
+        // Get all known words using the repository
+        val allKnownEntries = MochiApplication.wordRepository.getAllWordEntries()
+        val allKnownWords = allKnownEntries.associate { it.text to it.phonetics }
 
-        // Now, build the allWords list from the custom list, looking up phonetics
+        // Build the quiz words list
         for (wordText in customWordList) {
             val phonetics = allKnownWords[wordText]
             if (phonetics != null) {

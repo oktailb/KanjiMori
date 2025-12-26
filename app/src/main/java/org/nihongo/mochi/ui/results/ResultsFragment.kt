@@ -281,13 +281,12 @@ class ResultsFragment : Fragment() {
         return when {
             levelKey == "Hiragana" -> MochiApplication.kanaRepository.getKanaEntries(KanaType.HIRAGANA).map { it.character }
             levelKey == "Katakana" -> MochiApplication.kanaRepository.getKanaEntries(KanaType.KATAKANA).map { it.character }
-            levelKey.startsWith("bccwj_wordlist_") -> loadWordsFromXml(levelKey)
+            levelKey.startsWith("bccwj_wordlist_") || levelKey.startsWith("reading_") -> {
+                 val cleanKey = if (levelKey.startsWith("reading_n")) "jlpt_wordlist_${levelKey.removePrefix("reading_")}" else levelKey
+                 MochiApplication.wordRepository.getWordsForLevel(cleanKey)
+            }
             else -> {
                 val (type, value) = when {
-                    levelKey.startsWith("reading_") -> {
-                        val cleanKey = levelKey.removePrefix("reading_")
-                        if (cleanKey.startsWith("N")) "jlpt" to cleanKey else "" to ""
-                    }
                     levelKey.startsWith("N") -> "jlpt" to levelKey
                     levelKey.startsWith("Grade") -> "grade" to levelKey.removePrefix("Grade ")
                     else -> "" to ""
@@ -357,26 +356,6 @@ class ResultsFragment : Fragment() {
             LevelInfo("Writing Collège", "Grade 7"),
             LevelInfo("Writing Lycée", "Grade 8")
         )
-    }
-
-    private fun loadWordsFromXml(fileName: String): List<String> {
-        val wordList = mutableListOf<String>()
-        val resourceId = resources.getIdentifier(fileName, "xml", requireContext().packageName)
-        if (resourceId == 0) return emptyList()
-
-        val parser = resources.getXml(resourceId)
-        try {
-            var eventType = parser.eventType
-            while (eventType != XmlPullParser.END_DOCUMENT) {
-                if (eventType == XmlPullParser.START_TAG && parser.name == "word") {
-                    wordList.add(parser.nextText())
-                }
-                eventType = parser.next()
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-        return wordList
     }
 
     private fun calculateMasteryPercentage(characterList: List<String>, scoreType: ScoreManager.ScoreType): Double {

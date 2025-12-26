@@ -55,7 +55,7 @@ class WordListFragment : Fragment() {
         if (wordListName == "user_custom_list") {
             binding.textListTitle.text = getString(R.string.reading_user_list)
         } else {
-            binding.textListTitle.text = wordListName.replace("bccwj_wordlist_", "Common Words ").replace(".xml", "")
+            binding.textListTitle.text = wordListName.replace("bccwj_wordlist_", "Common Words ").replace(".json", "")
         }
 
         allWords = loadWordsForList(wordListName)
@@ -206,28 +206,11 @@ class WordListFragment : Fragment() {
                 WordItem(word, "")
             }
         }
-
-        val words = mutableListOf<WordItem>()
-        val resourceId = resources.getIdentifier(listName, "xml", requireContext().packageName)
-        if (resourceId == 0) return emptyList()
-
-        val parser = resources.getXml(resourceId)
-
-        try {
-            var eventType = parser.eventType
-            while (eventType != XmlPullParser.END_DOCUMENT) {
-                if (eventType == XmlPullParser.START_TAG && parser.name == "word") {
-                    val type = parser.getAttributeValue(null, "type") ?: ""
-                    val text = parser.nextText()
-                    words.add(WordItem(text, type))
-                }
-                eventType = parser.next()
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-
-        return words
+        
+        // Use repository to load words via JSON
+        // Using getWordEntriesForLevel to preserve type information
+        val wordEntries = MochiApplication.wordRepository.getWordEntriesForLevel(listName)
+        return wordEntries.map { WordItem(it.text, it.type) }
     }
 
     private fun loadAllKanjiDetails() {
