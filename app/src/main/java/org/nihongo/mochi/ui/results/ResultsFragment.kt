@@ -154,7 +154,7 @@ class ResultsFragment : Fragment() {
     }
 
     private fun saveSnapshot() {
-        val data = ScoreManager.getAllData(requireContext()).toByteArray()
+        val data = ScoreManager.getAllDataJson().toByteArray()
         val desc = "Backup " + java.text.SimpleDateFormat.getDateTimeInstance().format(java.util.Date())
 
         snapshotsClient.open(mCurrentSaveName, true, SnapshotsClient.RESOLUTION_POLICY_MOST_RECENTLY_MODIFIED)
@@ -194,7 +194,7 @@ class ResultsFragment : Fragment() {
                     val data = snapshot.snapshotContents.readFully()
                     if (data != null) {
                         val jsonString = String(data)
-                        ScoreManager.restoreData(requireContext(), jsonString)
+                        ScoreManager.restoreDataFromJson(jsonString)
                     }
                 } catch (e: IOException) {
                     Log.e("ResultsFragment", "Error reading snapshot", e)
@@ -281,7 +281,7 @@ class ResultsFragment : Fragment() {
     }
 
     private fun calculateUserListPercentage(scoreType: ScoreManager.ScoreType): Double {
-        val scores = ScoreManager.getAllScores(requireContext(), scoreType)
+        val scores = ScoreManager.getAllScores(scoreType)
         if (scores.isEmpty()) return 0.0
 
         val totalEncountered = scores.size
@@ -432,7 +432,7 @@ class ResultsFragment : Fragment() {
         if (characterList.isEmpty()) return 0.0
 
         val totalMasteryPoints = characterList.sumOf { character ->
-            val score = ScoreManager.getScore(requireContext(), character, scoreType)
+            val score = ScoreManager.getScore(character, scoreType)
             val balance = score.successes - score.failures
             balance.coerceIn(0, 10).toDouble()
         }

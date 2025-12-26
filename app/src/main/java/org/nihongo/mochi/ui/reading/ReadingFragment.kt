@@ -43,7 +43,7 @@ class ReadingFragment : Fragment() {
     }
 
     private fun calculateUserListPercentage() {
-        val scores = ScoreManager.getAllScores(requireContext(), ScoreType.READING)
+        val scores = ScoreManager.getAllScores(ScoreType.READING)
         if (scores.isEmpty()) {
             viewModel.userListPercentage = 0.0
             return

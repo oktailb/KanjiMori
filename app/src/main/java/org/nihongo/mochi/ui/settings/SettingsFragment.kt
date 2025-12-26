@@ -14,13 +14,12 @@ import androidx.core.os.LocaleListCompat
 import androidx.fragment.app.Fragment
 import org.nihongo.mochi.R
 import org.nihongo.mochi.databinding.FragmentSettingsBinding
-
-const val TEXT_SIZE_PREF_KEY = "TextSize"
-const val ANIMATION_SPEED_PREF_KEY = "AnimationSpeed"
-const val PRONUNCIATION_PREF_KEY = "Pronunciation"
-const val ADD_WRONG_ANSWERS_PREF_KEY = "AddWrongAnswers"
-const val REMOVE_GOOD_ANSWERS_PREF_KEY = "RemoveGoodAnswers"
-const val THEME_PREF_KEY = "Theme"
+import org.nihongo.mochi.settings.ADD_WRONG_ANSWERS_PREF_KEY
+import org.nihongo.mochi.settings.ANIMATION_SPEED_PREF_KEY
+import org.nihongo.mochi.settings.PRONUNCIATION_PREF_KEY
+import org.nihongo.mochi.settings.REMOVE_GOOD_ANSWERS_PREF_KEY
+import org.nihongo.mochi.settings.TEXT_SIZE_PREF_KEY
+import org.nihongo.mochi.settings.THEME_PREF_KEY
 
 class SettingsFragment : Fragment() {
 

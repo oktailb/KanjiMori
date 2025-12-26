@@ -24,12 +24,13 @@ import org.nihongo.mochi.data.ScoreManager.ScoreType
 import org.nihongo.mochi.databinding.FragmentRecognitionGameBinding
 import org.nihongo.mochi.ui.game.KanjiDetail
 import org.nihongo.mochi.ui.game.Reading
-import org.nihongo.mochi.ui.settings.ANIMATION_SPEED_PREF_KEY
-import org.nihongo.mochi.ui.settings.PRONUNCIATION_PREF_KEY
+import org.nihongo.mochi.settings.ANIMATION_SPEED_PREF_KEY
+import org.nihongo.mochi.settings.PRONUNCIATION_PREF_KEY
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
 import java.io.IOException
 import org.nihongo.mochi.ui.game.GameStatus
+import org.nihongo.mochi.domain.kana.KanaToRomaji
 
 class RecognitionGameFragment : Fragment() {
 
@@ -433,7 +434,7 @@ class RecognitionGameFragment : Fragment() {
             button.text.toString() == viewModel.correctAnswer
         }
 
-        ScoreManager.saveScore(requireContext(), viewModel.currentKanji.character, isCorrect, ScoreType.RECOGNITION)
+        ScoreManager.saveScore(viewModel.currentKanji.character, isCorrect, ScoreType.RECOGNITION)
 
         val answerButtons = listOf(binding.buttonAnswer1, binding.buttonAnswer2, binding.buttonAnswer3, binding.buttonAnswer4)
         val buttonIndex = answerButtons.indexOf(button)

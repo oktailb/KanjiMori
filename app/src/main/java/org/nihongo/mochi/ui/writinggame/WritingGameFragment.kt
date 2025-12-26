@@ -26,12 +26,13 @@ import org.nihongo.mochi.databinding.FragmentWritingGameBinding
 import org.nihongo.mochi.ui.game.GameStatus
 import org.nihongo.mochi.ui.game.KanjiDetail
 import org.nihongo.mochi.ui.game.Reading
-import org.nihongo.mochi.ui.settings.ANIMATION_SPEED_PREF_KEY
+import org.nihongo.mochi.settings.ANIMATION_SPEED_PREF_KEY
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
 import java.io.IOException
 import java.text.Normalizer
 import kotlin.math.max
+import org.nihongo.mochi.domain.kana.RomajiToKana
 
 class WritingGameFragment : Fragment() {
 
@@ -245,7 +246,7 @@ class WritingGameFragment : Fragment() {
             checkReading(userAnswer)
         }
 
-        ScoreManager.saveScore(requireContext(), viewModel.currentKanji.character, isCorrect, ScoreType.WRITING)
+        ScoreManager.saveScore(viewModel.currentKanji.character, isCorrect, ScoreType.WRITING)
 
         // Do NOT disable editTextAnswer to keep keyboard open
         binding.buttonSubmitAnswer.isEnabled = false

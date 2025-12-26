@@ -24,7 +24,7 @@ import kotlinx.coroutines.withContext
 import org.nihongo.mochi.R
 import org.nihongo.mochi.databinding.FragmentDictionaryBinding
 import org.nihongo.mochi.databinding.ItemDictionaryBinding
-import org.nihongo.mochi.ui.writinggame.RomajiToKana
+import org.nihongo.mochi.domain.kana.RomajiToKana
 import org.xmlpull.v1.XmlPullParser
 import kotlin.math.max
 import kotlin.math.min

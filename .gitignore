@@ -20,3 +20,5 @@ captures/
 
 # Logs
 *.log
+.kotlin
+.idea

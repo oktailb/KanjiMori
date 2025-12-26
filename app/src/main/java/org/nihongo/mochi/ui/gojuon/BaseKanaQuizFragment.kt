@@ -18,11 +18,11 @@ import androidx.navigation.fragment.findNavController
 import org.nihongo.mochi.R
 import org.nihongo.mochi.data.ScoreManager
 import org.nihongo.mochi.databinding.FragmentKanaQuizBinding
+import org.nihongo.mochi.settings.ANIMATION_SPEED_PREF_KEY
 import org.nihongo.mochi.ui.game.GameStatus
 import org.nihongo.mochi.ui.game.KanaCharacter
 import org.nihongo.mochi.ui.game.KanaProgress
 import org.nihongo.mochi.ui.game.KanaQuestionDirection
-import org.nihongo.mochi.ui.settings.ANIMATION_SPEED_PREF_KEY
 import org.xmlpull.v1.XmlPullParser
 
 abstract class BaseKanaQuizFragment : Fragment() {
@@ -262,7 +262,7 @@ abstract class BaseKanaQuizFragment : Fragment() {
         val correctAnswerText = if (isNormal) viewModel.currentQuestion.romaji else viewModel.currentQuestion.kana
         val isCorrect = selectedAnswer == correctAnswerText
 
-        ScoreManager.saveScore(requireContext(), viewModel.currentQuestion.kana, isCorrect, ScoreManager.ScoreType.RECOGNITION)
+        ScoreManager.saveScore(viewModel.currentQuestion.kana, isCorrect, ScoreManager.ScoreType.RECOGNITION)
 
         val answerButtons = listOf(binding.buttonAnswer1, binding.buttonAnswer2, binding.buttonAnswer3, binding.buttonAnswer4)
         val buttonIndex = answerButtons.indexOf(button)

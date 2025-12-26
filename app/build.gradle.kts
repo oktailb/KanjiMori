@@ -3,6 +3,7 @@ import java.util.Properties
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.serialization)
     id("androidx.navigation.safeargs.kotlin")
     id("kotlin-parcelize")
 }
@@ -82,6 +83,7 @@ android {
 }
 
 dependencies {
+    implementation(project(":shared"))
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
@@ -95,6 +97,8 @@ dependencies {
     implementation("com.google.mlkit:digital-ink-recognition:18.1.0")
     implementation(libs.flexbox)
     implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.multiplatform.settings)
+    implementation(libs.kotlinx.serialization.json)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

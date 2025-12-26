@@ -191,7 +191,7 @@ class WordQuizFragment : Fragment() {
     private fun onAnswerClicked(button: Button) {
         val isCorrect = button.text == viewModel.correctAnswer
 
-        ScoreManager.saveScore(requireContext(), viewModel.currentWord.text, isCorrect, ScoreManager.ScoreType.READING)
+        ScoreManager.saveScore(viewModel.currentWord.text, isCorrect, ScoreManager.ScoreType.READING)
         
         val answerButtons = listOf(binding.buttonAnswer1, binding.buttonAnswer2, binding.buttonAnswer3, binding.buttonAnswer4)
         val buttonIndex = answerButtons.indexOf(button)

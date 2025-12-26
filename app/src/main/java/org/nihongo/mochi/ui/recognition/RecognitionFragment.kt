@@ -148,7 +148,7 @@ class RecognitionFragment : Fragment() {
         if (characterList.isEmpty()) return 0.0
 
         val totalMasteryPoints = characterList.sumOf { character ->
-            val score = ScoreManager.getScore(requireContext(), character, ScoreType.RECOGNITION)
+            val score = ScoreManager.getScore(character, ScoreType.RECOGNITION)
             val balance = score.successes - score.failures
             balance.coerceIn(0, 10).toDouble()
         }

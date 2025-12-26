@@ -21,3 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Nihongo Mochi"
 include(":app")
+include(":shared")

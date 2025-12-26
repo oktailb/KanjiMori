@@ -14,6 +14,7 @@ import org.nihongo.mochi.R
 import org.nihongo.mochi.data.ScoreManager
 import org.nihongo.mochi.data.ScoreManager.ScoreType
 import org.nihongo.mochi.databinding.FragmentGameRecapBinding
+import org.nihongo.mochi.ui.ScoreUiUtils
 import org.xmlpull.v1.XmlPullParser
 
 class GameRecapFragment : Fragment() {
@@ -91,7 +92,7 @@ class GameRecapFragment : Fragment() {
             return
         }
 
-        val kanjiScores = kanjiList.map { ScoreManager.getScore(requireContext(), it, ScoreType.RECOGNITION) }
+        val kanjiScores = kanjiList.map { ScoreManager.getScore(it, ScoreType.RECOGNITION) }
 
         val startIndex = currentPage * pageSize
         val endIndex = (startIndex + pageSize).coerceAtMost(kanjiList.size)
@@ -106,7 +107,7 @@ class GameRecapFragment : Fragment() {
                 textSize = 24f
                 textAlignment = View.TEXT_ALIGNMENT_CENTER
                 setTextColor(Color.BLACK)
-                setBackgroundColor(ScoreManager.getScoreColor(requireContext(), score))
+                setBackgroundColor(ScoreUiUtils.getScoreColor(requireContext(), score))
                 val params = android.widget.GridLayout.LayoutParams().apply {
                     width = 0
                     height = android.widget.GridLayout.LayoutParams.WRAP_CONTENT

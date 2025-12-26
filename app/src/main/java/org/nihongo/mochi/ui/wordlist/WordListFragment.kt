@@ -16,6 +16,7 @@ import com.google.android.material.chip.Chip
 import org.nihongo.mochi.R
 import org.nihongo.mochi.data.ScoreManager
 import org.nihongo.mochi.databinding.FragmentWordListBinding
+import org.nihongo.mochi.ui.ScoreUiUtils
 import org.nihongo.mochi.ui.game.KanjiDetail
 import org.nihongo.mochi.ui.game.Reading
 import org.xmlpull.v1.XmlPullParser
@@ -136,7 +137,7 @@ class WordListFragment : Fragment() {
             }
 
             val knownFilter = if (ignoreKnown) {
-                val score = ScoreManager.getScore(requireContext(), word.text, ScoreManager.ScoreType.READING)
+                val score = ScoreManager.getScore(word.text, ScoreManager.ScoreType.READING)
                 (score.successes - score.failures) < 10
             } else {
                 true
@@ -165,7 +166,7 @@ class WordListFragment : Fragment() {
             return
         }
 
-        val wordScores = displayedWords.map { ScoreManager.getScore(requireContext(), it.text, ScoreManager.ScoreType.READING) }
+        val wordScores = displayedWords.map { ScoreManager.getScore(it.text, ScoreManager.ScoreType.READING) }
 
         val startIndex = currentPage * pageSize
         val endIndex = (startIndex + pageSize).coerceAtMost(displayedWords.size)
@@ -179,7 +180,7 @@ class WordListFragment : Fragment() {
             val chip = Chip(context).apply {
                 text = word.text
                 textSize = 18f
-                chipBackgroundColor = android.content.res.ColorStateList.valueOf(ScoreManager.getScoreColor(requireContext(), score))
+                chipBackgroundColor = android.content.res.ColorStateList.valueOf(ScoreUiUtils.getScoreColor(requireContext(), score))
                 setTextColor(Color.BLACK)
 
                 if (kanjiDetail != null && kanjiDetail.meanings.isEmpty()) {
@@ -199,7 +200,7 @@ class WordListFragment : Fragment() {
 
     private fun loadWordsForList(listName: String): List<WordItem> {
         if (listName == "user_custom_list") {
-            val scores = ScoreManager.getAllScores(requireContext(), ScoreManager.ScoreType.READING)
+            val scores = ScoreManager.getAllScores(ScoreManager.ScoreType.READING)
             return scores.mapNotNull { (word, score) ->
                 WordItem(word, "")
             }

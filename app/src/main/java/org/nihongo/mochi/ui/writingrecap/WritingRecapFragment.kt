@@ -13,6 +13,7 @@ import androidx.navigation.fragment.navArgs
 import org.nihongo.mochi.R
 import org.nihongo.mochi.data.ScoreManager
 import org.nihongo.mochi.databinding.FragmentWritingRecapBinding
+import org.nihongo.mochi.ui.ScoreUiUtils
 import org.xmlpull.v1.XmlPullParser
 
 class WritingRecapFragment : Fragment() {
@@ -85,7 +86,7 @@ class WritingRecapFragment : Fragment() {
 
         binding.buttonPlay.isEnabled = true
 
-        val kanjiScores = kanjiList.map { ScoreManager.getScore(requireContext(), it, ScoreManager.ScoreType.WRITING) }
+        val kanjiScores = kanjiList.map { ScoreManager.getScore(it, ScoreManager.ScoreType.WRITING) }
 
         val startIndex = currentPage * pageSize
         val endIndex = (startIndex + pageSize).coerceAtMost(kanjiList.size)
@@ -111,7 +112,7 @@ class WritingRecapFragment : Fragment() {
                 // Actually score colors are semantic (Red/Green/Orange/Gray).
                 // Let's assume ScoreManager returns appropriate colors, or use resources if needed.
                 // For background, we use the score color.
-                setBackgroundColor(ScoreManager.getScoreColor(requireContext(), score))
+                setBackgroundColor(ScoreUiUtils.getScoreColor(requireContext(), score))
                 
                 val params = android.widget.GridLayout.LayoutParams().apply {
                     width = 0
@@ -176,7 +177,7 @@ class WritingRecapFragment : Fragment() {
 
     private fun loadUserListKanji(): List<String> {
         populateFullKanjiMap()
-        val scores = ScoreManager.getAllScores(requireContext(), ScoreManager.ScoreType.WRITING)
+        val scores = ScoreManager.getAllScores(ScoreManager.ScoreType.WRITING)
         return scores.filter { (_, score) -> (score.successes - score.failures) < 10 }.keys.toList()
     }
     

@@ -64,7 +64,7 @@ class WritingFragment : Fragment() {
     }
 
     private fun calculateUserListPercentage() {
-        val scores = ScoreManager.getAllScores(requireContext(), ScoreManager.ScoreType.WRITING)
+        val scores = ScoreManager.getAllScores(ScoreManager.ScoreType.WRITING)
         if (scores.isEmpty()) {
             userListPercentage = 0.0
             return

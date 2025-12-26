@@ -16,7 +16,7 @@ import org.nihongo.mochi.data.ScoreManager
 class DecayWorker(context: Context, workerParams: WorkerParameters) : Worker(context, workerParams) {
 
     override fun doWork(): Result {
-        ScoreManager.decayScores(applicationContext)
+        ScoreManager.decayScores()
         
         // We only send a notification if the decay actually happened.
         // But ScoreManager.decayScores doesn't return info on whether something decayed.

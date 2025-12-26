@@ -15,6 +15,7 @@ import androidx.navigation.fragment.findNavController
 import org.nihongo.mochi.R
 import org.nihongo.mochi.data.ScoreManager
 import org.nihongo.mochi.databinding.FragmentKanaBinding
+import org.nihongo.mochi.ui.ScoreUiUtils
 import org.xmlpull.v1.XmlPullParser
 
 abstract class BaseKanaFragment : Fragment() {
@@ -101,13 +102,13 @@ abstract class BaseKanaFragment : Fragment() {
         for (lineKey in linesToShow) {
             val charsInLine = charactersByLine[lineKey] ?: continue
             for (kana in charsInLine) {
-                val score = ScoreManager.getScore(requireContext(), kana.value, ScoreManager.ScoreType.RECOGNITION)
+                val score = ScoreManager.getScore(kana.value, ScoreManager.ScoreType.RECOGNITION)
                 val textView = TextView(context).apply {
                     text = kana.value
                     textSize = 24f
                     textAlignment = View.TEXT_ALIGNMENT_CENTER
                     setTextColor(Color.BLACK)
-                    setBackgroundColor(ScoreManager.getScoreColor(requireContext(), score))
+                    setBackgroundColor(ScoreUiUtils.getScoreColor(requireContext(), score))
                     layoutParams = GridLayout.LayoutParams().apply {
                         width = 0
                         height = GridLayout.LayoutParams.WRAP_CONTENT
