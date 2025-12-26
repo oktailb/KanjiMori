@@ -1,16 +1,18 @@
 package org.nihongo.mochi.workers
 
+import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import org.nihongo.mochi.MainActivity
-import org.nihongo.mochi.R
 import org.nihongo.mochi.data.ScoreManager
 
 class DecayWorker(context: Context, workerParams: WorkerParameters) : Worker(context, workerParams) {
@@ -64,6 +66,13 @@ class DecayWorker(context: Context, workerParams: WorkerParameters) : Worker(con
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
             .build()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                // Permission not granted, cannot send notification
+                return
+            }
+        }
 
         // ID 1 to update the same notification
         notificationManager.notify(1, notification)
