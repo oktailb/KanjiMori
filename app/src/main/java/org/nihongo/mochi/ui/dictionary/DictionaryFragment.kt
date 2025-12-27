@@ -8,15 +8,23 @@ import android.graphics.Path
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.TypedValue
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.flexbox.FlexDirection
+import com.google.android.flexbox.FlexWrap
+import com.google.android.flexbox.FlexboxLayoutManager
+import com.google.android.flexbox.JustifyContent
 import com.google.mlkit.vision.digitalink.Ink
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -26,8 +34,7 @@ import org.nihongo.mochi.R
 import org.nihongo.mochi.databinding.FragmentDictionaryBinding
 import org.nihongo.mochi.databinding.ItemDictionaryBinding
 import org.nihongo.mochi.domain.kana.RomajiToKana
-import org.nihongo.mochi.domain.kanji.KanjiEntry
-import org.xmlpull.v1.XmlPullParser
+import java.util.Locale
 import kotlin.math.max
 import kotlin.math.min
 
@@ -35,7 +42,7 @@ class DictionaryFragment : Fragment() {
 
     private var _binding: FragmentDictionaryBinding? = null
     private val binding get() = _binding!!
-    private val viewModel: DictionaryViewModel by activityViewModels()
+    private lateinit var viewModel: DictionaryViewModel
     private lateinit var adapter: DictionaryAdapter
     private var textWatcher: TextWatcher? = null
 
@@ -45,17 +52,16 @@ class DictionaryFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentDictionaryBinding.inflate(inflater, container, false)
+        viewModel = ViewModelProvider(this)[DictionaryViewModel::class.java]
+        adapter = DictionaryAdapter { item ->
+            val action = DictionaryFragmentDirections.actionDictionaryToKanjiDetail(item.id)
+            findNavController().navigate(action)
+        }
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        adapter = DictionaryAdapter { item ->
-            val action = DictionaryFragmentDirections.actionDictionaryToKanjiDetail(item.id)
-            findNavController().navigate(action)
-        }
-
         binding.recyclerDictionary.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerDictionary.adapter = adapter
 
@@ -205,55 +211,30 @@ class DictionaryFragment : Fragment() {
     // --- Data Loading ---
     private suspend fun loadDictionaryData() = withContext(Dispatchers.IO) {
         if (viewModel.isDataLoaded) return@withContext
-        loadKanjiDetailsFromRepo()
-        parseMeanings()
-        viewModel.allKanjiList.addAll(viewModel.kanjiDataMap.values.sortedBy { it.id.toIntOrNull() ?: 0 })
-    }
+        
+        val locale = Locale.getDefault().toString()
+        val meanings = MochiApplication.meaningRepository.getMeanings(locale)
 
-    private fun loadKanjiDetailsFromRepo() {
-        // Use Shared Repository instead of XML
         val allKanji = MochiApplication.kanjiRepository.getAllKanji()
         
         for (kanjiEntry in allKanji) {
-            val readings = kanjiEntry.readings?.reading?.map { 
+            val readings = kanjiEntry.readings?.reading?.map {
                 ReadingInfo(it.value, it.type)
             } ?: emptyList()
             
             val strokes = kanjiEntry.strokes?.toIntOrNull() ?: 0
+            val itemMeanings = meanings[kanjiEntry.id] ?: emptyList()
             
             val item = DictionaryItem(
                 id = kanjiEntry.id,
                 character = kanjiEntry.character,
                 readings = readings,
                 strokeCount = strokes,
-                meanings = mutableListOf()
+                meanings = itemMeanings.toMutableList()
             )
             viewModel.kanjiDataMap[kanjiEntry.id] = item
         }
-    }
-
-    private fun parseMeanings() {
-        val parser = resources.getXml(R.xml.meanings)
-        try {
-            var eventType = parser.eventType
-            var currentId: String? = null
-            while (eventType != XmlPullParser.END_DOCUMENT) {
-                if (eventType == XmlPullParser.START_TAG) {
-                    when (parser.name) {
-                        "kanji" -> currentId = parser.getAttributeValue(null, "id")
-                        "meaning" -> {
-                            val meaning = parser.nextText()
-                            if (currentId != null && meaning.isNotEmpty()) {
-                                viewModel.kanjiDataMap[currentId]?.meanings?.add(meaning)
-                            }
-                        }
-                    }
-                }
-                eventType = parser.next()
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        viewModel.allKanjiList.addAll(viewModel.kanjiDataMap.values.sortedBy { it.id.toIntOrNull() ?: 0 })
     }
     
     private fun renderInkToBitmap(ink: Ink, targetSize: Int): Bitmap {

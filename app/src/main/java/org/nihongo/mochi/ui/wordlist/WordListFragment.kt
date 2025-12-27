@@ -20,9 +20,8 @@ import org.nihongo.mochi.databinding.FragmentWordListBinding
 import org.nihongo.mochi.ui.ScoreUiUtils
 import org.nihongo.mochi.ui.game.KanjiDetail
 import org.nihongo.mochi.ui.game.Reading
-import org.xmlpull.v1.XmlPullParser
-import org.xmlpull.v1.XmlPullParserException
 import java.io.IOException
+import java.util.Locale
 
 data class WordItem(val text: String, val type: String)
 
@@ -214,8 +213,9 @@ class WordListFragment : Fragment() {
     }
 
     private fun loadAllKanjiDetails() {
-        // Load meanings from XML (Legacy)
-        val meanings = loadMeanings()
+        // Load meanings using the new repository
+        val locale = Locale.getDefault().toString()
+        val meanings = MochiApplication.meaningRepository.getMeanings(locale)
         
         // Load details from Shared Repository (JSON)
         val allKanjiEntries = MochiApplication.kanjiRepository.getAllKanji()
@@ -237,42 +237,6 @@ class WordListFragment : Fragment() {
             val kanjiDetail = KanjiDetail(id, character, kanjiMeanings, readingsList)
             allKanjiDetails.add(kanjiDetail)
         }
-    }
-
-    private fun loadMeanings(): Map<String, List<String>> {
-        val meaningsMap = mutableMapOf<String, MutableList<String>>()
-        try {
-            val parser = resources.getXml(R.xml.meanings)
-            var currentId: String? = null
-            var eventType = parser.eventType
-            while (eventType != XmlPullParser.END_DOCUMENT) {
-                when (eventType) {
-                    XmlPullParser.START_TAG -> {
-                        if (parser.name == "kanji") {
-                            currentId = parser.getAttributeValue(null, "id")
-                            if (currentId != null) {
-                                meaningsMap.putIfAbsent(currentId, mutableListOf())
-                            }
-                        } else if (parser.name == "meaning" && currentId != null) {
-                            meaningsMap[currentId]?.add(parser.nextText())
-                        }
-                    }
-                    XmlPullParser.END_TAG -> {
-                        if (parser.name == "kanji") {
-                            currentId = null
-                        }
-                    }
-                }
-                eventType = parser.next()
-            }
-        } catch (e: Resources.NotFoundException) {
-            Log.e("WordListFragment", "meanings.xml not found.", e)
-        } catch (e: XmlPullParserException) {
-            Log.e("WordListFragment", "Error parsing meanings.xml", e)
-        } catch (e: IOException) {
-            Log.e("WordListFragment", "IO error reading meanings.xml", e)
-        }
-        return meaningsMap
     }
 
     override fun onDestroyView() {

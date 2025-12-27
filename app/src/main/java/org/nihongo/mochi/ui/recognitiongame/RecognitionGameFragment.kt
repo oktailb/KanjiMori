@@ -30,8 +30,8 @@ import org.nihongo.mochi.ui.game.GameStatus
 import org.nihongo.mochi.ui.game.KanjiDetail
 import org.nihongo.mochi.ui.game.KanjiProgress
 import org.nihongo.mochi.ui.game.Reading
-import org.xmlpull.v1.XmlPullParser
 import java.io.IOException
+import java.util.Locale
 
 class RecognitionGameFragment : Fragment() {
 
@@ -74,7 +74,7 @@ class RecognitionGameFragment : Fragment() {
         val level = args.level
         val customWordList = args.customWordList?.toList() ?: emptyList()
 
-        // Load all kanji details from Shared Repository and XML Meanings
+        // Load all kanji details from Shared Repository and JSON Meanings
         loadAllKanjiDetails()
 
         val kanjiCharsForLevel: List<String> = if (customWordList.isNotEmpty()) {
@@ -177,43 +177,9 @@ class RecognitionGameFragment : Fragment() {
         return MochiApplication.kanjiRepository.getKanjiByLevel(type, value).map { it.character }
     }
 
-    private fun loadMeanings(): Map<String, List<String>> {
-        val meaningsMap = mutableMapOf<String, MutableList<String>>()
-        try {
-            val parser = resources.getXml(R.xml.meanings)
-            var currentId: String? = null
-            var eventType = parser.eventType
-            while (eventType != XmlPullParser.END_DOCUMENT) {
-                when (eventType) {
-                    XmlPullParser.START_TAG -> {
-                        if (parser.name == "kanji") {
-                            currentId = parser.getAttributeValue(null, "id")
-                            if (currentId != null) {
-                                meaningsMap.putIfAbsent(currentId, mutableListOf())
-                            }
-                        } else if (parser.name == "meaning" && currentId != null) {
-                            meaningsMap[currentId]?.add(parser.nextText())
-                        }
-                    }
-                    XmlPullParser.END_TAG -> {
-                        if (parser.name == "kanji") {
-                            currentId = null
-                        }
-                    }
-                }
-                eventType = parser.next()
-            }
-        } catch (e: Resources.NotFoundException) {
-            Log.e("RecognitionGameFragment", "meanings.xml not found.", e)
-        } catch (e: Exception) {
-            Log.e("RecognitionGameFragment", "Error parsing meanings.xml", e)
-        }
-        return meaningsMap
-    }
-
     private fun loadAllKanjiDetails() {
-        // Load meanings from XML (Legacy)
-        val meanings = loadMeanings()
+        val locale = Locale.getDefault().toString()
+        val meanings = MochiApplication.meaningRepository.getMeanings(locale)
         
         // Load details from Shared Repository (JSON)
         val allKanjiEntries = MochiApplication.kanjiRepository.getAllKanji()

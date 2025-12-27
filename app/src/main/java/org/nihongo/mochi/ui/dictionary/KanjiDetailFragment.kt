@@ -1,8 +1,6 @@
 package org.nihongo.mochi.ui.dictionary
 
-import android.content.res.Resources
 import android.os.Bundle
-import android.util.Log
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -28,7 +26,7 @@ import org.nihongo.mochi.R
 import org.nihongo.mochi.databinding.FragmentKanjiDetailBinding
 import org.nihongo.mochi.databinding.ItemExampleBinding
 import org.nihongo.mochi.databinding.ItemReadingBinding
-import org.xmlpull.v1.XmlPullParser
+import java.util.Locale
 
 class KanjiDetailFragment : Fragment() {
 
@@ -250,35 +248,10 @@ class KanjiDetailFragment : Fragment() {
                 kanjiReadings.add(ReadingItem(r.type, r.value, freq))
             }
             
-            // Note: Components/Structure not yet in JSON model?
-            // If they are not in the JSON model I created, we lose them for now.
-            // Assuming for now we skip them or they need to be added to KanjiModel.
-        }
-
-        // Load Meanings from XML (Legacy)
-        loadMeanings(id)
-    }
-    
-    private fun loadMeanings(targetId: String) {
-        try {
-            val parser = resources.getXml(R.xml.meanings)
-            var eventType = parser.eventType
-            var currentId: String? = null
-            
-            while (eventType != XmlPullParser.END_DOCUMENT) {
-                if (eventType == XmlPullParser.START_TAG) {
-                    if (parser.name == "kanji") {
-                        currentId = parser.getAttributeValue(null, "id")
-                    } else if (parser.name == "meaning" && currentId == targetId) {
-                        kanjiMeanings.add(parser.nextText())
-                    }
-                } else if (eventType == XmlPullParser.END_TAG && parser.name == "kanji" && currentId == targetId) {
-                    break
-                }
-                eventType = parser.next()
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
+            // Load Meanings from the new repository
+            val locale = Locale.getDefault().toString()
+            val meanings = MochiApplication.meaningRepository.getMeanings(locale)
+            kanjiMeanings.addAll(meanings[id] ?: emptyList())
         }
     }
 

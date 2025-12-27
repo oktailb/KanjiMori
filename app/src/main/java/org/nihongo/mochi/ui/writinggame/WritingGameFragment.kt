@@ -2,7 +2,6 @@ package org.nihongo.mochi.ui.writinggame
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.content.res.Resources
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -17,8 +16,10 @@ import android.widget.ImageView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import kotlinx.coroutines.launch
 import org.nihongo.mochi.MochiApplication
 import org.nihongo.mochi.R
 import org.nihongo.mochi.data.ScoreManager
@@ -30,10 +31,8 @@ import org.nihongo.mochi.ui.game.GameStatus
 import org.nihongo.mochi.ui.game.KanjiDetail
 import org.nihongo.mochi.ui.game.KanjiProgress
 import org.nihongo.mochi.ui.game.Reading
-import org.xmlpull.v1.XmlPullParser
-import org.xmlpull.v1.XmlPullParserException
-import java.io.IOException
 import java.text.Normalizer
+import java.util.Locale
 import kotlin.math.max
 
 class WritingGameFragment : Fragment() {
@@ -106,21 +105,23 @@ class WritingGameFragment : Fragment() {
     private fun initializeGame() {
         val level = args.level ?: ""
 
-        loadAllKanjiDetails()
-        val kanjiCharsForLevel = loadKanjiCharsForLevel(level)
+        viewLifecycleOwner.lifecycleScope.launch {
+            loadAllKanjiDetails()
+            val kanjiCharsForLevel = loadKanjiCharsForLevel(level)
 
-        viewModel.allKanjiDetails.clear()
-        viewModel.allKanjiDetails.addAll(
-            viewModel.allKanjiDetailsXml.filter { kanjiCharsForLevel.contains(it.character) }
-        )
-        viewModel.allKanjiDetails.shuffle()
-        viewModel.kanjiListPosition = 0
+            viewModel.allKanjiDetails.clear()
+            viewModel.allKanjiDetails.addAll(
+                viewModel.allKanjiDetailsXml.filter { kanjiCharsForLevel.contains(it.character) }
+            )
+            viewModel.allKanjiDetails.shuffle()
+            viewModel.kanjiListPosition = 0
 
-        if (viewModel.allKanjiDetails.isNotEmpty()) {
-            startNewSet()
-        } else {
-            Log.e("WritingGameFragment", "No kanji loaded for level: $level.")
-            findNavController().popBackStack()
+            if (viewModel.allKanjiDetails.isNotEmpty()) {
+                startNewSet()
+            } else {
+                Log.e("WritingGameFragment", "No kanji loaded for level: $level.")
+                findNavController().popBackStack()
+            }
         }
     }
     
@@ -153,17 +154,8 @@ class WritingGameFragment : Fragment() {
         // Restore Feedback
         if (viewModel.showCorrectionFeedback) {
              showCorrectionFeedbackUI()
-             // If we are still in the delay period, we might need to repost the runnable
-             // However, handling precise timing across rotation is complex.
-             // Simplification: if restored during feedback, just show feedback and wait for user to maybe proceed manually or just wait.
-             // But since we rely on Handler, we need to restart the timer if we want it to auto-advance.
-             // For now, let's just make sure the UI state is correct. 
-             // Ideally, ViewModel should track remaining time, but for this fix, we will just ensure UI shows up.
              
-             // If restored and waiting, we might need to trigger the next question manually if the handler was lost.
-             // A simple way is to re-post the delay if we know we are waiting.
              if (viewModel.correctionDelayPending) {
-                  // Re-trigger the advance after a short delay so user can see context
                   Handler(Looper.getMainLooper()).postDelayed({
                       displayQuestion()
                   }, 2000)
@@ -436,39 +428,8 @@ class WritingGameFragment : Fragment() {
     }
 
     private fun loadMeanings(): Map<String, List<String>> {
-        val meaningsMap = mutableMapOf<String, MutableList<String>>()
-        try {
-            val parser = resources.getXml(R.xml.meanings)
-            var currentId: String? = null
-            var eventType = parser.eventType
-            while (eventType != XmlPullParser.END_DOCUMENT) {
-                when (eventType) {
-                    XmlPullParser.START_TAG -> {
-                        if (parser.name == "kanji") {
-                            currentId = parser.getAttributeValue(null, "id")
-                            if (currentId != null) {
-                                meaningsMap.putIfAbsent(currentId, mutableListOf())
-                            }
-                        } else if (parser.name == "meaning" && currentId != null) {
-                            meaningsMap[currentId]?.add(parser.nextText())
-                        }
-                    }
-                    XmlPullParser.END_TAG -> {
-                        if (parser.name == "kanji") {
-                            currentId = null
-                        }
-                    }
-                }
-                eventType = parser.next()
-            }
-        } catch (e: Resources.NotFoundException) {
-            Log.e("WritingGameFragment", "meanings.xml not found", e)
-        } catch (e: XmlPullParserException) {
-            Log.e("WritingGameFragment", "Error parsing meanings.xml", e)
-        } catch (e: IOException) {
-            Log.e("WritingGameFragment", "IO error reading meanings.xml", e)
-        }
-        return meaningsMap
+        val locale = Locale.getDefault().toString()
+        return MochiApplication.meaningRepository.getMeanings(locale)
     }
 
     private fun loadAllKanjiDetails() {
