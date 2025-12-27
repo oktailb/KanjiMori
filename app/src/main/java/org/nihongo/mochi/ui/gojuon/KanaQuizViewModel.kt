@@ -1,48 +1,69 @@
 package org.nihongo.mochi.ui.gojuon
 
 import androidx.lifecycle.ViewModel
+import org.nihongo.mochi.domain.game.KanaQuizEngine
+import org.nihongo.mochi.domain.game.QuizMode
 import org.nihongo.mochi.domain.models.GameStatus
 import org.nihongo.mochi.domain.models.KanaCharacter
 import org.nihongo.mochi.domain.models.KanaProgress
 import org.nihongo.mochi.domain.models.KanaQuestionDirection
 
-enum class QuizMode {
-    KANA_TO_ROMAJI,
-    ROMAJI_TO_KANA
-}
+// Re-export type alias
+typealias QuizMode = org.nihongo.mochi.domain.game.QuizMode
 
 class KanaQuizViewModel : ViewModel() {
 
-    var isGameInitialized = false
-    var quizMode: QuizMode = QuizMode.KANA_TO_ROMAJI
+    private val engine = KanaQuizEngine()
+
+    // Delegate properties to Engine
+    var isGameInitialized: Boolean
+        get() = engine.isGameInitialized
+        set(value) { engine.isGameInitialized = value }
+
+    var quizMode: QuizMode
+        get() = engine.quizMode
+        set(value) { engine.quizMode = value }
     
     // Data
-    var allKana = listOf<KanaCharacter>()
+    var allKana: List<KanaCharacter>
+        get() = engine.allKana
+        set(value) { engine.allKana = value }
     
     // Game State
-    var kanaListPosition = 0
-    val currentKanaSet = mutableListOf<KanaCharacter>()
-    val revisionList = mutableListOf<KanaCharacter>()
-    val kanaStatus = mutableMapOf<KanaCharacter, GameStatus>()
-    val kanaProgress = mutableMapOf<KanaCharacter, KanaProgress>()
+    var kanaListPosition: Int
+        get() = engine.kanaListPosition
+        set(value) { engine.kanaListPosition = value }
+
+    val currentKanaSet: MutableList<KanaCharacter>
+        get() = engine.currentKanaSet
+
+    val revisionList: MutableList<KanaCharacter>
+        get() = engine.revisionList
+
+    val kanaStatus: MutableMap<KanaCharacter, GameStatus>
+        get() = engine.kanaStatus
+
+    val kanaProgress: MutableMap<KanaCharacter, KanaProgress>
+        get() = engine.kanaProgress
     
-    lateinit var currentQuestion: KanaCharacter
-    var currentDirection: KanaQuestionDirection = KanaQuestionDirection.NORMAL
+    var currentQuestion: KanaCharacter
+        get() = engine.currentQuestion
+        set(value) { engine.currentQuestion = value }
+
+    var currentDirection: KanaQuestionDirection
+        get() = engine.currentDirection
+        set(value) { engine.currentDirection = value }
     
-    // UI State
-    var currentAnswers = listOf<String>()
+    var currentAnswers: List<String>
+        get() = engine.currentAnswers
+        set(value) { engine.currentAnswers = value }
+
+    // UI Specific State
     var areButtonsEnabled = true
     var buttonColors = mutableListOf<Int>()
     
     fun resetState() {
-        isGameInitialized = false
-        allKana = emptyList()
-        kanaListPosition = 0
-        currentKanaSet.clear()
-        revisionList.clear()
-        kanaStatus.clear()
-        kanaProgress.clear()
-        currentAnswers = emptyList()
+        engine.resetState()
         areButtonsEnabled = true
         buttonColors.clear()
     }
