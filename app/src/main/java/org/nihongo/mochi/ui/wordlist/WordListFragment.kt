@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -15,10 +16,10 @@ import org.nihongo.mochi.MochiApplication
 import org.nihongo.mochi.R
 import org.nihongo.mochi.data.ScoreManager
 import org.nihongo.mochi.databinding.FragmentWordListBinding
-import org.nihongo.mochi.ui.ScoreUiUtils
 import org.nihongo.mochi.domain.models.KanjiDetail
 import org.nihongo.mochi.domain.models.Reading
 import org.nihongo.mochi.domain.words.WordListEngine
+import org.nihongo.mochi.presentation.ScorePresentationUtils
 
 class WordListFragment : Fragment() {
 
@@ -161,6 +162,9 @@ class WordListFragment : Fragment() {
         val startIndex = currentPage * pageSize
         val endIndex = (startIndex + pageSize).coerceAtMost(displayedWords.size)
 
+        // Pre-fetch base color
+        val baseColor = ContextCompat.getColor(requireContext(), R.color.recap_grid_base_color)
+
         binding.wordsContainer.removeAllViews()
         for (i in startIndex until endIndex) {
             val word = displayedWords[i]
@@ -170,7 +174,7 @@ class WordListFragment : Fragment() {
             val chip = Chip(context).apply {
                 text = word.text
                 textSize = 18f
-                chipBackgroundColor = android.content.res.ColorStateList.valueOf(ScoreUiUtils.getScoreColor(requireContext(), score))
+                chipBackgroundColor = android.content.res.ColorStateList.valueOf(ScorePresentationUtils.getScoreColor(score, baseColor))
                 setTextColor(Color.BLACK)
 
                 if (kanjiDetail != null && kanjiDetail.meanings.isEmpty()) {

@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.GridLayout
 import android.widget.Space
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import org.nihongo.mochi.R
@@ -17,7 +18,7 @@ import org.nihongo.mochi.databinding.FragmentKanaBinding
 import org.nihongo.mochi.domain.kana.AndroidResourceLoader
 import org.nihongo.mochi.domain.kana.KanaEntry
 import org.nihongo.mochi.domain.kana.KanaRepository
-import org.nihongo.mochi.ui.ScoreUiUtils
+import org.nihongo.mochi.presentation.ScorePresentationUtils
 
 abstract class BaseKanaFragment : Fragment() {
 
@@ -105,6 +106,9 @@ abstract class BaseKanaFragment : Fragment() {
         val endLineIndex = (startLineIndex + pageSize).coerceAtMost(lineKeys.size)
         val linesToShow = lineKeys.subList(startLineIndex, endLineIndex)
 
+        // Pre-fetch base color
+        val baseColor = ContextCompat.getColor(requireContext(), R.color.recap_grid_base_color)
+
         for (lineKey in linesToShow) {
             val charsInLine = charactersByLine[lineKey] ?: continue
             for (kana in charsInLine) {
@@ -114,7 +118,7 @@ abstract class BaseKanaFragment : Fragment() {
                     textSize = 24f
                     textAlignment = View.TEXT_ALIGNMENT_CENTER
                     setTextColor(Color.BLACK)
-                    setBackgroundColor(ScoreUiUtils.getScoreColor(requireContext(), score))
+                    setBackgroundColor(ScorePresentationUtils.getScoreColor(score, baseColor))
                     layoutParams = GridLayout.LayoutParams().apply {
                         width = 0
                         height = GridLayout.LayoutParams.WRAP_CONTENT

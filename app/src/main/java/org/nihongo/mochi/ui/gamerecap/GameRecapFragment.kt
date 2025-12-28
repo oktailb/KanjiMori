@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -16,7 +17,7 @@ import org.nihongo.mochi.data.ScoreManager
 import org.nihongo.mochi.data.ScoreManager.ScoreType
 import org.nihongo.mochi.databinding.FragmentGameRecapBinding
 import org.nihongo.mochi.domain.kanji.KanjiEntry
-import org.nihongo.mochi.ui.ScoreUiUtils
+import org.nihongo.mochi.presentation.ScorePresentationUtils
 
 class GameRecapFragment : Fragment() {
 
@@ -92,6 +93,9 @@ class GameRecapFragment : Fragment() {
         val startIndex = currentPage * pageSize
         val endIndex = (startIndex + pageSize).coerceAtMost(kanjiList.size)
 
+        // Pre-fetch base color
+        val baseColor = ContextCompat.getColor(requireContext(), R.color.recap_grid_base_color)
+
         binding.gridKanji.removeAllViews()
         for (i in startIndex until endIndex) {
             val kanjiEntry = kanjiList[i]
@@ -102,7 +106,7 @@ class GameRecapFragment : Fragment() {
                 textSize = 24f
                 textAlignment = View.TEXT_ALIGNMENT_CENTER
                 setTextColor(Color.BLACK)
-                setBackgroundColor(ScoreUiUtils.getScoreColor(requireContext(), score))
+                setBackgroundColor(ScorePresentationUtils.getScoreColor(score, baseColor))
                 val params = android.widget.GridLayout.LayoutParams().apply {
                     width = 0
                     height = android.widget.GridLayout.LayoutParams.WRAP_CONTENT
