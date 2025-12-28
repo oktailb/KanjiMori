@@ -12,39 +12,44 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
-import com.google.android.gms.games.AchievementsClient
-import com.google.android.gms.games.GamesSignInClient
-import com.google.android.gms.games.PlayGames
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.gms.games.SnapshotsClient
 import com.google.android.gms.games.snapshot.SnapshotMetadata
-import com.google.android.gms.games.snapshot.SnapshotMetadataChange
+import kotlinx.coroutines.launch
 import org.nihongo.mochi.MochiApplication
 import org.nihongo.mochi.R
-import org.nihongo.mochi.data.ScoreManager
 import org.nihongo.mochi.databinding.FragmentResultsBinding
 import org.nihongo.mochi.domain.statistics.LevelProgress
 import org.nihongo.mochi.domain.statistics.StatisticsEngine
-import java.io.IOException
+import org.nihongo.mochi.services.AndroidCloudSaveService
 
 class ResultsFragment : Fragment() {
 
     private var _binding: FragmentResultsBinding? = null
     private val binding get() = _binding!!
-
-    private lateinit var gamesSignInClient: GamesSignInClient
-    private lateinit var achievementsClient: AchievementsClient
-    private lateinit var snapshotsClient: SnapshotsClient
     
     private lateinit var statisticsEngine: StatisticsEngine
+    private lateinit var androidCloudSaveService: AndroidCloudSaveService
 
-    private val RC_SAVED_GAMES = 9009
-    private var mCurrentSaveName = "NihongoMochiSnapshot"
+    private val viewModel: ResultsViewModel by viewModels {
+        object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                androidCloudSaveService = AndroidCloudSaveService(requireActivity())
+                statisticsEngine = StatisticsEngine(MochiApplication.levelContentProvider)
+                @Suppress("UNCHECKED_CAST")
+                return ResultsViewModel(androidCloudSaveService, statisticsEngine) as T
+            }
+        }
+    }
 
     private val achievementsLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             Log.d("ResultsFragment", "Achievements activity returned OK.")
-        } else {
-            Log.d("ResultsFragment", "Achievements activity returned with code: ${result.resultCode}")
         }
     }
 
@@ -61,14 +66,23 @@ class ResultsFragment : Fragment() {
                 }
                 
                 if (snapshotMetadata != null) {
-                    mCurrentSaveName = snapshotMetadata.uniqueName
-                    loadSnapshot()
+                    viewModel.setCurrentSaveName(snapshotMetadata.uniqueName)
+                    // We need to load from the service, but since we have the metadata, 
+                    // the service might just need the name.
+                    // However, our current service implementation takes 'name' to open it.
+                    lifecycleScope.launch {
+                        val data = androidCloudSaveService.loadGame(snapshotMetadata.uniqueName)
+                        if (data != null) {
+                            viewModel.loadGame(data)
+                            updateAllPercentages()
+                        }
+                    }
                 }
             } else if (intent.hasExtra(SnapshotsClient.EXTRA_SNAPSHOT_NEW)) {
-                // Create a new snapshot named with a unique string
+                // Create a new snapshot
                 val unique = java.math.BigInteger(281, java.util.Random()).toString(13)
-                mCurrentSaveName = "NihongoMochiSnapshot-$unique"
-                saveSnapshot()
+                viewModel.setCurrentSaveName("NihongoMochiSnapshot-$unique")
+                viewModel.saveGame()
             }
         }
     }
@@ -84,34 +98,48 @@ class ResultsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        gamesSignInClient = PlayGames.getGamesSignInClient(requireActivity())
-        achievementsClient = PlayGames.getAchievementsClient(requireActivity())
-        snapshotsClient = PlayGames.getSnapshotsClient(requireActivity())
         
-        statisticsEngine = StatisticsEngine(
-            MochiApplication.levelContentProvider
-        )
+        // statisticsEngine is initialized in ViewModel factory but we need it here for list populating
+        // In a pure MVVM, the ViewModel would expose the list of items to display.
+        // For now, we will use the one created in Factory if possible, or create another instance here just for reading stats.
+        // Actually, we can reuse the one from ViewModel if we exposed it, or just instantiate here as before.
+        // Let's instantiate locally for UI population to keep changes minimal on that part.
+        statisticsEngine = StatisticsEngine(MochiApplication.levelContentProvider)
 
         setupCollapsibleSections()
         updateAllPercentages()
 
-        binding.buttonSignIn.setOnClickListener { signInManually() }
+        binding.buttonSignIn.setOnClickListener { viewModel.signIn() }
         binding.buttonAchievements.setOnClickListener { showAchievements() }
         binding.buttonBackup.setOnClickListener { showSavedGamesUI() }
         binding.buttonRestore.setOnClickListener { showSavedGamesUI() }
+        
+        setupObservers()
+    }
+    
+    private fun setupObservers() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch {
+                    viewModel.isAuthenticated.collect { isAuthenticated ->
+                        updateSignInUI(isAuthenticated)
+                    }
+                }
+                launch {
+                    viewModel.message.collect { msg ->
+                        if (msg != null) {
+                            Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show()
+                            viewModel.clearMessage()
+                        }
+                    }
+                }
+            }
+        }
     }
 
     override fun onResume() {
         super.onResume()
-        checkSignInStatus()
-    }
-
-    private fun checkSignInStatus() {
-        gamesSignInClient.isAuthenticated.addOnCompleteListener { isAuthenticatedTask ->
-            val isAuthenticated = isAuthenticatedTask.isSuccessful && isAuthenticatedTask.result.isAuthenticated
-            updateSignInUI(isAuthenticated)
-        }
+        viewModel.checkSignInStatus()
     }
 
     private fun updateSignInUI(isSignedIn: Boolean) {
@@ -128,99 +156,26 @@ class ResultsFragment : Fragment() {
         }
     }
 
-    private fun signInManually() {
-        gamesSignInClient.signIn().addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                val result = task.result
-                if (result.isAuthenticated) {
-                    Log.d("ResultsFragment", "Manual sign-in successful")
-                    updateSignInUI(true)
-                } else {
-                    Log.d("ResultsFragment", "Manual sign-in returned, but not authenticated")
-                    Toast.makeText(requireContext(), "Connexion annulée ou non aboutie", Toast.LENGTH_SHORT).show()
-                    updateSignInUI(false)
-                }
-            } else {
-                Log.e("ResultsFragment", "Manual sign-in failed", task.exception)
-                Toast.makeText(requireContext(), "Erreur de connexion : ${task.exception?.localizedMessage}", Toast.LENGTH_LONG).show()
-                updateSignInUI(false)
-            }
-        }
-    }
-
     private fun showAchievements() {
-        achievementsClient.achievementsIntent.addOnSuccessListener { intent ->
-            achievementsLauncher.launch(intent)
+        lifecycleScope.launch {
+             try {
+                 val intent = androidCloudSaveService.getAchievementsIntent()
+                 achievementsLauncher.launch(intent)
+             } catch (e: Exception) {
+                 Toast.makeText(requireContext(), "Impossible d'ouvrir les succès", Toast.LENGTH_SHORT).show()
+             }
         }
     }
 
     private fun showSavedGamesUI() {
-        val maxNumberOfSavedGamesToShow = 5
-        snapshotsClient.getSelectSnapshotIntent("Sauvegardes", true, true, maxNumberOfSavedGamesToShow)
-            .addOnSuccessListener { intent ->
+        lifecycleScope.launch {
+            try {
+                val intent = androidCloudSaveService.getSavedGamesIntent("Sauvegardes", true, true, 5)
                 savedGamesLauncher.launch(intent)
+            } catch (e: Exception) {
+                 Toast.makeText(requireContext(), "Impossible d'ouvrir l'interface de sauvegarde", Toast.LENGTH_SHORT).show()
             }
-            .addOnFailureListener { e ->
-                Toast.makeText(requireContext(), "Impossible d'ouvrir l'interface de sauvegarde: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
-            }
-    }
-
-    private fun saveSnapshot() {
-        val data = ScoreManager.getAllDataJson().toByteArray()
-        val desc = "Backup " + java.text.SimpleDateFormat.getDateTimeInstance().format(java.util.Date())
-
-        snapshotsClient.open(mCurrentSaveName, true, SnapshotsClient.RESOLUTION_POLICY_MOST_RECENTLY_MODIFIED)
-            .addOnFailureListener { e ->
-                 Log.e("ResultsFragment", "Error opening snapshot", e)
-                 Toast.makeText(requireContext(), "Erreur lors de l'ouverture de la sauvegarde", Toast.LENGTH_SHORT).show()
-            }
-            .continueWithTask { task ->
-                val snapshot = task.result.data!!
-                snapshot.snapshotContents.writeBytes(data)
-
-                val metadataChange = SnapshotMetadataChange.Builder()
-                    .setDescription(desc)
-                    .build()
-                
-                snapshotsClient.commitAndClose(snapshot, metadataChange)
-            }
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    Toast.makeText(requireContext(), "Sauvegarde effectuée avec succès", Toast.LENGTH_SHORT).show()
-                } else {
-                    Log.e("ResultsFragment", "Error saving snapshot", task.exception)
-                    Toast.makeText(requireContext(), "Erreur lors de la sauvegarde", Toast.LENGTH_SHORT).show()
-                }
-            }
-    }
-
-    private fun loadSnapshot() {
-         snapshotsClient.open(mCurrentSaveName, true, SnapshotsClient.RESOLUTION_POLICY_MOST_RECENTLY_MODIFIED)
-            .addOnFailureListener { e ->
-                Log.e("ResultsFragment", "Error opening snapshot", e)
-                Toast.makeText(requireContext(), "Erreur lors de l'ouverture de la sauvegarde", Toast.LENGTH_SHORT).show()
-            }
-            .continueWith { task ->
-                val snapshot = task.result.data!!
-                try {
-                    val data = snapshot.snapshotContents.readFully()
-                    if (data != null) {
-                        val jsonString = String(data)
-                        ScoreManager.restoreDataFromJson(jsonString)
-                    }
-                } catch (e: IOException) {
-                    Log.e("ResultsFragment", "Error reading snapshot", e)
-                }
-            }
-            .addOnCompleteListener { task ->
-                 if (task.isSuccessful) {
-                     updateAllPercentages()
-                     Toast.makeText(requireContext(), "Données restaurées avec succès", Toast.LENGTH_SHORT).show()
-                 } else {
-                     Log.e("ResultsFragment", "Error loading snapshot", task.exception)
-                     Toast.makeText(requireContext(), "Erreur lors de la restauration", Toast.LENGTH_SHORT).show()
-                 }
-            }
+        }
     }
 
     private fun setupCollapsibleSections() {

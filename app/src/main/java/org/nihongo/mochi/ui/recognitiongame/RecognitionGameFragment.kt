@@ -27,6 +27,7 @@ import org.nihongo.mochi.domain.game.QuestionDirection
 import org.nihongo.mochi.domain.models.GameStatus
 import org.nihongo.mochi.domain.models.KanjiDetail
 import org.nihongo.mochi.domain.models.Reading
+import org.nihongo.mochi.domain.util.TextSizeCalculator
 import org.nihongo.mochi.settings.ANIMATION_SPEED_PREF_KEY
 import org.nihongo.mochi.settings.PRONUNCIATION_PREF_KEY
 
@@ -137,17 +138,8 @@ class RecognitionGameFragment : Fragment() {
     }
     
     private fun updateButtonSize(button: Button, text: String) {
-        if (viewModel.currentDirection == QuestionDirection.REVERSE) {
-            button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 40f)
-        } else {
-            val length = text.length
-            val newSize = when {
-                length > 40 -> 10f
-                length > 20 -> 12f
-                else -> 14f
-            }
-            button.setTextSize(TypedValue.COMPLEX_UNIT_SP, newSize)
-        }
+        val newSize = TextSizeCalculator.calculateButtonTextSize(text.length, viewModel.currentDirection)
+        button.setTextSize(TypedValue.COMPLEX_UNIT_SP, newSize)
     }
 
     private fun loadAllKanjiDetails() {
@@ -204,16 +196,9 @@ class RecognitionGameFragment : Fragment() {
             }
             binding.textKanjiToGuess.text = questionText
 
-            val length = questionText.length
             val lineCount = questionText.count { it == '\n' } + 1
-
-            val newSize = when {
-                lineCount > 7 || length > 100 -> 14f
-                lineCount > 5 || length > 70 -> 18f
-                lineCount > 3 || length > 40 -> 24f
-                lineCount > 1 || length > 15 -> 32f
-                else -> 48f
-            }
+            val newSize = TextSizeCalculator.calculateQuestionTextSize(questionText.length, lineCount, viewModel.currentDirection)
+            
             binding.textKanjiToGuess.setTextSize(TypedValue.COMPLEX_UNIT_SP, newSize)
         }
     }

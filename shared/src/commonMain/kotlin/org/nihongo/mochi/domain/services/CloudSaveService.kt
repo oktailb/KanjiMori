@@ -1,0 +1,8 @@
+package org.nihongo.mochi.domain.services
+
+interface CloudSaveService {
+    suspend fun signIn(): Boolean
+    suspend fun isAuthenticated(): Boolean
+    suspend fun saveGame(name: String, data: String, description: String): Boolean
+    suspend fun loadGame(name: String): String?
+}
