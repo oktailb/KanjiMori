@@ -8,25 +8,34 @@ import android.graphics.Path
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.mlkit.vision.digitalink.Ink
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.nihongo.mochi.MochiApplication
 import org.nihongo.mochi.R
 import org.nihongo.mochi.databinding.FragmentDictionaryBinding
 import org.nihongo.mochi.databinding.ItemDictionaryBinding
+import org.nihongo.mochi.domain.dictionary.DictionaryItem
+import org.nihongo.mochi.domain.dictionary.DictionaryViewModel
+import org.nihongo.mochi.domain.dictionary.SearchMode
 import org.nihongo.mochi.domain.kana.RomajiToKana
-import java.util.Locale
+import org.nihongo.mochi.domain.recognition.ModelStatus
+import org.nihongo.mochi.domain.recognition.RecognitionPoint
+import org.nihongo.mochi.domain.recognition.RecognitionStroke
 import kotlin.math.max
 import kotlin.math.min
 
@@ -34,9 +43,28 @@ class DictionaryFragment : Fragment() {
 
     private var _binding: FragmentDictionaryBinding? = null
     private val binding get() = _binding!!
-    private lateinit var viewModel: DictionaryViewModel
+    
+    // We instantiate AndroidMlKitRecognizer here to inject it into ViewModel
+    private val androidRecognizer = AndroidMlKitRecognizer()
+
+    private val viewModel: DictionaryViewModel by activityViewModels {
+        viewModelFactory {
+            initializer {
+                DictionaryViewModel(
+                    handwritingRecognizer = androidRecognizer,
+                    kanjiRepository = MochiApplication.kanjiRepository,
+                    meaningRepository = MochiApplication.meaningRepository,
+                    settingsRepository = MochiApplication.settingsRepository
+                )
+            }
+        }
+    }
+    
     private lateinit var adapter: DictionaryAdapter
     private var textWatcher: TextWatcher? = null
+    
+    // Keep track of the last Ink object for UI rendering purposes only
+    private var lastUiInk: Ink? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -44,7 +72,6 @@ class DictionaryFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentDictionaryBinding.inflate(inflater, container, false)
-        viewModel = ViewModelProvider(this)[DictionaryViewModel::class.java]
         adapter = DictionaryAdapter { item ->
             val action = DictionaryFragmentDirections.actionDictionaryToKanjiDetail(item.id)
             findNavController().navigate(action)
@@ -58,19 +85,20 @@ class DictionaryFragment : Fragment() {
         binding.recyclerDictionary.adapter = adapter
 
         setupFilterListeners()
-        observeDrawingResults()
+        setupStateObservation()
+        setupDrawingObservation()
+        setupModelObservation()
 
-        if (!viewModel.isDataLoaded) {
-            viewLifecycleOwner.lifecycleScope.launch {
-                loadDictionaryData()
-                viewModel.isDataLoaded = true
-                applyFilters()
-            }
-        } else {
-            restoreUIState()
-        }
+        // Trigger initial load if needed
+        viewModel.loadDictionaryData()
+        
+        // Restore UI State implicitly via StateFlow collection
+        restoreUIState()
+        
+        // Ensure model is downloaded
+        viewModel.downloadModel()
     }
-
+    
     private fun restoreUIState() {
         binding.editSearch.setText(viewModel.textQuery)
         binding.editStrokeCount.setText(viewModel.strokeQuery)
@@ -78,38 +106,68 @@ class DictionaryFragment : Fragment() {
         binding.radioGroupSearchMode.check(
             if (viewModel.searchMode == SearchMode.READING) R.id.radio_mode_reading else R.id.radio_mode_meaning
         )
-        adapter.submitList(viewModel.lastResults)
-        updateDrawingThumbnail()
-        binding.textResultCount.text = getString(R.string.dictionary_results_count_format, viewModel.lastResults.size)
     }
 
     private fun setupFilterListeners() {
         binding.buttonDrawSearch.setOnClickListener {
-            DrawingDialogFragment().show(parentFragmentManager, "DrawingDialog")
+            // Check model status before showing dialog
+            if (viewModel.modelStatus.value != ModelStatus.DOWNLOADED) {
+                Toast.makeText(context, "Model not ready: ${viewModel.modelStatus.value}", Toast.LENGTH_SHORT).show()
+                viewModel.downloadModel() // Try again
+                return@setOnClickListener
+            }
+            
+            val dialog = DrawingDialogFragment()
+            dialog.onInkDrawn = { ink ->
+                lastUiInk = ink
+                updateDrawingThumbnail()
+                val strokes = convertInkToStrokes(ink)
+                Log.i("DictionaryFragment", "Submitting ${strokes.size} strokes for recognition")
+                viewModel.recognizeInk(strokes)
+            }
+            dialog.show(parentFragmentManager, "DrawingDialog")
         }
 
         binding.buttonClearDrawing.setOnClickListener {
+            lastUiInk = null
+            updateDrawingThumbnail()
             viewModel.clearDrawingFilter()
-            applyFilters()
         }
 
-        // Hide the apply filters button as search is now reactive
         binding.buttonApplyFilters.visibility = View.GONE
 
         binding.radioGroupSearchMode.setOnCheckedChangeListener { _, checkedId ->
             viewModel.searchMode = if (checkedId == R.id.radio_mode_reading) SearchMode.READING else SearchMode.MEANING
-            applyFilters()
+            viewModel.applyFilters()
         }
 
         binding.editStrokeCount.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable?) {
-                applyFilters()
+                viewModel.strokeQuery = s.toString()
+                viewModel.applyFilters()
             }
         })
+        
+        binding.checkExactMatch.setOnCheckedChangeListener { _, isChecked ->
+            viewModel.exactMatch = isChecked
+            viewModel.applyFilters()
+        }
 
         setupTextWatcher()
+    }
+    
+    private fun convertInkToStrokes(ink: Ink): List<RecognitionStroke> {
+        val strokes = mutableListOf<RecognitionStroke>()
+        for (inkStroke in ink.strokes) {
+            val points = mutableListOf<RecognitionPoint>()
+            for (inkPoint in inkStroke.points) {
+                points.add(RecognitionPoint(inkPoint.x, inkPoint.y, inkPoint.timestamp ?: 0L))
+            }
+            strokes.add(RecognitionStroke(points))
+        }
+        return strokes
     }
 
     private fun setupTextWatcher() {
@@ -131,102 +189,82 @@ class DictionaryFragment : Fragment() {
                     }
                     binding.editSearch.addTextChangedListener(this)
                 }
-                applyFilters()
+                viewModel.textQuery = binding.editSearch.text.toString()
+                viewModel.applyFilters()
             }
         }
         binding.editSearch.addTextChangedListener(textWatcher)
     }
     
-    private fun observeDrawingResults() {
-        viewModel.recognitionResults.observe(viewLifecycleOwner) { candidates ->
-            if (candidates != null) {
-                viewModel.drawingCandidates = candidates
-                applyFilters() // Apply drawing filter immediately
+    private fun setupStateObservation() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch {
+                    viewModel.lastResults.collect { results ->
+                        adapter.submitList(results)
+                        binding.textResultCount.text = getString(R.string.dictionary_results_count_format, results.size)
+                    }
+                }
             }
         }
-    }
-
-    private fun applyFilters() {
-        // Update ViewModel with current UI state before filtering
-        viewModel.textQuery = binding.editSearch.text.toString()
-        viewModel.strokeQuery = binding.editStrokeCount.text.toString()
-        viewModel.exactMatch = binding.checkExactMatch.isChecked
-        
-        var filteredList = viewModel.allKanjiList.toList()
-
-        // 1. Drawing filter
-        viewModel.drawingCandidates?.let { candidates ->
-            val candidateSet = candidates.toSet()
-            filteredList = filteredList.filter { candidateSet.contains(it.character) }
-        }
-
-        // 2. Stroke count filter
-        val strokeCount = viewModel.strokeQuery.toIntOrNull()
-        if (strokeCount != null) {
-            filteredList = filteredList.filter { it.strokeCount == strokeCount }
-        }
-
-        // 3. Text filter
-        val query = viewModel.textQuery.trim().lowercase()
-        if (query.isNotEmpty()) {
-            if (viewModel.searchMode == SearchMode.READING) {
-                 val cleanQuery = query.replace(".", "")
-                 filteredList = filteredList.filter { item ->
-                     item.readings.any { it.text.replace(".", "").lowercase().contains(cleanQuery) }
-                 }
-            } else { // MEANING
-                 filteredList = filteredList.filter { item ->
-                     item.meanings.any { it.lowercase().contains(query) }
-                 }
-            }
-        }
-        
-        // Update UI
-        viewModel.lastResults = filteredList
-        adapter.submitList(filteredList)
-        binding.textResultCount.text = getString(R.string.dictionary_results_count_format, filteredList.size)
-        updateDrawingThumbnail()
     }
     
+    private fun setupModelObservation() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                 viewModel.modelStatus.collect { status ->
+                     Log.d("DictionaryFragment", "Model Status: $status")
+                     // Could update a UI indicator here (e.g., a small icon)
+                 }
+            }
+        }
+    }
+    
+    private fun setupDrawingObservation() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.recognitionResults.collect { candidates ->
+                     if (candidates == null) {
+                         if (lastUiInk != null) {
+                             lastUiInk = null
+                             updateDrawingThumbnail()
+                         }
+                     } else {
+                         // Results received
+                         Log.i("DictionaryFragment", "Recognition results received: ${candidates.size} candidates")
+                         val strokes = viewModel.lastStrokes
+                         if (strokes != null) {
+                             lastUiInk = strokesToInk(strokes)
+                             updateDrawingThumbnail()
+                         }
+                     }
+                }
+            }
+        }
+    }
+
+    private fun strokesToInk(strokes: List<RecognitionStroke>): Ink {
+        val builder = Ink.builder()
+        for (stroke in strokes) {
+            val inkStrokeBuilder = Ink.Stroke.builder()
+            for (point in stroke.points) {
+                inkStrokeBuilder.addPoint(Ink.Point.create(point.x, point.y, point.t))
+            }
+            builder.addStroke(inkStrokeBuilder.build())
+        }
+        return builder.build()
+    }
+
     private fun updateDrawingThumbnail() {
-        if (viewModel.lastInk != null) {
+        if (lastUiInk != null) {
             binding.cardDrawingThumbnail.visibility = View.VISIBLE
             binding.buttonClearDrawing.visibility = View.VISIBLE
-            val bitmap = renderInkToBitmap(viewModel.lastInk!!, 100)
+            val bitmap = renderInkToBitmap(lastUiInk!!, 100)
             binding.imageDrawingThumbnail.setImageBitmap(bitmap)
         } else {
             binding.cardDrawingThumbnail.visibility = View.GONE
             binding.buttonClearDrawing.visibility = View.GONE
         }
-    }
-    
-    // --- Data Loading ---
-    private suspend fun loadDictionaryData() = withContext(Dispatchers.IO) {
-        if (viewModel.isDataLoaded) return@withContext
-        
-        val locale = Locale.getDefault().toString()
-        val meanings = MochiApplication.meaningRepository.getMeanings(locale)
-
-        val allKanji = MochiApplication.kanjiRepository.getAllKanji()
-        
-        for (kanjiEntry in allKanji) {
-            val readings = kanjiEntry.readings?.reading?.map {
-                ReadingInfo(it.value, it.type)
-            } ?: emptyList()
-            
-            val strokes = kanjiEntry.strokes?.toIntOrNull() ?: 0
-            val itemMeanings = meanings[kanjiEntry.id] ?: emptyList()
-            
-            val item = DictionaryItem(
-                id = kanjiEntry.id,
-                character = kanjiEntry.character,
-                readings = readings,
-                strokeCount = strokes,
-                meanings = itemMeanings.toMutableList()
-            )
-            viewModel.kanjiDataMap[kanjiEntry.id] = item
-        }
-        viewModel.allKanjiList.addAll(viewModel.kanjiDataMap.values.sortedBy { it.id.toIntOrNull() ?: 0 })
     }
     
     private fun renderInkToBitmap(ink: Ink, targetSize: Int): Bitmap {
@@ -290,16 +328,6 @@ class DictionaryFragment : Fragment() {
         _binding = null
         textWatcher = null
     }
-
-    data class ReadingInfo(val text: String, val type: String)
-
-    data class DictionaryItem(
-        val id: String,
-        val character: String,
-        val readings: List<ReadingInfo>,
-        val strokeCount: Int,
-        val meanings: MutableList<String>
-    )
 
     class DictionaryAdapter(private val onItemClick: (DictionaryItem) -> Unit) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         private var list: List<DictionaryItem> = emptyList()
