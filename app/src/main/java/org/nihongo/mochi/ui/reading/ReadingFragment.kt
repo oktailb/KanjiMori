@@ -9,8 +9,6 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import org.nihongo.mochi.R
 import org.nihongo.mochi.databinding.FragmentReadingBinding
-import org.nihongo.mochi.data.ScoreManager
-import org.nihongo.mochi.data.ScoreManager.ScoreType
 
 class ReadingFragment : Fragment() {
 
@@ -30,7 +28,7 @@ class ReadingFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         // Ensure data is fresh when view is created
-        calculateUserListPercentage()
+        viewModel.calculatePercentages()
         updateButtonText()
         setupClickListeners()
     }
@@ -38,28 +36,8 @@ class ReadingFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         // Recalculate on resume in case user played a game and improved score
-        calculateUserListPercentage()
+        viewModel.calculatePercentages()
         updateButtonText()
-    }
-
-    private fun calculateUserListPercentage() {
-        val scores = ScoreManager.getAllScores(ScoreType.READING)
-        if (scores.isEmpty()) {
-            viewModel.userListPercentage = 0.0
-            return
-        }
-        val totalEncountered = scores.size
-        val mastered = scores.count { (_, score) -> (score.successes - score.failures) >= 10 }
-        
-        viewModel.userListPercentage = if (totalEncountered > 0) {
-            (mastered.toDouble() / totalEncountered.toDouble()) * 100.0
-        } else {
-            0.0
-        }
-        
-        // Note: Logic for other percentages (N5, N4, etc.) should ideally be here too
-        // But since they were initialized to 0.0 in original code and not calculated, 
-        // I will keep them as stored in ViewModel (0.0 default).
     }
 
     private fun updateButtonText() {

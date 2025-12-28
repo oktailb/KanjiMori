@@ -20,12 +20,8 @@ import kotlinx.coroutines.launch
 import org.nihongo.mochi.R
 import org.nihongo.mochi.databinding.FragmentKanaQuizBinding
 import org.nihongo.mochi.domain.models.GameState
-import org.nihongo.mochi.domain.kana.AndroidResourceLoader
-import org.nihongo.mochi.domain.kana.KanaRepository
 import org.nihongo.mochi.domain.models.AnswerButtonState
 import org.nihongo.mochi.domain.models.GameStatus
-import org.nihongo.mochi.domain.models.KanaCharacter
-import org.nihongo.mochi.domain.models.KanaProgress
 import org.nihongo.mochi.domain.models.KanaQuestionDirection
 import org.nihongo.mochi.settings.ANIMATION_SPEED_PREF_KEY
 
@@ -42,11 +38,6 @@ abstract class BaseKanaQuizFragment : Fragment() {
 
     abstract fun getQuizModeArgument(): String
     abstract fun getLevelArgument(): String
-
-    // Lazy init of repository
-    private val kanaRepository by lazy {
-        KanaRepository(AndroidResourceLoader(requireContext()))
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -65,7 +56,11 @@ abstract class BaseKanaQuizFragment : Fragment() {
         viewModel.setAnimationSpeed(animationSpeed)
 
         if (!viewModel.isGameInitialized) {
-            initializeGame()
+            val success = viewModel.initializeGame(kanaType, getQuizModeArgument(), getLevelArgument())
+            if (!success) {
+                findNavController().popBackStack()
+                return
+            }
         }
 
         setupStateObservation()
@@ -125,38 +120,6 @@ abstract class BaseKanaQuizFragment : Fragment() {
                 }
                 answerButtons[index].setBackgroundColor(ContextCompat.getColor(requireContext(), colorRes))
             }
-        }
-    }
-
-    private fun initializeGame() {
-        viewModel.resetState()
-        val modeArg = getQuizModeArgument()
-        viewModel.quizMode = if (modeArg == "Kana -> Romaji") QuizMode.KANA_TO_ROMAJI else QuizMode.ROMAJI_TO_KANA
-
-        val allCharacters = loadKana(kanaType)
-        val level = getLevelArgument()
-        viewModel.allKana = filterCharactersForLevel(allCharacters, level).shuffled()
-
-        if (viewModel.allKana.isNotEmpty()) {
-            viewModel.startGame()
-            viewModel.isGameInitialized = true
-        } else {
-            findNavController().popBackStack()
-        }
-    }
-
-    private fun loadKana(type: org.nihongo.mochi.domain.kana.KanaType): List<KanaCharacter> {
-        return kanaRepository.getKanaEntries(type).map { entry ->
-            KanaCharacter(entry.character, entry.romaji, entry.category)
-        }
-    }
-
-    private fun filterCharactersForLevel(allCharacters: List<KanaCharacter>, level: String): List<KanaCharacter> {
-        return when (level) {
-            "Gojūon" -> allCharacters.filter { it.category == "gojuon" }
-            "Dakuon" -> allCharacters.filter { it.category == "dakuon" || it.category == "handakuon" }
-            "Yōon" -> allCharacters.filter { it.category == "yoon" }
-            else -> allCharacters
         }
     }
 

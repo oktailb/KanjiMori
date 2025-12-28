@@ -6,9 +6,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import org.nihongo.mochi.R
-import org.nihongo.mochi.data.ScoreManager
 import org.nihongo.mochi.databinding.FragmentWritingBinding
 
 data class LevelInfo(val button: Button, val xmlName: String, val stringResId: Int)
@@ -17,9 +17,9 @@ class WritingFragment : Fragment() {
 
     private var _binding: FragmentWritingBinding? = null
     private val binding get() = _binding!!
+    private val viewModel: WritingViewModel by viewModels()
 
     private lateinit var levelInfos: List<LevelInfo>
-    private var userListPercentage = 0.0
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -39,7 +39,7 @@ class WritingFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        calculateUserListPercentage()
+        viewModel.calculatePercentages()
         updateButtonText()
     }
 
@@ -63,28 +63,12 @@ class WritingFragment : Fragment() {
         )
     }
 
-    private fun calculateUserListPercentage() {
-        val scores = ScoreManager.getAllScores(ScoreManager.ScoreType.WRITING)
-        if (scores.isEmpty()) {
-            userListPercentage = 0.0
-            return
-        }
-        val totalEncountered = scores.size
-        val mastered = scores.count { (_, score) -> (score.successes - score.failures) >= 10 }
-
-        userListPercentage = if (totalEncountered > 0) {
-            (mastered.toDouble() / totalEncountered.toDouble()) * 100.0
-        } else {
-            0.0
-        }
-    }
-
     private fun updateButtonText() {
         for (info in levelInfos) {
             // The text for these buttons is not updated with a percentage for now.
         }
         val userListText = getString(R.string.reading_user_list)
-        binding.buttonUserList.text = "$userListText\n${userListPercentage.toInt()}%"
+        binding.buttonUserList.text = "$userListText\n${viewModel.userListPercentage.toInt()}%"
     }
 
 

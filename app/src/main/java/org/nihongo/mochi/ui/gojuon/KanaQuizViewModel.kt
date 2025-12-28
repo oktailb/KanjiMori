@@ -4,8 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import org.nihongo.mochi.MochiApplication
 import org.nihongo.mochi.domain.game.KanaQuizEngine
 import org.nihongo.mochi.domain.game.QuizMode
+import org.nihongo.mochi.domain.kana.KanaType
 import org.nihongo.mochi.domain.models.AnswerButtonState
 import org.nihongo.mochi.domain.models.GameStatus
 import org.nihongo.mochi.domain.models.GameState
@@ -82,6 +84,37 @@ class KanaQuizViewModel : ViewModel() {
     fun submitAnswer(selectedAnswer: String, selectedIndex: Int) {
         viewModelScope.launch {
             engine.submitAnswer(selectedAnswer, selectedIndex)
+        }
+    }
+
+    fun initializeGame(kanaType: KanaType, quizModeStr: String, levelStr: String): Boolean {
+        resetState()
+        quizMode = if (quizModeStr == "Kana -> Romaji") QuizMode.KANA_TO_ROMAJI else QuizMode.ROMAJI_TO_KANA
+
+        val allCharacters = loadKana(kanaType)
+        allKana = filterCharactersForLevel(allCharacters, levelStr).shuffled()
+
+        return if (allKana.isNotEmpty()) {
+            startGame()
+            isGameInitialized = true
+            true
+        } else {
+            false
+        }
+    }
+
+    private fun loadKana(type: KanaType): List<KanaCharacter> {
+        return MochiApplication.kanaRepository.getKanaEntries(type).map { entry ->
+            KanaCharacter(entry.character, entry.romaji, entry.category)
+        }
+    }
+
+    private fun filterCharactersForLevel(allCharacters: List<KanaCharacter>, level: String): List<KanaCharacter> {
+        return when (level) {
+            "Gojūon" -> allCharacters.filter { it.category == "gojuon" }
+            "Dakuon" -> allCharacters.filter { it.category == "dakuon" || it.category == "handakuon" }
+            "Yōon" -> allCharacters.filter { it.category == "yoon" }
+            else -> allCharacters
         }
     }
 }

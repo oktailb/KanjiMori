@@ -3,7 +3,6 @@ package org.nihongo.mochi.ui.recognitiongame
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.util.Log
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
@@ -19,15 +18,12 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import kotlinx.coroutines.launch
-import org.nihongo.mochi.MochiApplication
 import org.nihongo.mochi.R
 import org.nihongo.mochi.databinding.FragmentRecognitionGameBinding
 import org.nihongo.mochi.domain.game.QuestionDirection
 import org.nihongo.mochi.domain.models.AnswerButtonState
 import org.nihongo.mochi.domain.models.GameStatus
 import org.nihongo.mochi.domain.models.GameState
-import org.nihongo.mochi.domain.models.KanjiDetail
-import org.nihongo.mochi.domain.models.Reading
 import org.nihongo.mochi.domain.util.TextSizeCalculator
 import org.nihongo.mochi.settings.ANIMATION_SPEED_PREF_KEY
 import org.nihongo.mochi.settings.PRONUNCIATION_PREF_KEY
@@ -62,11 +58,14 @@ class RecognitionGameFragment : Fragment() {
         viewModel.setAnimationSpeed(animationSpeed)
 
         if (!viewModel.isGameInitialized) {
-            initializeGame()
-            viewModel.isGameInitialized = true
+            val customWordList = args.customWordList?.toList()
+            val success = viewModel.initializeGame(args.gameMode, args.readingMode, args.level, customWordList)
+            if (!success) {
+                findNavController().popBackStack()
+                return
+            }
         }
 
-        setupUI()
         setupStateObservation()
 
         val answerButtons = listOf(binding.buttonAnswer1, binding.buttonAnswer2, binding.buttonAnswer3, binding.buttonAnswer4)
@@ -128,68 +127,9 @@ class RecognitionGameFragment : Fragment() {
         }
     }
 
-    private fun initializeGame() {
-        viewModel.gameMode = args.gameMode
-        viewModel.readingMode = args.readingMode
-        val level = args.level
-        val customWordList = args.customWordList?.toList() ?: emptyList()
-
-        loadAllKanjiDetails()
-
-        val kanjiCharsForLevel: List<String> = if (customWordList.isNotEmpty()) {
-            customWordList
-        } else {
-            MochiApplication.levelContentProvider.getCharactersForLevel(level)
-        }
-
-        viewModel.allKanjiDetails.clear()
-        viewModel.allKanjiDetails.addAll(
-            viewModel.allKanjiDetailsXml.filter {
-                kanjiCharsForLevel.contains(it.character) && it.meanings.isNotEmpty()
-            }
-        )
-        viewModel.allKanjiDetails.shuffle()
-        viewModel.kanjiListPosition = 0
-
-        if (viewModel.allKanjiDetails.isNotEmpty()) {
-            viewModel.startGame()
-        } else {
-            Log.e("RecognitionGameFragment", "No kanji loaded for level: $level.")
-            findNavController().popBackStack()
-        }
-    }
-
-    private fun setupUI() {
-        if (viewModel.allKanjiDetails.isEmpty()) return
-        // UI setup is mostly handled by state observation now
-    }
-    
     private fun updateButtonSize(button: Button, text: String) {
         val newSize = TextSizeCalculator.calculateButtonTextSize(text.length, viewModel.currentDirection)
         button.setTextSize(TypedValue.COMPLEX_UNIT_SP, newSize)
-    }
-
-    private fun loadAllKanjiDetails() {
-        val locale = MochiApplication.settingsRepository.getAppLocale()
-        val meanings = MochiApplication.meaningRepository.getMeanings(locale)
-        val allKanjiEntries = MochiApplication.kanjiRepository.getAllKanji()
-        
-        viewModel.allKanjiDetailsXml.clear()
-        
-        for (entry in allKanjiEntries) {
-            val id = entry.id
-            val character = entry.character
-            val kanjiMeanings = meanings[id] ?: emptyList()
-            
-            val readingsList = mutableListOf<Reading>()
-            entry.readings?.reading?.forEach { readingEntry ->
-                 val freq = readingEntry.frequency?.toIntOrNull() ?: 0
-                 readingsList.add(Reading(readingEntry.value, readingEntry.type, freq))
-            }
-            
-            val kanjiDetail = KanjiDetail(id, character, kanjiMeanings, readingsList)
-            viewModel.allKanjiDetailsXml.add(kanjiDetail)
-        }
     }
 
     private fun displayQuestion() {
@@ -198,9 +138,6 @@ class RecognitionGameFragment : Fragment() {
 
         val answerButtons = listOf(binding.buttonAnswer1, binding.buttonAnswer2, binding.buttonAnswer3, binding.buttonAnswer4)
         val answers = viewModel.currentAnswers
-
-        // Button colors are handled by updateButtonStates observing the flow
-        // Just need to set text and enable
 
         answerButtons.zip(answers).forEach { (button, answerText) ->
             button.text = answerText
