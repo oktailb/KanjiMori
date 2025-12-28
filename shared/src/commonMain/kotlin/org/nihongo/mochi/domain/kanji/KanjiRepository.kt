@@ -64,7 +64,7 @@ class KanjiRepository(
         val locale = settingsRepository.getAppLocale()
         val meanings = meaningRepository.getMeanings(locale)
         return getAllKanji().filter { 
-            it.jlptLevel == null && it.schoolGrade == null && !meanings.containsKey(it.id) && it.readings?.reading?.isNotEmpty() == true
+            it.jlptLevel == null && it.schoolGrade == null && !meanings.containsKey(it.id)
         }
     }
 }

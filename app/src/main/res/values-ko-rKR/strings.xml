@@ -7,6 +7,8 @@
     <string name="nav_header_subtitle">android.studio@android.com</string>
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
+    <string name="action_sign_in">로그인</string>
+    <string name="action_achievements">업적</string>
 
     <string name="menu_transform">Transform</string>
     <string name="menu_reflow">Reflow</string>
@@ -66,6 +68,10 @@
     <string name="recognition_jlpt">일본어 능력 시험</string>
     <string name="recognition_primary_school">초등학교(Jōyō 1..1006)</string>
     <string name="recognition_high_school">고등학교(Jōyō 1007..2136)</string>
+    <string name="section_challenges">도전 과제</string>
+    <string name="challenge_native">네이티브 챌린지</string>
+    <string name="challenge_no_reading">읽기 없음</string>
+    <string name="challenge_no_meaning">의미 없음</string>
 
     <!-- Writing Screen -->
     <string name="writing_title">書き方</string>
@@ -154,6 +160,11 @@
     <!-- Results Screen -->
     <string name="results_title">결과</string>
     <string name="results_recognition_title">인식</string>
+    <string name="results_section_kanas">가나 (히라가나 / 가타카나)</string>
+    <string name="results_section_jlpt">JLPT (N5 - N1)</string>
+    <string name="results_section_school">학교 (학년 / 고등학교)</string>
+    <string name="results_section_frequency">빈도</string>
+    <string name="results_frequency_x_words">가장 자주 사용되는 단어 %1$d개</string>
     <string name="results_hiragana">히라가나 - %1$d%%</string>
     <string name="results_katakana">가타카나 - %1$d%%</string>
     <string name="results_jlpt_n5">JLPT N5 - %1$d%%</string>

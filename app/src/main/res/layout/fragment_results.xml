@@ -100,7 +100,7 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:text="Kanas (Hiragana / Katakana)"
+                                android:text="@string/results_section_kanas"
                                 android:textSize="18sp"
                                 android:textStyle="bold"
                                 android:textColor="@color/card_text"/>
@@ -170,7 +170,7 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:text="JLPT (N5 - N1)"
+                                android:text="@string/results_section_jlpt"
                                 android:textSize="18sp"
                                 android:textStyle="bold"
                                 android:textColor="@color/card_text"/>
@@ -220,7 +220,7 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:text="Scolaire (Grades / Lycée)"
+                                android:text="@string/results_section_school"
                                 android:textSize="18sp"
                                 android:textStyle="bold"
                                 android:textColor="@color/card_text"/>
@@ -365,7 +365,7 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:text="JLPT (N5 - N1)"
+                                android:text="@string/results_section_jlpt"
                                 android:textSize="18sp"
                                 android:textStyle="bold"
                                 android:textColor="@color/card_text"/>
@@ -415,7 +415,7 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:text="Fréquence"
+                                android:text="@string/results_section_frequency"
                                 android:textSize="18sp"
                                 android:textStyle="bold"
                                 android:textColor="@color/card_text"/>
@@ -562,7 +562,7 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:text="JLPT (N5 - N1)"
+                                android:text="@string/results_section_jlpt"
                                 android:textSize="18sp"
                                 android:textStyle="bold"
                                 android:textColor="@color/card_text"/>
@@ -612,7 +612,7 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:text="Scolaire (Grades / Lycée)"
+                                android:text="@string/results_section_school"
                                 android:textSize="18sp"
                                 android:textStyle="bold"
                                 android:textColor="@color/card_text"/>
@@ -677,7 +677,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Se connecter"
+            android:text="@string/action_sign_in"
             android:visibility="gone"
             app:icon="@android:drawable/ic_menu_add"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
@@ -688,7 +688,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Succès"
+            android:text="@string/action_achievements"
             android:visibility="gone"
             app:icon="@android:drawable/btn_star"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"

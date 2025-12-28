@@ -432,62 +432,59 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Challenges"
+                        android:text="@string/section_challenges"
                         android:textSize="20sp"
                         android:textStyle="bold"
                         android:layout_centerVertical="true"/>
 
                 </RelativeLayout>
 
-                <GridLayout
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:columnCount="3"
+                    android:orientation="vertical"
                     android:clipChildren="false"
                     android:clipToPadding="false">
 
                     <Button
                         android:id="@+id/button_native_challenge"
                         style="@style/Widget.MaterialComponents.Button"
-                        android:layout_width="0dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_columnWeight="1"
                         android:layout_margin="4dp"
                         app:elevation="6dp"
                         android:textColor="?attr/colorOnSecondary"
                         android:backgroundTint="?attr/colorSecondary"
                         app:strokeColor="?attr/colorPrimaryVariant"
                         app:strokeWidth="0dp"
-                        android:text="Native Challenge" />
+                        android:text="@string/challenge_native" />
 
                     <Button
                         android:id="@+id/button_no_reading_challenge"
                         style="@style/Widget.MaterialComponents.Button"
-                        android:layout_width="0dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_columnWeight="1"
                         android:layout_margin="4dp"
                         app:elevation="6dp"
                         android:textColor="?attr/colorOnSecondary"
                         android:backgroundTint="?attr/colorSecondary"
                         app:strokeColor="?attr/colorPrimaryVariant"
                         app:strokeWidth="0dp"
-                        android:text="No Reading" />
+                        android:text="@string/challenge_no_reading" />
 
                     <Button
                         android:id="@+id/button_no_meaning_challenge"
                         style="@style/Widget.MaterialComponents.Button"
-                        android:layout_width="0dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_columnWeight="1"
                         android:layout_margin="4dp"
                         app:elevation="6dp"
                         android:textColor="?attr/colorOnSecondary"
                         android:backgroundTint="?attr/colorSecondary"
                         app:strokeColor="?attr/colorPrimaryVariant"
                         app:strokeWidth="0dp"
-                        android:text="No Meaning" />
-                </GridLayout>
+                        android:text="@string/challenge_no_meaning" />
+                </LinearLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 

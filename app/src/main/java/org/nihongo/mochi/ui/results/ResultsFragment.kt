@@ -174,7 +174,7 @@ class ResultsFragment : Fragment() {
                  val intent = androidCloudSaveService.getAchievementsIntent()
                  achievementsLauncher.launch(intent)
              } catch (e: Exception) {
-                 Toast.makeText(requireContext(), "Impossible d'ouvrir les succès:" + e.message, Toast.LENGTH_SHORT).show()
+                 Toast.makeText(requireContext(), getString(R.string.about_coming_soon) + ": " + e.message, Toast.LENGTH_SHORT).show()
              }
         }
     }
@@ -185,7 +185,7 @@ class ResultsFragment : Fragment() {
                 val intent = androidCloudSaveService.getSavedGamesIntent("Sauvegardes", true, true, 5)
                 savedGamesLauncher.launch(intent)
             } catch (e: Exception) {
-                 Toast.makeText(requireContext(), "Impossible d'ouvrir l'interface de sauvegarde: " + e.message, Toast.LENGTH_SHORT).show()
+                 Toast.makeText(requireContext(), getString(R.string.about_coming_soon) + ": " + e.message, Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -326,35 +326,35 @@ class ResultsFragment : Fragment() {
             }
             "Reading 1000" -> {
                 binding.progressReading1000.progress = percentageInt
-                binding.titleReading1000.text = "1000 mots les plus fréquents - $percentageInt%"
+                binding.titleReading1000.text = getString(R.string.results_frequency_x_words, 1000) + " - $percentageInt%"
             }
             "Reading 2000" -> {
                 binding.progressReading2000.progress = percentageInt
-                binding.titleReading2000.text = "2000 mots les plus fréquents - $percentageInt%"
+                binding.titleReading2000.text = getString(R.string.results_frequency_x_words, 2000) + " - $percentageInt%"
             }
             "Reading 3000" -> {
                 binding.progressReading3000.progress = percentageInt
-                binding.titleReading3000.text = "3000 mots les plus fréquents - $percentageInt%"
+                binding.titleReading3000.text = getString(R.string.results_frequency_x_words, 3000) + " - $percentageInt%"
             }
             "Reading 4000" -> {
                 binding.progressReading4000.progress = percentageInt
-                binding.titleReading4000.text = "4000 mots les plus fréquents - $percentageInt%"
+                binding.titleReading4000.text = getString(R.string.results_frequency_x_words, 4000) + " - $percentageInt%"
             }
             "Reading 5000" -> {
                 binding.progressReading5000.progress = percentageInt
-                binding.titleReading5000.text = "5000 mots les plus fréquents - $percentageInt%"
+                binding.titleReading5000.text = getString(R.string.results_frequency_x_words, 5000) + " - $percentageInt%"
             }
             "Reading 6000" -> {
                 binding.progressReading6000.progress = percentageInt
-                binding.titleReading6000.text = "6000 mots les plus fréquents - $percentageInt%"
+                binding.titleReading6000.text = getString(R.string.results_frequency_x_words, 6000) + " - $percentageInt%"
             }
             "Reading 7000" -> {
                 binding.progressReading7000.progress = percentageInt
-                binding.titleReading7000.text = "7000 mots les plus fréquents - $percentageInt%"
+                binding.titleReading7000.text = getString(R.string.results_frequency_x_words, 7000) + " - $percentageInt%"
             }
             "Reading 8000" -> {
                 binding.progressReading8000.progress = percentageInt
-                binding.titleReading8000.text = "8000 mots les plus fréquents - $percentageInt%"
+                binding.titleReading8000.text = getString(R.string.results_frequency_x_words, 8000) + " - $percentageInt%"
             }
             "Writing User" -> {
                 binding.progressWritingUser.progress = percentageInt

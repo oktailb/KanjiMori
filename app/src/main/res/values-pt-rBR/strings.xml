@@ -7,6 +7,8 @@
     <string name="nav_header_subtitle">android.studio@android.com</string>
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Definições</string>
+    <string name="action_sign_in">Entrar</string>
+    <string name="action_achievements">Conquistas</string>
 
     <string name="menu_transform">Transform</string>
     <string name="menu_reflow">Reflow</string>
@@ -66,6 +68,10 @@
     <string name="recognition_jlpt">Exame de Proficiência em Língua Japonesa</string>
     <string name="recognition_primary_school">Escola primária (Jōyō 1..1006)</string>
     <string name="recognition_high_school">Liceu (Jōyō 1007..2136)</string>
+    <string name="section_challenges">Desafios</string>
+    <string name="challenge_native">Desafio nativo</string>
+    <string name="challenge_no_reading">Sem leitura</string>
+    <string name="challenge_no_meaning">Sem significado</string>
 
     <!-- Writing Screen -->
     <string name="writing_title">書き方</string>
@@ -154,6 +160,11 @@
     <!-- Results Screen -->
     <string name="results_title">Resultados</string>
     <string name="results_recognition_title">Reconhecimento</string>
+    <string name="results_section_kanas">Kanas (Hiragana / Katakana)</string>
+    <string name="results_section_jlpt">JLPT (N5 - N1)</string>
+    <string name="results_section_school">Escola (Graus / Ensino Médio)</string>
+    <string name="results_section_frequency">Frequência</string>
+    <string name="results_frequency_x_words">%1$d palavras mais frequentes</string>
     <string name="results_hiragana">Hiraganas - %1$d%%</string>
     <string name="results_katakana">Katakanas - %1$d%%</string>
     <string name="results_jlpt_n5">JLPT N5 - %1$d%%</string>

@@ -7,6 +7,8 @@
     <string name="nav_header_subtitle">android.studio@android.com</string>
     <string name="nav_header_desc">নেভিগেশন হেডার</string>
     <string name="action_settings">সেটিংস</string>
+    <string name="action_sign_in">সাইন ইন করুন</string>
+    <string name="action_achievements">অর্জন</string>
 
     <string name="menu_transform">রূপান্তর</string>
     <string name="menu_reflow">রিফ্লো</string>
@@ -60,6 +62,10 @@
     <string name="recognition_jlpt">জাপানি ভাষা দক্ষতা পরীক্ষা</string>
     <string name="recognition_primary_school">প্রাথমিক বিদ্যালয় (জ্যোয়ো ১..১০০৬)</string>
     <string name="recognition_high_school">উচ্চ বিদ্যালয় (জ্যোয়ো ১০০৭..২১৩৬)</string>
+    <string name="section_challenges">চ্যালেঞ্জ</string>
+    <string name="challenge_native">দেশীয় চ্যালেঞ্জ</string>
+    <string name="challenge_no_reading">পড়া নেই</string>
+    <string name="challenge_no_meaning">অর্থ নেই</string>
 
     <!-- Writing Screen -->
     <string name="writing_title">書き方</string>
@@ -150,6 +156,11 @@
     <!-- Results Screen -->
     <string name="results_title">ফলাফল</string>
     <string name="results_recognition_title">স্বীকৃতি</string>
+    <string name="results_section_kanas">কানা (হিরাগানা / কাতাকানা)</string>
+    <string name="results_section_jlpt">JLPT (N5 - N1)</string>
+    <string name="results_section_school">স্কুল (গ্রেড / হাই স্কুল)</string>
+    <string name="results_section_frequency">ফ্রিকোয়েন্সি</string>
+    <string name="results_frequency_x_words">%1$d সর্বাধিক ব্যবহৃত শব্দ</string>
     <string name="results_hiragana">হিরাগানা - %1$d%%</string>
     <string name="results_katakana">কাতাকানা - %1$d%%</string>
     <string name="results_jlpt_n5">JLPT N5 - %1$d%%</string>
