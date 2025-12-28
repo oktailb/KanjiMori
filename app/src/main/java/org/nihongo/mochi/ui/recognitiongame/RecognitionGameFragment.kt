@@ -3,8 +3,6 @@ package org.nihongo.mochi.ui.recognitiongame
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import android.util.TypedValue
 import android.view.LayoutInflater
@@ -15,17 +13,22 @@ import android.widget.ImageView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import kotlinx.coroutines.launch
 import org.nihongo.mochi.MochiApplication
 import org.nihongo.mochi.R
 import org.nihongo.mochi.databinding.FragmentRecognitionGameBinding
-import org.nihongo.mochi.settings.ANIMATION_SPEED_PREF_KEY
-import org.nihongo.mochi.settings.PRONUNCIATION_PREF_KEY
+import org.nihongo.mochi.domain.game.GameState
+import org.nihongo.mochi.domain.game.QuestionDirection
 import org.nihongo.mochi.domain.models.GameStatus
 import org.nihongo.mochi.domain.models.KanjiDetail
 import org.nihongo.mochi.domain.models.Reading
-import java.util.Locale
+import org.nihongo.mochi.settings.ANIMATION_SPEED_PREF_KEY
+import org.nihongo.mochi.settings.PRONUNCIATION_PREF_KEY
 
 class RecognitionGameFragment : Fragment() {
 
@@ -52,6 +55,9 @@ class RecognitionGameFragment : Fragment() {
         // Pass pronunciation mode to ViewModel
         val pronunciationMode = sharedPreferences.getString(PRONUNCIATION_PREF_KEY, "Hiragana") ?: "Hiragana"
         viewModel.updatePronunciationMode(pronunciationMode)
+        
+        val animationSpeed = sharedPreferences.getFloat(ANIMATION_SPEED_PREF_KEY, 1.0f)
+        viewModel.setAnimationSpeed(animationSpeed)
 
         if (!viewModel.isGameInitialized) {
             initializeGame()
@@ -59,10 +65,38 @@ class RecognitionGameFragment : Fragment() {
         }
 
         setupUI()
+        setupStateObservation()
 
         val answerButtons = listOf(binding.buttonAnswer1, binding.buttonAnswer2, binding.buttonAnswer3, binding.buttonAnswer4)
-        answerButtons.forEach { button ->
-            button.setOnClickListener { onAnswerClicked(button) }
+        answerButtons.forEachIndexed { index, button ->
+            button.setOnClickListener { onAnswerClicked(button, index) }
+        }
+    }
+
+    private fun setupStateObservation() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.state.collect { state ->
+                    renderState(state)
+                }
+            }
+        }
+    }
+
+    private fun renderState(state: GameState) {
+        when(state) {
+            GameState.Loading -> { 
+                // Could show loading indicator
+            }
+            GameState.WaitingForAnswer -> {
+                displayQuestion()
+            }
+            is GameState.ShowingResult -> {
+                showResult(state.isCorrect, state.selectedAnswerIndex)
+            }
+            GameState.Finished -> {
+                findNavController().popBackStack()
+            }
         }
     }
 
@@ -77,7 +111,7 @@ class RecognitionGameFragment : Fragment() {
         val kanjiCharsForLevel: List<String> = if (customWordList.isNotEmpty()) {
             customWordList
         } else {
-            loadKanjiCharsForLevel(level)
+            MochiApplication.levelContentProvider.getCharactersForLevel(level)
         }
 
         viewModel.allKanjiDetails.clear()
@@ -90,7 +124,7 @@ class RecognitionGameFragment : Fragment() {
         viewModel.kanjiListPosition = 0
 
         if (viewModel.allKanjiDetails.isNotEmpty()) {
-            startNewSet()
+            viewModel.startGame()
         } else {
             Log.e("RecognitionGameFragment", "No kanji loaded for level: $level.")
             findNavController().popBackStack()
@@ -99,27 +133,7 @@ class RecognitionGameFragment : Fragment() {
 
     private fun setupUI() {
         if (viewModel.allKanjiDetails.isEmpty()) return
-
-        displayQuestionText()
-        updateProgressBar()
-
-        val answerButtons = listOf(binding.buttonAnswer1, binding.buttonAnswer2, binding.buttonAnswer3, binding.buttonAnswer4)
-        answerButtons.forEachIndexed { index, button ->
-            if (viewModel.currentAnswers.size > index) {
-                val answerText = viewModel.currentAnswers[index]
-                button.text = answerText
-                updateButtonSize(button, answerText)
-            }
-            if (viewModel.buttonColors.size > index) {
-                val colorRes = viewModel.buttonColors[index]
-                if (colorRes != 0) {
-                    button.setBackgroundColor(ContextCompat.getColor(requireContext(), colorRes))
-                } else {
-                    button.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.button_background))
-                }
-            }
-        }
-        answerButtons.forEach { it.isEnabled = viewModel.areButtonsEnabled }
+        // UI setup is mostly handled by state observation now
     }
     
     private fun updateButtonSize(button: Button, text: String) {
@@ -134,31 +148,6 @@ class RecognitionGameFragment : Fragment() {
             }
             button.setTextSize(TypedValue.COMPLEX_UNIT_SP, newSize)
         }
-    }
-
-    private fun startNewSet() {
-        val hasNext = viewModel.startNewSet()
-
-        if (!hasNext) {
-            findNavController().popBackStack()
-            return
-        }
-
-        updateProgressBar()
-        displayQuestion()
-    }
-
-    private fun loadKanjiCharsForLevel(levelName: String): List<String> {
-        val (type, value) = when {
-            levelName.startsWith("N") -> "jlpt" to levelName
-            levelName.startsWith("Grade ") -> {
-                val grade = levelName.removePrefix("Grade ")
-                "grade" to grade
-            }
-            else -> return emptyList()
-        }
-        
-        return MochiApplication.kanjiRepository.getKanjiByLevel(type, value).map { it.character }
     }
 
     private fun loadAllKanjiDetails() {
@@ -185,14 +174,8 @@ class RecognitionGameFragment : Fragment() {
     }
 
     private fun displayQuestion() {
-        if (viewModel.revisionList.isEmpty()) {
-            startNewSet()
-            return
-        }
-
-        viewModel.nextQuestion()
-
         displayQuestionText()
+        updateProgressBar()
 
         val answerButtons = listOf(binding.buttonAnswer1, binding.buttonAnswer2, binding.buttonAnswer3, binding.buttonAnswer4)
         val answers = viewModel.currentAnswers
@@ -235,39 +218,32 @@ class RecognitionGameFragment : Fragment() {
         }
     }
 
-    private fun onAnswerClicked(button: Button) {
+    private fun onAnswerClicked(button: Button, index: Int) {
         val selectedAnswer = button.text.toString()
-        val isCorrect = viewModel.submitAnswer(selectedAnswer)
-
+        viewModel.submitAnswer(selectedAnswer, index)
+        // Disable buttons immediately to prevent double clicks
         val answerButtons = listOf(binding.buttonAnswer1, binding.buttonAnswer2, binding.buttonAnswer3, binding.buttonAnswer4)
-        val buttonIndex = answerButtons.indexOf(button)
-
-        if (isCorrect) {
-            viewModel.buttonColors[buttonIndex] = R.color.answer_correct
-            
-            // Check if partial (one direction solved), color stays neutral?
-            val status = viewModel.kanjiStatus[viewModel.currentKanji]
-            if (status == GameStatus.PARTIAL) {
-                 viewModel.buttonColors[buttonIndex] = R.color.answer_neutral
-            }
-
-        } else {
-            viewModel.buttonColors[buttonIndex] = R.color.answer_incorrect
-        }
-
-        button.setBackgroundColor(ContextCompat.getColor(requireContext(), viewModel.buttonColors[buttonIndex]))
-
-        updateProgressBar()
-
         answerButtons.forEach { it.isEnabled = false }
-        viewModel.areButtonsEnabled = false
-
-        val animationSpeed = sharedPreferences.getFloat(ANIMATION_SPEED_PREF_KEY, 1.0f)
-        val delay = (1000 * animationSpeed).toLong()
-
-        Handler(Looper.getMainLooper()).postDelayed({
-            displayQuestion()
-        }, delay)
+    }
+    
+    private fun showResult(isCorrect: Boolean, selectedIndex: Int) {
+        val answerButtons = listOf(binding.buttonAnswer1, binding.buttonAnswer2, binding.buttonAnswer3, binding.buttonAnswer4)
+        
+        if (isCorrect) {
+             viewModel.buttonColors[selectedIndex] = R.color.answer_correct
+             // Check partial
+             val status = viewModel.kanjiStatus[viewModel.currentKanji]
+             if (status == GameStatus.PARTIAL) {
+                 viewModel.buttonColors[selectedIndex] = R.color.answer_neutral
+             }
+        } else {
+             viewModel.buttonColors[selectedIndex] = R.color.answer_incorrect
+        }
+        
+        answerButtons[selectedIndex].setBackgroundColor(ContextCompat.getColor(requireContext(), viewModel.buttonColors[selectedIndex]))
+        updateProgressBar()
+        
+        answerButtons.forEach { it.isEnabled = false }
     }
 
     private fun updateProgressBar() {

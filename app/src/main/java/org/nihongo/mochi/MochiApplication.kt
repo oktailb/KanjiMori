@@ -11,6 +11,7 @@ import org.nihongo.mochi.domain.kana.RomajiToKana
 import org.nihongo.mochi.domain.kanji.KanjiRepository
 import org.nihongo.mochi.domain.meaning.MeaningRepository
 import org.nihongo.mochi.domain.settings.SettingsRepository
+import org.nihongo.mochi.domain.util.LevelContentProvider
 import org.nihongo.mochi.domain.words.WordRepository
 
 class MochiApplication : Application() {
@@ -25,6 +26,8 @@ class MochiApplication : Application() {
         lateinit var meaningRepository: MeaningRepository
             private set
         lateinit var settingsRepository: SettingsRepository
+            private set
+        lateinit var levelContentProvider: LevelContentProvider
             private set
     }
 
@@ -49,6 +52,8 @@ class MochiApplication : Application() {
         wordRepository = WordRepository(resourceLoader)
         meaningRepository = MeaningRepository(resourceLoader)
         
+        levelContentProvider = LevelContentProvider(kanaRepository, kanjiRepository, wordRepository)
+
         // Init Services depending on repositories
         KanaToRomaji.init(kanaRepository)
         RomajiToKana.init(kanaRepository)

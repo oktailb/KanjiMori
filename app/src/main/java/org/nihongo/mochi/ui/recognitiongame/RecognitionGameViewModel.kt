@@ -1,6 +1,10 @@
 package org.nihongo.mochi.ui.recognitiongame
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import org.nihongo.mochi.domain.game.GameState
 import org.nihongo.mochi.domain.game.RecognitionGameEngine
 import org.nihongo.mochi.domain.models.GameStatus
 import org.nihongo.mochi.domain.models.KanjiDetail
@@ -60,6 +64,8 @@ class RecognitionGameViewModel : ViewModel() {
     val currentAnswers: List<String>
         get() = engine.currentAnswers
 
+    val state: StateFlow<GameState> = engine.state
+
     // UI Specific State (Platform dependent)
     var areButtonsEnabled = true
     var buttonColors = mutableListOf<Int>() // Resource IDs are platform specific
@@ -67,9 +73,20 @@ class RecognitionGameViewModel : ViewModel() {
     fun updatePronunciationMode(mode: String) {
         engine.pronunciationMode = mode
     }
+    
+    fun setAnimationSpeed(speed: Float) {
+        engine.animationSpeed = speed
+    }
 
     fun startNewSet(): Boolean {
-        return engine.startNewSet()
+        // This is now internal to engine mostly, but used for initial setup in Fragment
+        // Fragment calls startNewSet() to check if game can start?
+        // Let's keep it for now but ideally engine.startGame() should be used
+        return true
+    }
+    
+    fun startGame() {
+        engine.startGame()
     }
 
     fun nextQuestion() {
@@ -80,8 +97,10 @@ class RecognitionGameViewModel : ViewModel() {
         return engine.getFormattedReadings(kanji)
     }
 
-    fun submitAnswer(selectedAnswer: String): Boolean {
-        return engine.submitAnswer(selectedAnswer)
+    fun submitAnswer(selectedAnswer: String, selectedIndex: Int) {
+        viewModelScope.launch {
+            engine.submitAnswer(selectedAnswer, selectedIndex)
+        }
     }
 
     fun resetState() {

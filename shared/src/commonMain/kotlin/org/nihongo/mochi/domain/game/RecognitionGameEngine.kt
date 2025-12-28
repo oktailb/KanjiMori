@@ -1,5 +1,9 @@
 package org.nihongo.mochi.domain.game
 
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import org.nihongo.mochi.data.ScoreManager
 import org.nihongo.mochi.domain.kana.KanaToRomaji
 import org.nihongo.mochi.domain.kana.KanaUtils
@@ -9,6 +13,13 @@ import org.nihongo.mochi.domain.models.KanjiProgress
 import kotlin.random.Random
 
 enum class QuestionDirection { NORMAL, REVERSE }
+
+sealed class GameState {
+    object Loading : GameState()
+    object WaitingForAnswer : GameState()
+    data class ShowingResult(val isCorrect: Boolean, val selectedAnswerIndex: Int) : GameState()
+    object Finished : GameState()
+}
 
 class RecognitionGameEngine {
     var isGameInitialized = false
@@ -28,9 +39,13 @@ class RecognitionGameEngine {
     // UI State
     var currentAnswers = listOf<String>()
     
+    private val _state = MutableStateFlow<GameState>(GameState.Loading)
+    val state: StateFlow<GameState> = _state.asStateFlow()
+
     // Configuration
     var pronunciationMode: String = "Hiragana" // "Hiragana" or "Roman"
-    
+    var animationSpeed: Float = 1.0f
+
     fun resetState() {
         isGameInitialized = false
         allKanjiDetails.clear()
@@ -40,9 +55,19 @@ class RecognitionGameEngine {
         kanjiProgress.clear()
         kanjiListPosition = 0
         currentAnswers = emptyList()
+        _state.value = GameState.Loading
     }
     
-    fun startNewSet(): Boolean {
+    fun startGame() {
+        if (startNewSet()) {
+            nextQuestion()
+            _state.value = GameState.WaitingForAnswer
+        } else {
+            _state.value = GameState.Finished
+        }
+    }
+
+    private fun startNewSet(): Boolean {
         revisionList.clear()
         kanjiStatus.clear()
         kanjiProgress.clear()
@@ -153,7 +178,7 @@ class RecognitionGameEngine {
         return (onStrings + kunStrings).joinToString("\n")
     }
 
-    fun submitAnswer(selectedAnswer: String): Boolean {
+    suspend fun submitAnswer(selectedAnswer: String, selectedIndex: Int) {
         val isCorrect = if (currentDirection == QuestionDirection.NORMAL) {
             // For NORMAL, button text might be multi-line, check if any line matches correctAnswer
             selectedAnswer.lines().any { it.equals(correctAnswer, ignoreCase = true) }
@@ -179,6 +204,17 @@ class RecognitionGameEngine {
             kanjiStatus[currentKanji] = GameStatus.INCORRECT
         }
         
-        return isCorrect
+        _state.value = GameState.ShowingResult(isCorrect, selectedIndex)
+        delay((1000 * animationSpeed).toLong())
+
+        if (revisionList.isEmpty()) {
+            if (!startNewSet()) {
+                _state.value = GameState.Finished
+                return
+            }
+        }
+        
+        nextQuestion()
+        _state.value = GameState.WaitingForAnswer
     }
 }

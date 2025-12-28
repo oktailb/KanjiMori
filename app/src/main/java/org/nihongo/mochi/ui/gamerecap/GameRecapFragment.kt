@@ -128,17 +128,8 @@ class GameRecapFragment : Fragment() {
     }
 
     private fun loadKanjiForLevel(levelKey: String): List<KanjiEntry> {
-        val (type, value) = when {
-            levelKey.startsWith("N") -> "jlpt" to levelKey
-            levelKey.startsWith("Grade ") -> {
-                val grade = levelKey.removePrefix("Grade ")
-                "grade" to grade
-            }
-            // Add other cases if needed (e.g. secondary school)
-            else -> return emptyList()
-        }
-        
-        return MochiApplication.kanjiRepository.getKanjiByLevel(type, value)
+        val characters = MochiApplication.levelContentProvider.getCharactersForLevel(levelKey)
+        return characters.mapNotNull { MochiApplication.kanjiRepository.getKanjiByCharacter(it) }
     }
 
     override fun onDestroyView() {

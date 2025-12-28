@@ -104,7 +104,7 @@ class WritingGameFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             loadAllKanjiDetails()
-            val kanjiCharsForLevel = loadKanjiCharsForLevel(level)
+            val kanjiCharsForLevel = MochiApplication.levelContentProvider.getCharactersForLevel(level)
 
             viewModel.allKanjiDetails.clear()
             viewModel.allKanjiDetails.addAll(
@@ -314,22 +314,6 @@ class WritingGameFragment : Fragment() {
                 progressIndicators[i].visibility = View.GONE
             }
         }
-    }
-
-    // --- Loading Data (Migrated to use Shared Repository) ---
-
-    private fun loadKanjiCharsForLevel(levelName: String): List<String> {
-        val (type, value) = when {
-            levelName.startsWith("N") -> "jlpt" to levelName
-            levelName.startsWith("Grade ") -> {
-                val grade = levelName.removePrefix("Grade ")
-                "grade" to grade
-            }
-            // Add custom mapping if needed
-            else -> return emptyList()
-        }
-        
-        return MochiApplication.kanjiRepository.getKanjiByLevel(type, value).map { it.character }
     }
 
     private fun loadMeanings(): Map<String, List<String>> {

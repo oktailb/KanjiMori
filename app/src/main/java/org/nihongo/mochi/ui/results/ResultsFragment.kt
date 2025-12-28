@@ -90,9 +90,7 @@ class ResultsFragment : Fragment() {
         snapshotsClient = PlayGames.getSnapshotsClient(requireActivity())
         
         statisticsEngine = StatisticsEngine(
-            MochiApplication.kanaRepository,
-            MochiApplication.kanjiRepository,
-            MochiApplication.wordRepository
+            MochiApplication.levelContentProvider
         )
 
         setupCollapsibleSections()

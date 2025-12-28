@@ -20,6 +20,7 @@ kotlinxSerialization = "1.7.3"
 kotlinTest = "2.0.21"
 kotlinxDatetime = "0.6.1"
 mokoResources = "0.24.5"
+kotlinxCoroutines = "1.7.3"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -42,6 +43,7 @@ kotlin-test = { group = "org.jetbrains.kotlin", name = "kotlin-test", version.re
 kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "kotlinxDatetime" }
 moko-resources = { group = "dev.icerock.moko", name = "resources", version.ref = "mokoResources" }
 moko-resources-generator = { group = "dev.icerock.moko", name = "resources-generator", version.ref = "mokoResources" }
+kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
