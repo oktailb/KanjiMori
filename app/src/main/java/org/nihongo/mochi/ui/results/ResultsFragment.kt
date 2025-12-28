@@ -14,10 +14,10 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import com.google.android.gms.games.SnapshotsClient
 import com.google.android.gms.games.snapshot.SnapshotMetadata
 import kotlinx.coroutines.launch
@@ -25,6 +25,7 @@ import org.nihongo.mochi.MochiApplication
 import org.nihongo.mochi.R
 import org.nihongo.mochi.databinding.FragmentResultsBinding
 import org.nihongo.mochi.domain.statistics.LevelProgress
+import org.nihongo.mochi.domain.statistics.ResultsViewModel
 import org.nihongo.mochi.domain.statistics.StatisticsEngine
 import org.nihongo.mochi.services.AndroidCloudSaveService
 
@@ -33,16 +34,20 @@ class ResultsFragment : Fragment() {
     private var _binding: FragmentResultsBinding? = null
     private val binding get() = _binding!!
     
+    // We maintain these references here if needed for direct calls, 
+    // but primarily they are injected into the ViewModel.
+    // However, StatisticsEngine is used directly in updateAllPercentages.
     private lateinit var statisticsEngine: StatisticsEngine
     private lateinit var androidCloudSaveService: AndroidCloudSaveService
 
     private val viewModel: ResultsViewModel by viewModels {
-        object : ViewModelProvider.Factory {
-            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        viewModelFactory {
+            initializer {
+                // Instantiate dependencies
                 androidCloudSaveService = AndroidCloudSaveService(requireActivity())
                 statisticsEngine = StatisticsEngine(MochiApplication.levelContentProvider)
-                @Suppress("UNCHECKED_CAST")
-                return ResultsViewModel(androidCloudSaveService, statisticsEngine) as T
+                
+                ResultsViewModel(androidCloudSaveService, statisticsEngine)
             }
         }
     }
@@ -99,12 +104,15 @@ class ResultsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
-        // statisticsEngine is initialized in ViewModel factory but we need it here for list populating
-        // In a pure MVVM, the ViewModel would expose the list of items to display.
-        // For now, we will use the one created in Factory if possible, or create another instance here just for reading stats.
-        // Actually, we can reuse the one from ViewModel if we exposed it, or just instantiate here as before.
-        // Let's instantiate locally for UI population to keep changes minimal on that part.
-        statisticsEngine = StatisticsEngine(MochiApplication.levelContentProvider)
+        // We need statisticsEngine for UI population (updateAllPercentages)
+        // It was instantiated in the factory, but that local variable might not be set 
+        // if the VM was restored. So we must ensure it's initialized here too.
+        if (!::statisticsEngine.isInitialized) {
+             statisticsEngine = StatisticsEngine(MochiApplication.levelContentProvider)
+        }
+        if (!::androidCloudSaveService.isInitialized) {
+            androidCloudSaveService = AndroidCloudSaveService(requireActivity())
+        }
 
         setupCollapsibleSections()
         updateAllPercentages()
@@ -162,7 +170,7 @@ class ResultsFragment : Fragment() {
                  val intent = androidCloudSaveService.getAchievementsIntent()
                  achievementsLauncher.launch(intent)
              } catch (e: Exception) {
-                 Toast.makeText(requireContext(), "Impossible d'ouvrir les succès", Toast.LENGTH_SHORT).show()
+                 Toast.makeText(requireContext(), "Impossible d'ouvrir les succès:" + e.message, Toast.LENGTH_SHORT).show()
              }
         }
     }
@@ -173,7 +181,7 @@ class ResultsFragment : Fragment() {
                 val intent = androidCloudSaveService.getSavedGamesIntent("Sauvegardes", true, true, 5)
                 savedGamesLauncher.launch(intent)
             } catch (e: Exception) {
-                 Toast.makeText(requireContext(), "Impossible d'ouvrir l'interface de sauvegarde", Toast.LENGTH_SHORT).show()
+                 Toast.makeText(requireContext(), "Impossible d'ouvrir l'interface de sauvegarde: " + e.message, Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -346,7 +354,7 @@ class ResultsFragment : Fragment() {
             }
             "Writing User" -> {
                 binding.progressWritingUser.progress = percentageInt
-                binding.titleWritingUser.text = getString(R.string.writing_user_lists) + " - $percentageInt%"
+                binding.titleWritingUser.text = getString(R.string.reading_user_list) + " - $percentageInt%"
             }
             "Writing JLPT N5" -> {
                 binding.progressWritingN5.progress = percentageInt
@@ -401,10 +409,5 @@ class ResultsFragment : Fragment() {
                 binding.titleWritingLycee.text = getString(R.string.results_high_school, percentageInt)
             }
         }
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 }
