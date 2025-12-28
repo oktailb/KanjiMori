@@ -3,8 +3,6 @@ package org.nihongo.mochi.ui.writinggame
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
@@ -16,19 +14,23 @@ import android.widget.ImageView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import kotlinx.coroutines.launch
 import org.nihongo.mochi.MochiApplication
 import org.nihongo.mochi.R
 import org.nihongo.mochi.databinding.FragmentWritingGameBinding
+import org.nihongo.mochi.domain.game.QuestionType
 import org.nihongo.mochi.domain.kana.KanaUtils
 import org.nihongo.mochi.domain.kana.RomajiToKana
-import org.nihongo.mochi.settings.ANIMATION_SPEED_PREF_KEY
 import org.nihongo.mochi.domain.models.GameStatus
+import org.nihongo.mochi.domain.models.GameState
 import org.nihongo.mochi.domain.models.KanjiDetail
 import org.nihongo.mochi.domain.models.Reading
+import org.nihongo.mochi.settings.ANIMATION_SPEED_PREF_KEY
 import java.util.Locale
 import kotlin.math.max
 
@@ -79,12 +81,14 @@ class WritingGameFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
+        val animationSpeed = sharedPreferences.getFloat(ANIMATION_SPEED_PREF_KEY, 1.0f)
+        viewModel.setAnimationSpeed(animationSpeed)
+        
         if (!viewModel.isGameInitialized) {
             initializeGame()
-            viewModel.isGameInitialized = true
-        } else {
-             restoreUI()
         }
+
+        setupStateObservation()
 
         binding.buttonSubmitAnswer.setOnClickListener { checkAnswer() }
         binding.editTextAnswer.setOnEditorActionListener { _, actionId, _ ->
@@ -99,6 +103,33 @@ class WritingGameFragment : Fragment() {
         binding.editTextAnswer.addTextChangedListener(textWatcher)
     }
     
+    private fun setupStateObservation() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.state.collect { state ->
+                    renderState(state)
+                }
+            }
+        }
+    }
+
+    private fun renderState(state: GameState) {
+        when(state) {
+            GameState.Loading -> { 
+                // Could show loading indicator
+            }
+            GameState.WaitingForAnswer -> {
+                displayQuestion()
+            }
+            is GameState.ShowingResult -> {
+                showResult(state.isCorrect)
+            }
+            GameState.Finished -> {
+                findNavController().popBackStack()
+            }
+        }
+    }
+
     private fun initializeGame() {
         val level = args.level ?: ""
 
@@ -114,7 +145,8 @@ class WritingGameFragment : Fragment() {
             viewModel.kanjiListPosition = 0
 
             if (viewModel.allKanjiDetails.isNotEmpty()) {
-                startNewSet()
+                viewModel.startGame()
+                viewModel.isGameInitialized = true
             } else {
                 Log.e("WritingGameFragment", "No kanji loaded for level: $level.")
                 findNavController().popBackStack()
@@ -122,71 +154,10 @@ class WritingGameFragment : Fragment() {
         }
     }
     
-    private fun restoreUI() {
-        if (viewModel.allKanjiDetails.isEmpty()) return
-        
-        // Restore Question Display
-        binding.textKanjiToGuess.text = viewModel.currentKanji.character
-        binding.textQuestionLabel.text = if (viewModel.currentQuestionType == QuestionType.MEANING) {
-            getString(R.string.game_writing_label_meaning)
-        } else {
-            getString(R.string.game_writing_label_reading)
-        }
-        
-        // Restore Button State
-        if (viewModel.isAnswerProcessing) {
-             binding.buttonSubmitAnswer.isEnabled = false
-             if (viewModel.lastAnswerStatus == true) {
-                 binding.buttonSubmitAnswer.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.answer_correct))
-             } else if (viewModel.lastAnswerStatus == false) {
-                 binding.buttonSubmitAnswer.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.answer_incorrect))
-             } else {
-                 binding.buttonSubmitAnswer.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.answer_neutral))
-             }
-        } else {
-             binding.buttonSubmitAnswer.isEnabled = true
-             binding.buttonSubmitAnswer.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.leaf_green))
-        }
-
-        // Restore Feedback
-        if (viewModel.showCorrectionFeedback) {
-             showCorrectionFeedbackUI()
-             
-             if (viewModel.correctionDelayPending) {
-                  Handler(Looper.getMainLooper()).postDelayed({
-                      displayQuestion()
-                  }, 2000)
-                  viewModel.correctionDelayPending = false 
-             }
-        } else {
-            binding.layoutCorrectionFeedback.visibility = View.INVISIBLE
-        }
-        
-        updateProgressBar()
-    }
-
-    private fun startNewSet() {
-        val hasNext = viewModel.startNewSet()
-        
-        if (!hasNext) {
-            findNavController().popBackStack()
-            return
-        }
-
-        updateProgressBar()
-        displayQuestion()
-    }
-
     private fun displayQuestion() {
-        if (viewModel.revisionList.isEmpty()) {
-            startNewSet()
-            return
-        }
-
-        viewModel.nextQuestion()
-
         binding.textKanjiToGuess.text = viewModel.currentKanji.character
         binding.editTextAnswer.text.clear()
+        
         // Ensure editable state
         binding.editTextAnswer.isEnabled = true
         binding.buttonSubmitAnswer.isEnabled = true
@@ -201,60 +172,39 @@ class WritingGameFragment : Fragment() {
 
         // request focus and show keyboard if possible
         binding.editTextAnswer.requestFocus()
+        
+        updateProgressBar()
     }
 
     private fun checkAnswer() {
-        if (viewModel.isAnswerProcessing) return
-        
         val userAnswer = binding.editTextAnswer.text.toString()
-        val isCorrect = viewModel.submitAnswer(userAnswer)
-
-        // Do NOT disable editTextAnswer to keep keyboard open
+        viewModel.submitAnswer(userAnswer)
+        // Disable UI immediately, state update will follow
+        binding.buttonSubmitAnswer.isEnabled = false
+    }
+    
+    private fun showResult(isCorrect: Boolean) {
         binding.buttonSubmitAnswer.isEnabled = false
 
         if (isCorrect) {
             val status = viewModel.kanjiStatus[viewModel.currentKanji]
 
             if (status == GameStatus.CORRECT) {
-                // Fully solved
                 binding.buttonSubmitAnswer.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.answer_correct))
             } else {
-                // Partially solved
                 binding.buttonSubmitAnswer.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.answer_neutral))
             }
-
-            val animationSpeed = sharedPreferences.getFloat(ANIMATION_SPEED_PREF_KEY, 1.0f)
-            val delay = (1000 * animationSpeed).toLong()
             
-            viewModel.correctionDelayPending = true
-            Handler(Looper.getMainLooper()).postDelayed({
-                if (isAdded) displayQuestion() // Check isAdded to avoid crash if fragment destroyed
-            }, delay)
-
+            // Delay is handled by engine via state transitions
         } else {
             binding.buttonSubmitAnswer.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.answer_incorrect))
-            
-            // Setup Correction Feedback
-            var delayMs = showCorrectionFeedbackUI()
-            
-            // Limit max delay to avoid waiting too long (e.g., 6 seconds max)
-            delayMs = delayMs.coerceAtMost(6000L)
-
-            val animationSpeed = sharedPreferences.getFloat(ANIMATION_SPEED_PREF_KEY, 1.0f)
-            val finalDelay = (delayMs * animationSpeed).toLong()
-            
-            viewModel.correctionDelayPending = true
-            Handler(Looper.getMainLooper()).postDelayed({
-                if (isAdded) displayQuestion()
-            }, finalDelay)
+            showCorrectionFeedbackUI()
         }
 
         updateProgressBar()
     }
     
-    private fun showCorrectionFeedbackUI(): Long {
-        var delayMs = 3000L
-        
+    private fun showCorrectionFeedbackUI() {
         binding.layoutCorrectionFeedback.visibility = View.VISIBLE
         
         if (viewModel.currentQuestionType == QuestionType.MEANING) {
@@ -264,9 +214,6 @@ class WritingGameFragment : Fragment() {
             
             val meaningsText = viewModel.currentKanji.meanings.joinToString(", ")
             binding.textCorrectionSimple.text = meaningsText
-            
-            // Calculate delay based on length
-            delayMs = max(2000L, meaningsText.length * 100L)
         } else {
             // Show Readings Columns
             binding.textCorrectionSimple.visibility = View.GONE
@@ -277,12 +224,7 @@ class WritingGameFragment : Fragment() {
             
             binding.textReadingsOn.text = if (onReadings.isNotEmpty()) onReadings else "-"
             binding.textReadingsKun.text = if (kunReadings.isNotEmpty()) kunReadings else "-"
-            
-            // Calculate delay
-            val totalLength = onReadings.length + kunReadings.length
-            delayMs = max(2000L, totalLength * 150L)
         }
-        return delayMs
     }
 
     private fun updateProgressBar() {

@@ -9,18 +9,12 @@ import org.nihongo.mochi.domain.kana.KanaToRomaji
 import org.nihongo.mochi.domain.kana.KanaUtils
 import org.nihongo.mochi.domain.models.AnswerButtonState
 import org.nihongo.mochi.domain.models.GameStatus
+import org.nihongo.mochi.domain.models.GameState
 import org.nihongo.mochi.domain.models.KanjiDetail
 import org.nihongo.mochi.domain.models.KanjiProgress
 import kotlin.random.Random
 
 enum class QuestionDirection { NORMAL, REVERSE }
-
-sealed class GameState {
-    object Loading : GameState()
-    object WaitingForAnswer : GameState()
-    data class ShowingResult(val isCorrect: Boolean, val selectedAnswerIndex: Int) : GameState()
-    object Finished : GameState()
-}
 
 class RecognitionGameEngine {
     var isGameInitialized = false

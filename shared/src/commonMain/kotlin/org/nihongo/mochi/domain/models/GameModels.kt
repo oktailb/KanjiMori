@@ -30,3 +30,11 @@ enum class KanaQuestionDirection { NORMAL, REVERSE } // NORMAL: Kana -> Romaji, 
 
 @Serializable
 data class Word(val text: String, val phonetics: String)
+
+// Shared Game State
+sealed class GameState {
+    object Loading : GameState()
+    object WaitingForAnswer : GameState()
+    data class ShowingResult(val isCorrect: Boolean, val selectedAnswerIndex: Int = -1) : GameState()
+    object Finished : GameState()
+}

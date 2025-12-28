@@ -19,7 +19,7 @@ import androidx.navigation.fragment.findNavController
 import kotlinx.coroutines.launch
 import org.nihongo.mochi.R
 import org.nihongo.mochi.databinding.FragmentKanaQuizBinding
-import org.nihongo.mochi.domain.game.GameState
+import org.nihongo.mochi.domain.models.GameState
 import org.nihongo.mochi.domain.kana.AndroidResourceLoader
 import org.nihongo.mochi.domain.kana.KanaRepository
 import org.nihongo.mochi.domain.models.AnswerButtonState

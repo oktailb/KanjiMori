@@ -7,9 +7,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import org.nihongo.mochi.data.ScoreManager
 import org.nihongo.mochi.domain.models.AnswerButtonState
 import org.nihongo.mochi.domain.models.GameStatus
+import org.nihongo.mochi.domain.models.GameState
 import org.nihongo.mochi.domain.models.KanaCharacter
 import org.nihongo.mochi.domain.models.KanaProgress
 import org.nihongo.mochi.domain.models.KanaQuestionDirection
+import kotlin.random.Random
 
 enum class QuizMode {
     KANA_TO_ROMAJI,
@@ -100,7 +102,7 @@ class KanaQuizEngine {
         val progress = kanaProgress[currentQuestion]!!
 
         currentDirection = when {
-            !progress.normalSolved && !progress.reverseSolved -> if (Math.random() < 0.5) KanaQuestionDirection.NORMAL else KanaQuestionDirection.REVERSE
+            !progress.normalSolved && !progress.reverseSolved -> if (Random.nextDouble() < 0.5) KanaQuestionDirection.NORMAL else KanaQuestionDirection.REVERSE
             !progress.normalSolved -> KanaQuestionDirection.NORMAL
             else -> KanaQuestionDirection.REVERSE
         }

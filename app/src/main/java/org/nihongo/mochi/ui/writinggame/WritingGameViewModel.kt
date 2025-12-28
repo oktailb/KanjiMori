@@ -1,9 +1,13 @@
 package org.nihongo.mochi.ui.writinggame
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import org.nihongo.mochi.domain.game.TextNormalizer
 import org.nihongo.mochi.domain.game.WritingGameEngine
 import org.nihongo.mochi.domain.models.GameStatus
+import org.nihongo.mochi.domain.models.GameState
 import org.nihongo.mochi.domain.models.KanjiDetail
 import org.nihongo.mochi.domain.models.KanjiProgress
 import java.text.Normalizer
@@ -54,14 +58,10 @@ class WritingGameViewModel : ViewModel() {
     val currentQuestionType: QuestionType
         get() = engine.currentQuestionType
 
-    var isAnswerProcessing: Boolean
-        get() = engine.isAnswerProcessing
-        set(value) { engine.isAnswerProcessing = value }
-
-    var lastAnswerStatus: Boolean?
-        get() = engine.lastAnswerStatus
-        set(value) { engine.lastAnswerStatus = value }
-
+    // Observables
+    val state: StateFlow<GameState> = engine.state
+    
+    // Feedback state from engine (though StateFlow handles main flow)
     var showCorrectionFeedback: Boolean
         get() = engine.showCorrectionFeedback
         set(value) { engine.showCorrectionFeedback = value }
@@ -70,6 +70,10 @@ class WritingGameViewModel : ViewModel() {
         get() = engine.correctionDelayPending
         set(value) { engine.correctionDelayPending = value }
 
+    fun setAnimationSpeed(speed: Float) {
+        engine.animationSpeed = speed
+    }
+
     fun startNewSet(): Boolean {
         return engine.startNewSet()
     }
@@ -77,9 +81,15 @@ class WritingGameViewModel : ViewModel() {
     fun nextQuestion() {
         engine.nextQuestion()
     }
+    
+    fun startGame() {
+        engine.startGame()
+    }
 
-    fun submitAnswer(userAnswer: String): Boolean {
-        return engine.submitAnswer(userAnswer)
+    fun submitAnswer(userAnswer: String) {
+        viewModelScope.launch {
+            engine.submitAnswer(userAnswer)
+        }
     }
 
     fun resetState() {

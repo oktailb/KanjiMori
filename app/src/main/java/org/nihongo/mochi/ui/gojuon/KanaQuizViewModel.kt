@@ -4,11 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import org.nihongo.mochi.domain.game.GameState
 import org.nihongo.mochi.domain.game.KanaQuizEngine
 import org.nihongo.mochi.domain.game.QuizMode
 import org.nihongo.mochi.domain.models.AnswerButtonState
 import org.nihongo.mochi.domain.models.GameStatus
+import org.nihongo.mochi.domain.models.GameState
 import org.nihongo.mochi.domain.models.KanaCharacter
 import org.nihongo.mochi.domain.models.KanaProgress
 import org.nihongo.mochi.domain.models.KanaQuestionDirection

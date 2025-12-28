@@ -1,8 +1,13 @@
 package org.nihongo.mochi.domain.game
 
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import org.nihongo.mochi.data.ScoreManager
 import org.nihongo.mochi.domain.kana.KanaUtils
 import org.nihongo.mochi.domain.models.GameStatus
+import org.nihongo.mochi.domain.models.GameState
 import org.nihongo.mochi.domain.models.KanjiDetail
 import org.nihongo.mochi.domain.models.KanjiProgress
 import kotlin.random.Random
@@ -27,11 +32,17 @@ class WritingGameEngine(private val textNormalizer: TextNormalizer? = null) {
     lateinit var currentKanji: KanjiDetail
     var currentQuestionType: QuestionType = QuestionType.MEANING
     
-    // UI State for Feedback
+    // UI State
+    private val _state = MutableStateFlow<GameState>(GameState.Loading)
+    val state: StateFlow<GameState> = _state.asStateFlow()
+    
     var isAnswerProcessing = false
     var lastAnswerStatus: Boolean? = null
     var showCorrectionFeedback = false
     var correctionDelayPending = false
+
+    // Configuration
+    var animationSpeed: Float = 1.0f
 
     fun resetState() {
         isGameInitialized = false
@@ -45,6 +56,15 @@ class WritingGameEngine(private val textNormalizer: TextNormalizer? = null) {
         lastAnswerStatus = null
         showCorrectionFeedback = false
         correctionDelayPending = false
+        _state.value = GameState.Loading
+    }
+
+    fun startGame() {
+        if (startNewSet()) {
+            displayQuestion()
+        } else {
+            _state.value = GameState.Finished
+        }
     }
 
     fun startNewSet(): Boolean {
@@ -68,6 +88,18 @@ class WritingGameEngine(private val textNormalizer: TextNormalizer? = null) {
         }
         return true
     }
+    
+    private fun displayQuestion() {
+        if (revisionList.isEmpty()) {
+            if (!startNewSet()) {
+                _state.value = GameState.Finished
+                return
+            }
+        }
+        
+        nextQuestion()
+        _state.value = GameState.WaitingForAnswer
+    }
 
     fun nextQuestion() {
         if (revisionList.isEmpty()) return
@@ -87,7 +119,7 @@ class WritingGameEngine(private val textNormalizer: TextNormalizer? = null) {
         }
     }
 
-    fun submitAnswer(userAnswer: String): Boolean {
+    suspend fun submitAnswer(userAnswer: String): Boolean {
         if (isAnswerProcessing) return false
         isAnswerProcessing = true
 
@@ -112,9 +144,37 @@ class WritingGameEngine(private val textNormalizer: TextNormalizer? = null) {
             } else {
                 kanjiStatus[currentKanji] = GameStatus.PARTIAL
             }
+            
+            _state.value = GameState.ShowingResult(isCorrect)
+            delay((1000 * animationSpeed).toLong())
+            displayQuestion()
+            
         } else {
             kanjiStatus[currentKanji] = GameStatus.INCORRECT
             showCorrectionFeedback = true
+            _state.value = GameState.ShowingResult(isCorrect)
+            
+            // For incorrect answers, feedback is shown, and we might wait longer or wait for user action
+            // The original logic had a complex delay. 
+            // We can simplify: showing result -> delay -> next question OR just show result and let UI decide when to call next
+            
+            // To mimic original behavior where feedback time depended on length:
+            // The logic was in Fragment. We can move it here or just use a standard delay + factor
+            
+            var delayMs = 2000L
+            if (currentQuestionType == QuestionType.MEANING) {
+                 val len = currentKanji.meanings.joinToString(", ").length
+                 delayMs = kotlin.math.max(2000L, len * 100L)
+            } else {
+                 val len = currentKanji.readings.sumOf { it.value.length }
+                 delayMs = kotlin.math.max(2000L, len * 150L)
+            }
+            
+            // Limit max delay
+            delayMs = delayMs.coerceAtMost(6000L)
+            
+            delay((delayMs * animationSpeed).toLong())
+            displayQuestion()
         }
 
         return isCorrect
