@@ -2,15 +2,12 @@ package org.nihongo.mochi.ui.results
 
 import android.app.Activity
 import android.content.Context
-import android.content.Intent
-import android.graphics.Bitmap
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -19,16 +16,14 @@ import com.google.android.gms.games.AchievementsClient
 import com.google.android.gms.games.GamesSignInClient
 import com.google.android.gms.games.PlayGames
 import com.google.android.gms.games.SnapshotsClient
-import com.google.android.gms.games.snapshot.Snapshot
 import com.google.android.gms.games.snapshot.SnapshotMetadata
 import com.google.android.gms.games.snapshot.SnapshotMetadataChange
-import com.google.android.gms.tasks.Task
 import org.nihongo.mochi.MochiApplication
 import org.nihongo.mochi.R
 import org.nihongo.mochi.data.ScoreManager
 import org.nihongo.mochi.databinding.FragmentResultsBinding
-import org.nihongo.mochi.domain.kana.KanaType
-import org.xmlpull.v1.XmlPullParser
+import org.nihongo.mochi.domain.statistics.LevelProgress
+import org.nihongo.mochi.domain.statistics.StatisticsEngine
 import java.io.IOException
 
 class ResultsFragment : Fragment() {
@@ -39,6 +34,8 @@ class ResultsFragment : Fragment() {
     private lateinit var gamesSignInClient: GamesSignInClient
     private lateinit var achievementsClient: AchievementsClient
     private lateinit var snapshotsClient: SnapshotsClient
+    
+    private lateinit var statisticsEngine: StatisticsEngine
 
     private val RC_SAVED_GAMES = 9009
     private var mCurrentSaveName = "NihongoMochiSnapshot"
@@ -91,6 +88,12 @@ class ResultsFragment : Fragment() {
         gamesSignInClient = PlayGames.getGamesSignInClient(requireActivity())
         achievementsClient = PlayGames.getAchievementsClient(requireActivity())
         snapshotsClient = PlayGames.getSnapshotsClient(requireActivity())
+        
+        statisticsEngine = StatisticsEngine(
+            MochiApplication.kanaRepository,
+            MochiApplication.kanjiRepository,
+            MochiApplication.wordRepository
+        )
 
         setupCollapsibleSections()
         updateAllPercentages()
@@ -262,128 +265,16 @@ class ResultsFragment : Fragment() {
     }
 
     private fun updateAllPercentages() {
-        val levelInfos = initializeLevelInfos()
-
-        for (info in levelInfos) {
-            // Determine score type for calculation
-            val scoreType = when {
-                info.name.startsWith("Reading") -> ScoreManager.ScoreType.READING
-                info.name.startsWith("Writing") -> ScoreManager.ScoreType.WRITING
-                else -> ScoreManager.ScoreType.RECOGNITION
-            }
-
-            val charactersForLevel = getCharactersForLevel(info.xmlName, scoreType)
-
-            // For user list, we calculate differently: mastered vs encountered
-            val percentage = if (info.xmlName == "user_list") {
-                calculateUserListPercentage(scoreType)
-            } else {
-                calculateMasteryPercentage(charactersForLevel, scoreType)
-            }
-
-            updateCategoryUI(info, percentage)
+        val allStats = statisticsEngine.getAllStatistics()
+        
+        for (stat in allStats) {
+            updateCategoryUI(stat)
         }
     }
     
-    private fun getCharactersForLevel(levelKey: String, scoreType: ScoreManager.ScoreType): List<String> {
-        return when {
-            levelKey == "Hiragana" -> MochiApplication.kanaRepository.getKanaEntries(KanaType.HIRAGANA).map { it.character }
-            levelKey == "Katakana" -> MochiApplication.kanaRepository.getKanaEntries(KanaType.KATAKANA).map { it.character }
-            levelKey.startsWith("bccwj_wordlist_") || levelKey.startsWith("reading_") -> {
-                 val cleanKey = if (levelKey.startsWith("reading_n")) "jlpt_wordlist_${levelKey.removePrefix("reading_")}" else levelKey
-                 MochiApplication.wordRepository.getWordsForLevel(cleanKey)
-            }
-            else -> {
-                val (type, value) = when {
-                    levelKey.startsWith("N") -> "jlpt" to levelKey
-                    levelKey.startsWith("Grade") -> "grade" to levelKey.removePrefix("Grade ")
-                    else -> "" to ""
-                }
-                if(type.isNotEmpty()) MochiApplication.kanjiRepository.getKanjiByLevel(type, value).map { it.character } else emptyList()
-            }
-        }
-    }
-
-    private fun calculateUserListPercentage(scoreType: ScoreManager.ScoreType): Double {
-        val scores = ScoreManager.getAllScores(scoreType)
-        if (scores.isEmpty()) return 0.0
-
-        val totalEncountered = scores.size
-        val mastered = scores.count { (_, score) -> (score.successes - score.failures) >= 10 }
-
-        return if (totalEncountered > 0) {
-            (mastered.toDouble() / totalEncountered.toDouble()) * 100.0
-        } else {
-            0.0
-        }
-    }
-
-    private fun initializeLevelInfos(): List<LevelInfo> {
-        return listOf(
-            LevelInfo("JLPT N5", "N5"),
-            LevelInfo("JLPT N4", "N4"),
-            LevelInfo("JLPT N3", "N3"),
-            LevelInfo("JLPT N2", "N2"),
-            LevelInfo("JLPT N1", "N1"),
-            LevelInfo("Grade 1", "Grade 1"),
-            LevelInfo("Grade 2", "Grade 2"),
-            LevelInfo("Grade 3", "Grade 3"),
-            LevelInfo("Grade 4", "Grade 4"),
-            LevelInfo("Grade 5", "Grade 5"),
-            LevelInfo("Grade 6", "Grade 6"),
-            LevelInfo("Collège", "Grade 7"),
-            LevelInfo("Lycée", "Grade 8"),
-            LevelInfo("Hiragana", "Hiragana"),
-            LevelInfo("Katakana", "Katakana"),
-            LevelInfo("Reading User", "user_list"),
-            LevelInfo("Reading N5", "reading_n5"),
-            LevelInfo("Reading N4", "reading_n4"),
-            LevelInfo("Reading N3", "reading_n3"),
-            LevelInfo("Reading N2", "reading_n2"),
-            LevelInfo("Reading N1", "reading_n1"),
-            LevelInfo("Reading 1000", "bccwj_wordlist_1000"),
-            LevelInfo("Reading 2000", "bccwj_wordlist_2000"),
-            LevelInfo("Reading 3000", "bccwj_wordlist_3000"),
-            LevelInfo("Reading 4000", "bccwj_wordlist_4000"),
-            LevelInfo("Reading 5000", "bccwj_wordlist_5000"),
-            LevelInfo("Reading 6000", "bccwj_wordlist_6000"),
-            LevelInfo("Reading 7000", "bccwj_wordlist_7000"),
-            LevelInfo("Reading 8000", "bccwj_wordlist_8000"),
-            LevelInfo("Writing User", "user_list"),
-            LevelInfo("Writing JLPT N5", "N5"),
-            LevelInfo("Writing JLPT N4", "N4"),
-            LevelInfo("Writing JLPT N3", "N3"),
-            LevelInfo("Writing JLPT N2", "N2"),
-            LevelInfo("Writing JLPT N1", "N1"),
-            LevelInfo("Writing Grade 1", "Grade 1"),
-            LevelInfo("Writing Grade 2", "Grade 2"),
-            LevelInfo("Writing Grade 3", "Grade 3"),
-            LevelInfo("Writing Grade 4", "Grade 4"),
-            LevelInfo("Writing Grade 5", "Grade 5"),
-            LevelInfo("Writing Grade 6", "Grade 6"),
-            LevelInfo("Writing Collège", "Grade 7"),
-            LevelInfo("Writing Lycée", "Grade 8")
-        )
-    }
-
-    private fun calculateMasteryPercentage(characterList: List<String>, scoreType: ScoreManager.ScoreType): Double {
-        if (characterList.isEmpty()) return 0.0
-
-        val totalMasteryPoints = characterList.sumOf { character ->
-            val score = ScoreManager.getScore(character, scoreType)
-            val balance = score.successes - score.failures
-            balance.coerceIn(0, 10).toDouble()
-        }
-
-        val maxPossiblePoints = characterList.size * 10.0
-        if (maxPossiblePoints == 0.0) return 0.0
-
-        return (totalMasteryPoints / maxPossiblePoints) * 100
-    }
-
-    private fun updateCategoryUI(info: LevelInfo, percentage: Double) {
-        val percentageInt = percentage.toInt()
-        when (info.name) {
+    private fun updateCategoryUI(info: LevelProgress) {
+        val percentageInt = info.percentage
+        when (info.title) {
             "Hiragana" -> {
                 binding.progressRecognitionHiragana.progress = percentageInt
                 binding.titleRecognitionHiragana.text = getString(R.string.results_hiragana, percentageInt)
@@ -563,6 +454,4 @@ class ResultsFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
-
-    data class LevelInfo(val name: String, val xmlName: String)
 }

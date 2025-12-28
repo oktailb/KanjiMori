@@ -22,16 +22,13 @@ import androidx.navigation.fragment.navArgs
 import kotlinx.coroutines.launch
 import org.nihongo.mochi.MochiApplication
 import org.nihongo.mochi.R
-import org.nihongo.mochi.data.ScoreManager
-import org.nihongo.mochi.data.ScoreManager.ScoreType
 import org.nihongo.mochi.databinding.FragmentWritingGameBinding
+import org.nihongo.mochi.domain.kana.KanaUtils
 import org.nihongo.mochi.domain.kana.RomajiToKana
 import org.nihongo.mochi.settings.ANIMATION_SPEED_PREF_KEY
 import org.nihongo.mochi.domain.models.GameStatus
 import org.nihongo.mochi.domain.models.KanjiDetail
-import org.nihongo.mochi.domain.models.KanjiProgress
 import org.nihongo.mochi.domain.models.Reading
-import java.text.Normalizer
 import java.util.Locale
 import kotlin.math.max
 
@@ -169,24 +166,11 @@ class WritingGameFragment : Fragment() {
     }
 
     private fun startNewSet() {
-        viewModel.revisionList.clear()
-        viewModel.kanjiStatus.clear()
-        viewModel.kanjiProgress.clear()
-
-        if (viewModel.kanjiListPosition >= viewModel.allKanjiDetails.size) {
+        val hasNext = viewModel.startNewSet()
+        
+        if (!hasNext) {
             findNavController().popBackStack()
             return
-        }
-
-        val nextSet = viewModel.allKanjiDetails.drop(viewModel.kanjiListPosition).take(10)
-        viewModel.kanjiListPosition += nextSet.size
-
-        viewModel.currentKanjiSet.clear()
-        viewModel.currentKanjiSet.addAll(nextSet)
-        viewModel.revisionList.addAll(nextSet)
-        viewModel.currentKanjiSet.forEach {
-            viewModel.kanjiStatus[it] = GameStatus.NOT_ANSWERED
-            viewModel.kanjiProgress[it] = KanjiProgress()
         }
 
         updateProgressBar()
@@ -199,12 +183,8 @@ class WritingGameFragment : Fragment() {
             return
         }
 
-        viewModel.isAnswerProcessing = false
-        viewModel.lastAnswerStatus = null
-        viewModel.showCorrectionFeedback = false
-        viewModel.correctionDelayPending = false
-        
-        viewModel.currentKanji = viewModel.revisionList.random()
+        viewModel.nextQuestion()
+
         binding.textKanjiToGuess.text = viewModel.currentKanji.character
         binding.editTextAnswer.text.clear()
         // Ensure editable state
@@ -212,14 +192,6 @@ class WritingGameFragment : Fragment() {
         binding.buttonSubmitAnswer.isEnabled = true
         binding.buttonSubmitAnswer.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.leaf_green))
         binding.layoutCorrectionFeedback.visibility = View.INVISIBLE
-
-        // Determine question type based on what is missing
-        val progress = viewModel.kanjiProgress[viewModel.currentKanji]!!
-        viewModel.currentQuestionType = when {
-            !progress.meaningSolved && !progress.readingSolved -> if (Math.random() < 0.5) QuestionType.MEANING else QuestionType.READING
-            !progress.meaningSolved -> QuestionType.MEANING
-            else -> QuestionType.READING // reading not solved
-        }
 
         binding.textQuestionLabel.text = if (viewModel.currentQuestionType == QuestionType.MEANING) {
             getString(R.string.game_writing_label_meaning)
@@ -233,36 +205,22 @@ class WritingGameFragment : Fragment() {
 
     private fun checkAnswer() {
         if (viewModel.isAnswerProcessing) return
-        viewModel.isAnswerProcessing = true
-
+        
         val userAnswer = binding.editTextAnswer.text.toString()
-        val isCorrect = if (viewModel.currentQuestionType == QuestionType.MEANING) {
-            checkMeaning(userAnswer)
-        } else {
-            checkReading(userAnswer)
-        }
-
-        ScoreManager.saveScore(viewModel.currentKanji.character, isCorrect, ScoreType.WRITING)
+        val isCorrect = viewModel.submitAnswer(userAnswer)
 
         // Do NOT disable editTextAnswer to keep keyboard open
         binding.buttonSubmitAnswer.isEnabled = false
 
         if (isCorrect) {
-            val progress = viewModel.kanjiProgress[viewModel.currentKanji]!!
-            if (viewModel.currentQuestionType == QuestionType.MEANING) progress.meaningSolved = true
-            else progress.readingSolved = true
+            val status = viewModel.kanjiStatus[viewModel.currentKanji]
 
-            if (progress.meaningSolved && progress.readingSolved) {
+            if (status == GameStatus.CORRECT) {
                 // Fully solved
                 binding.buttonSubmitAnswer.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.answer_correct))
-                viewModel.kanjiStatus[viewModel.currentKanji] = GameStatus.CORRECT
-                viewModel.revisionList.remove(viewModel.currentKanji)
-                viewModel.lastAnswerStatus = true
             } else {
                 // Partially solved
                 binding.buttonSubmitAnswer.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.answer_neutral))
-                viewModel.kanjiStatus[viewModel.currentKanji] = GameStatus.PARTIAL
-                viewModel.lastAnswerStatus = null
             }
 
             val animationSpeed = sharedPreferences.getFloat(ANIMATION_SPEED_PREF_KEY, 1.0f)
@@ -275,10 +233,7 @@ class WritingGameFragment : Fragment() {
 
         } else {
             binding.buttonSubmitAnswer.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.answer_incorrect))
-            viewModel.kanjiStatus[viewModel.currentKanji] = GameStatus.INCORRECT
-            viewModel.lastAnswerStatus = false
-            viewModel.showCorrectionFeedback = true
-
+            
             // Setup Correction Feedback
             var delayMs = showCorrectionFeedbackUI()
             
@@ -317,7 +272,7 @@ class WritingGameFragment : Fragment() {
             binding.textCorrectionSimple.visibility = View.GONE
             binding.layoutReadingsColumns.visibility = View.VISIBLE
             
-            val onReadings = viewModel.currentKanji.readings.filter { it.type == "on" }.joinToString("\n") { hiraganaToKatakana(it.value) }
+            val onReadings = viewModel.currentKanji.readings.filter { it.type == "on" }.joinToString("\n") { KanaUtils.hiraganaToKatakana(it.value) }
             val kunReadings = viewModel.currentKanji.readings.filter { it.type == "kun" }.joinToString("\n") { it.value }
             
             binding.textReadingsOn.text = if (onReadings.isNotEmpty()) onReadings else "-"
@@ -328,56 +283,6 @@ class WritingGameFragment : Fragment() {
             delayMs = max(2000L, totalLength * 150L)
         }
         return delayMs
-    }
-
-    private fun normalizeForComparison(input: String, isReading: Boolean): String {
-        var normalized = input.lowercase()
-
-        // For meanings, also remove accents
-        if (!isReading) {
-            normalized = Normalizer.normalize(normalized, Normalizer.Form.NFD)
-                .replace("\\p{InCombiningDiacriticalMarks}+".toRegex(), "")
-        }
-
-        // For readings, convert everything to Hiragana
-        if (isReading) {
-            normalized = katakanaToHiragana(normalized)
-        }
-
-        // Remove common punctuation and spaces
-        return normalized.replace(Regex("[.\\s-]"), "")
-    }
-
-    private fun checkMeaning(answer: String): Boolean {
-        val normalizedAnswer = normalizeForComparison(answer, isReading = false)
-        return viewModel.currentKanji.meanings.any { normalizeForComparison(it, isReading = false) == normalizedAnswer }
-    }
-    
-    // Converts hiragana characters to katakana
-    private fun hiraganaToKatakana(s: String): String {
-        return s.map { c ->
-            if (c in '\u3041'..'\u3096') {
-                (c + 0x60)
-            } else {
-                c
-            }
-        }.joinToString("")
-    }
-    
-    // Converts katakana characters to hiragana
-    private fun katakanaToHiragana(s: String): String {
-        return s.map { c ->
-            if (c in '\u30A1'..'\u30F6') {
-                (c - 0x60)
-            } else {
-                c
-            }
-        }.joinToString("")
-    }
-
-    private fun checkReading(answer: String): Boolean {
-        val normalizedAnswer = normalizeForComparison(answer, isReading = true)
-        return viewModel.currentKanji.readings.any { normalizeForComparison(it.value, isReading = true) == normalizedAnswer }
     }
 
     private fun updateProgressBar() {

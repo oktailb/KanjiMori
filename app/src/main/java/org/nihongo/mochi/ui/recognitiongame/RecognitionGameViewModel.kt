@@ -7,7 +7,6 @@ import org.nihongo.mochi.domain.models.KanjiDetail
 import org.nihongo.mochi.domain.models.KanjiProgress
 
 // Re-export type aliases to maintain compatibility with Fragment imports if they use these types from ViewModel package
-// Although Fragments should ideally import from domain.models directly
 typealias QuestionDirection = org.nihongo.mochi.domain.game.QuestionDirection
 
 class RecognitionGameViewModel : ViewModel() {
@@ -19,18 +18,17 @@ class RecognitionGameViewModel : ViewModel() {
         get() = engine.isGameInitialized
         set(value) { engine.isGameInitialized = value }
 
-    val allKanjiDetailsXml = mutableListOf<KanjiDetail>() // Keep XML separate if needed for Android resource loading, or move to Engine if pure data
+    val allKanjiDetailsXml = mutableListOf<KanjiDetail>()
     
     val allKanjiDetails: MutableList<KanjiDetail>
         get() = engine.allKanjiDetails
 
-    var currentKanjiSet: MutableList<KanjiDetail>
+    // Read-only access to lists for UI binding (if needed) but mutations should go through Engine methods ideally
+    val currentKanjiSet: MutableList<KanjiDetail>
         get() = engine.currentKanjiSet
-        set(value) { engine.currentKanjiSet = value }
 
-    var revisionList: MutableList<KanjiDetail>
+    val revisionList: MutableList<KanjiDetail>
         get() = engine.revisionList
-        set(value) { engine.revisionList = value }
 
     val kanjiStatus: MutableMap<KanjiDetail, GameStatus>
         get() = engine.kanjiStatus
@@ -42,13 +40,11 @@ class RecognitionGameViewModel : ViewModel() {
         get() = engine.kanjiListPosition
         set(value) { engine.kanjiListPosition = value }
 
-    var currentKanji: KanjiDetail
+    val currentKanji: KanjiDetail
         get() = engine.currentKanji
-        set(value) { engine.currentKanji = value }
 
-    var correctAnswer: String
+    val correctAnswer: String
         get() = engine.correctAnswer
-        set(value) { engine.correctAnswer = value }
 
     var gameMode: String
         get() = engine.gameMode
@@ -58,17 +54,35 @@ class RecognitionGameViewModel : ViewModel() {
         get() = engine.readingMode
         set(value) { engine.readingMode = value }
 
-    var currentDirection: QuestionDirection
+    val currentDirection: QuestionDirection
         get() = engine.currentDirection
-        set(value) { engine.currentDirection = value }
     
-    var currentAnswers: List<String>
+    val currentAnswers: List<String>
         get() = engine.currentAnswers
-        set(value) { engine.currentAnswers = value }
 
     // UI Specific State (Platform dependent)
     var areButtonsEnabled = true
     var buttonColors = mutableListOf<Int>() // Resource IDs are platform specific
+
+    fun updatePronunciationMode(mode: String) {
+        engine.pronunciationMode = mode
+    }
+
+    fun startNewSet(): Boolean {
+        return engine.startNewSet()
+    }
+
+    fun nextQuestion() {
+        engine.nextQuestion()
+    }
+    
+    fun getFormattedReadings(kanji: KanjiDetail): String {
+        return engine.getFormattedReadings(kanji)
+    }
+
+    fun submitAnswer(selectedAnswer: String): Boolean {
+        return engine.submitAnswer(selectedAnswer)
+    }
 
     fun resetState() {
         engine.resetState()

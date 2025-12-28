@@ -1,18 +1,26 @@
 package org.nihongo.mochi.ui.writinggame
 
 import androidx.lifecycle.ViewModel
-import org.nihongo.mochi.domain.game.QuestionType
+import org.nihongo.mochi.domain.game.TextNormalizer
 import org.nihongo.mochi.domain.game.WritingGameEngine
 import org.nihongo.mochi.domain.models.GameStatus
 import org.nihongo.mochi.domain.models.KanjiDetail
 import org.nihongo.mochi.domain.models.KanjiProgress
+import java.text.Normalizer
 
 // Re-export type alias for compatibility
 typealias QuestionType = org.nihongo.mochi.domain.game.QuestionType
 
 class WritingGameViewModel : ViewModel() {
     
-    private val engine = WritingGameEngine()
+    private val androidNormalizer = object : TextNormalizer {
+        override fun normalize(text: String): String {
+             return Normalizer.normalize(text, Normalizer.Form.NFD)
+                .replace("\\p{InCombiningDiacriticalMarks}+".toRegex(), "")
+        }
+    }
+    
+    private val engine = WritingGameEngine(androidNormalizer)
     
     // Delegate properties to Engine
     var isGameInitialized: Boolean
@@ -22,7 +30,6 @@ class WritingGameViewModel : ViewModel() {
     val allKanjiDetails: MutableList<KanjiDetail>
         get() = engine.allKanjiDetails
 
-    // Keep XML separate as it might be specific to Android resource loading/initialization
     val allKanjiDetailsXml = mutableListOf<KanjiDetail>()
 
     var kanjiListPosition: Int
@@ -41,17 +48,11 @@ class WritingGameViewModel : ViewModel() {
     val kanjiProgress: MutableMap<KanjiDetail, KanjiProgress>
         get() = engine.kanjiProgress
 
-    var currentKanji: KanjiDetail
+    val currentKanji: KanjiDetail
         get() = engine.currentKanji
-        set(value) { engine.currentKanji = value }
 
-    var currentQuestionType: QuestionType
+    val currentQuestionType: QuestionType
         get() = engine.currentQuestionType
-        set(value) { engine.currentQuestionType = value }
-
-    var correctAnswer: String
-        get() = engine.correctAnswer
-        set(value) { engine.correctAnswer = value }
 
     var isAnswerProcessing: Boolean
         get() = engine.isAnswerProcessing
@@ -68,6 +69,18 @@ class WritingGameViewModel : ViewModel() {
     var correctionDelayPending: Boolean
         get() = engine.correctionDelayPending
         set(value) { engine.correctionDelayPending = value }
+
+    fun startNewSet(): Boolean {
+        return engine.startNewSet()
+    }
+
+    fun nextQuestion() {
+        engine.nextQuestion()
+    }
+
+    fun submitAnswer(userAnswer: String): Boolean {
+        return engine.submitAnswer(userAnswer)
+    }
 
     fun resetState() {
         engine.resetState()

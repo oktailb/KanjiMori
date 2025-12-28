@@ -2,7 +2,6 @@ package org.nihongo.mochi.ui.recognitiongame
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.content.res.Resources
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -20,17 +19,12 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import org.nihongo.mochi.MochiApplication
 import org.nihongo.mochi.R
-import org.nihongo.mochi.data.ScoreManager
-import org.nihongo.mochi.data.ScoreManager.ScoreType
 import org.nihongo.mochi.databinding.FragmentRecognitionGameBinding
-import org.nihongo.mochi.domain.kana.KanaToRomaji
 import org.nihongo.mochi.settings.ANIMATION_SPEED_PREF_KEY
 import org.nihongo.mochi.settings.PRONUNCIATION_PREF_KEY
 import org.nihongo.mochi.domain.models.GameStatus
 import org.nihongo.mochi.domain.models.KanjiDetail
-import org.nihongo.mochi.domain.models.KanjiProgress
 import org.nihongo.mochi.domain.models.Reading
-import java.io.IOException
 import java.util.Locale
 
 class RecognitionGameFragment : Fragment() {
@@ -55,6 +49,10 @@ class RecognitionGameFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // Pass pronunciation mode to ViewModel
+        val pronunciationMode = sharedPreferences.getString(PRONUNCIATION_PREF_KEY, "Hiragana") ?: "Hiragana"
+        viewModel.updatePronunciationMode(pronunciationMode)
+
         if (!viewModel.isGameInitialized) {
             initializeGame()
             viewModel.isGameInitialized = true
@@ -74,7 +72,6 @@ class RecognitionGameFragment : Fragment() {
         val level = args.level
         val customWordList = args.customWordList?.toList() ?: emptyList()
 
-        // Load all kanji details from Shared Repository and JSON Meanings
         loadAllKanjiDetails()
 
         val kanjiCharsForLevel: List<String> = if (customWordList.isNotEmpty()) {
@@ -84,7 +81,6 @@ class RecognitionGameFragment : Fragment() {
         }
 
         viewModel.allKanjiDetails.clear()
-        // Filter loaded details to keep only those in the current level/list
         viewModel.allKanjiDetails.addAll(
             viewModel.allKanjiDetailsXml.filter {
                 kanjiCharsForLevel.contains(it.character) && it.meanings.isNotEmpty()
@@ -112,18 +108,7 @@ class RecognitionGameFragment : Fragment() {
             if (viewModel.currentAnswers.size > index) {
                 val answerText = viewModel.currentAnswers[index]
                 button.text = answerText
-
-                if (viewModel.currentDirection == QuestionDirection.REVERSE) {
-                    button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 40f)
-                } else {
-                    val length = answerText.length
-                    val newSize = when {
-                        length > 40 -> 10f
-                        length > 20 -> 12f
-                        else -> 14f
-                    }
-                    button.setTextSize(TypedValue.COMPLEX_UNIT_SP, newSize)
-                }
+                updateButtonSize(button, answerText)
             }
             if (viewModel.buttonColors.size > index) {
                 val colorRes = viewModel.buttonColors[index]
@@ -136,27 +121,27 @@ class RecognitionGameFragment : Fragment() {
         }
         answerButtons.forEach { it.isEnabled = viewModel.areButtonsEnabled }
     }
-
+    
+    private fun updateButtonSize(button: Button, text: String) {
+        if (viewModel.currentDirection == QuestionDirection.REVERSE) {
+            button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 40f)
+        } else {
+            val length = text.length
+            val newSize = when {
+                length > 40 -> 10f
+                length > 20 -> 12f
+                else -> 14f
+            }
+            button.setTextSize(TypedValue.COMPLEX_UNIT_SP, newSize)
+        }
+    }
 
     private fun startNewSet() {
-        viewModel.revisionList.clear()
-        viewModel.kanjiStatus.clear()
-        viewModel.kanjiProgress.clear()
+        val hasNext = viewModel.startNewSet()
 
-        if (viewModel.kanjiListPosition >= viewModel.allKanjiDetails.size) {
+        if (!hasNext) {
             findNavController().popBackStack()
             return
-        }
-
-        val nextSet = viewModel.allKanjiDetails.drop(viewModel.kanjiListPosition).take(10)
-        viewModel.kanjiListPosition += nextSet.size
-
-        viewModel.currentKanjiSet.clear()
-        viewModel.currentKanjiSet.addAll(nextSet)
-        viewModel.revisionList.addAll(nextSet)
-        viewModel.currentKanjiSet.forEach {
-            viewModel.kanjiStatus[it] = GameStatus.NOT_ANSWERED
-            viewModel.kanjiProgress[it] = KanjiProgress()
         }
 
         updateProgressBar()
@@ -170,7 +155,6 @@ class RecognitionGameFragment : Fragment() {
                 val grade = levelName.removePrefix("Grade ")
                 "grade" to grade
             }
-            // Add custom mapping if needed for "Grade 7" -> "7" etc.
             else -> return emptyList()
         }
         
@@ -180,8 +164,6 @@ class RecognitionGameFragment : Fragment() {
     private fun loadAllKanjiDetails() {
         val locale = Locale.getDefault().toString()
         val meanings = MochiApplication.meaningRepository.getMeanings(locale)
-        
-        // Load details from Shared Repository (JSON)
         val allKanjiEntries = MochiApplication.kanjiRepository.getAllKanji()
         
         viewModel.allKanjiDetailsXml.clear()
@@ -191,7 +173,6 @@ class RecognitionGameFragment : Fragment() {
             val character = entry.character
             val kanjiMeanings = meanings[id] ?: emptyList()
             
-            // Map JSON readings to UI Readings
             val readingsList = mutableListOf<Reading>()
             entry.readings?.reading?.forEach { readingEntry ->
                  val freq = readingEntry.frequency?.toIntOrNull() ?: 0
@@ -203,65 +184,18 @@ class RecognitionGameFragment : Fragment() {
         }
     }
 
-    private fun hiraganaToKatakana(s: String): String {
-        return s.map { c ->
-            if (c in '\u3041'..'\u3096') {
-                (c + 0x60)
-            } else {
-                c
-            }
-        }.joinToString("")
-    }
-
-    private fun getFormattedReadings(kanji: KanjiDetail): String {
-        val pronunciationMode = sharedPreferences.getString(PRONUNCIATION_PREF_KEY, "Hiragana")
-
-        val onReadings = kanji.readings.filter { it.type == "on" }
-        val kunReadings = kanji.readings.filter { it.type == "kun" }
-
-        val selectedOn = if (viewModel.readingMode == "common") {
-            onReadings.sortedByDescending { it.frequency }
-        } else {
-            onReadings.shuffled()
-        }.take(2)
-
-        val selectedKun = if (viewModel.readingMode == "common") {
-            kunReadings.sortedByDescending { it.frequency }
-        } else {
-            kunReadings.shuffled()
-        }.take(2)
-
-        val onStrings = selectedOn.map {
-            if (pronunciationMode == "Roman") KanaToRomaji.convert(it.value).uppercase() else hiraganaToKatakana(it.value)
-        }
-        val kunStrings = selectedKun.map {
-            if (pronunciationMode == "Roman") KanaToRomaji.convert(it.value) else it.value
-        }
-
-        return (onStrings + kunStrings).joinToString("\n")
-    }
-
     private fun displayQuestion() {
         if (viewModel.revisionList.isEmpty()) {
             startNewSet()
             return
         }
 
-        viewModel.currentKanji = viewModel.revisionList.random()
-        val progress = viewModel.kanjiProgress[viewModel.currentKanji]!!
-
-        // Determine direction
-        viewModel.currentDirection = when {
-            !progress.normalSolved && !progress.reverseSolved -> if (Math.random() < 0.5) QuestionDirection.NORMAL else QuestionDirection.REVERSE
-            !progress.normalSolved -> QuestionDirection.NORMAL
-            else -> QuestionDirection.REVERSE
-        }
+        viewModel.nextQuestion()
 
         displayQuestionText()
 
-        val answers = generateAnswers(viewModel.currentKanji)
-        viewModel.currentAnswers = answers
         val answerButtons = listOf(binding.buttonAnswer1, binding.buttonAnswer2, binding.buttonAnswer3, binding.buttonAnswer4)
+        val answers = viewModel.currentAnswers
 
         viewModel.buttonColors.clear()
         repeat(4) { viewModel.buttonColors.add(R.color.button_background) }
@@ -270,18 +204,7 @@ class RecognitionGameFragment : Fragment() {
             button.text = answerText
             button.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.button_background))
             button.isEnabled = true
-
-            if (viewModel.currentDirection == QuestionDirection.REVERSE) {
-                button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 40f)
-            } else {
-                val length = answerText.length
-                val newSize = when {
-                    length > 40 -> 10f
-                    length > 20 -> 12f
-                    else -> 14f
-                }
-                button.setTextSize(TypedValue.COMPLEX_UNIT_SP, newSize)
-            }
+            updateButtonSize(button, answerText)
         }
         viewModel.areButtonsEnabled = true
     }
@@ -294,7 +217,7 @@ class RecognitionGameFragment : Fragment() {
             val questionText = if (viewModel.gameMode == "meaning") {
                 viewModel.currentKanji.meanings.joinToString("\n")
             } else {
-                getFormattedReadings(viewModel.currentKanji)
+                viewModel.getFormattedReadings(viewModel.currentKanji)
             }
             binding.textKanjiToGuess.text = questionText
 
@@ -312,84 +235,24 @@ class RecognitionGameFragment : Fragment() {
         }
     }
 
-    private fun generateAnswers(correctKanji: KanjiDetail): List<String> {
-        if (viewModel.currentDirection == QuestionDirection.NORMAL) {
-            val correctButtonText: String
-            if (viewModel.gameMode == "meaning") {
-                viewModel.correctAnswer = correctKanji.meanings.firstOrNull() ?: ""
-                correctButtonText = correctKanji.meanings.take(3).joinToString("\n")
-            } else { // reading mode
-                correctButtonText = getFormattedReadings(correctKanji)
-                viewModel.correctAnswer = correctButtonText.lines().firstOrNull() ?: ""
-            }
-
-            if (viewModel.correctAnswer.isEmpty()) return listOf("", "", "", "")
-
-            val incorrectPool = viewModel.allKanjiDetails
-                .asSequence()
-                .filter { it.id != correctKanji.id }
-                .map { detail ->
-                    if (viewModel.gameMode == "meaning") {
-                        detail.meanings.take(3).joinToString("\n")
-                    } else {
-                        getFormattedReadings(detail)
-                    }
-                }
-                .filter { it.isNotEmpty() }
-                .distinct()
-                .shuffled()
-                .take(3)
-                .toList()
-
-            return (incorrectPool + correctButtonText).shuffled()
-        } else {
-            viewModel.correctAnswer = correctKanji.character
-            val correctButtonText = correctKanji.character
-
-            val incorrectPool = viewModel.allKanjiDetails
-                .asSequence()
-                .filter { it.id != correctKanji.id }
-                .map { it.character }
-                .distinct()
-                .shuffled()
-                .take(3)
-                .toList()
-
-            return (incorrectPool + correctButtonText).shuffled()
-        }
-    }
-
     private fun onAnswerClicked(button: Button) {
-        val selectedAnswers = button.text.lines()
-
-        val isCorrect = if (viewModel.currentDirection == QuestionDirection.NORMAL) {
-            selectedAnswers.any { it.equals(viewModel.correctAnswer, ignoreCase = true) }
-        } else {
-            button.text.toString() == viewModel.correctAnswer
-        }
-
-        ScoreManager.saveScore(viewModel.currentKanji.character, isCorrect, ScoreType.RECOGNITION)
+        val selectedAnswer = button.text.toString()
+        val isCorrect = viewModel.submitAnswer(selectedAnswer)
 
         val answerButtons = listOf(binding.buttonAnswer1, binding.buttonAnswer2, binding.buttonAnswer3, binding.buttonAnswer4)
         val buttonIndex = answerButtons.indexOf(button)
 
         if (isCorrect) {
             viewModel.buttonColors[buttonIndex] = R.color.answer_correct
-
-            val progress = viewModel.kanjiProgress[viewModel.currentKanji]!!
-            if (viewModel.currentDirection == QuestionDirection.NORMAL) progress.normalSolved = true
-            else progress.reverseSolved = true
-
-            if (progress.normalSolved && progress.reverseSolved) {
-                viewModel.kanjiStatus[viewModel.currentKanji] = GameStatus.CORRECT
-                viewModel.revisionList.remove(viewModel.currentKanji)
-            } else {
-                viewModel.kanjiStatus[viewModel.currentKanji] = GameStatus.PARTIAL
-                viewModel.buttonColors[buttonIndex] = R.color.answer_neutral
+            
+            // Check if partial (one direction solved), color stays neutral?
+            val status = viewModel.kanjiStatus[viewModel.currentKanji]
+            if (status == GameStatus.PARTIAL) {
+                 viewModel.buttonColors[buttonIndex] = R.color.answer_neutral
             }
+
         } else {
             viewModel.buttonColors[buttonIndex] = R.color.answer_incorrect
-            viewModel.kanjiStatus[viewModel.currentKanji] = GameStatus.INCORRECT
         }
 
         button.setBackgroundColor(ContextCompat.getColor(requireContext(), viewModel.buttonColors[buttonIndex]))
