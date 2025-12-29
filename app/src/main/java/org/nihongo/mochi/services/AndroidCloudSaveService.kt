@@ -13,7 +13,7 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
-class AndroidCloudSaveService(private val activity: Activity) : CloudSaveService {
+class AndroidCloudSaveService(activity: Activity) : CloudSaveService {
 
     private val gamesSignInClient: GamesSignInClient = PlayGames.getGamesSignInClient(activity)
     private val snapshotsClient: SnapshotsClient = PlayGames.getSnapshotsClient(activity)
@@ -33,7 +33,7 @@ class AndroidCloudSaveService(private val activity: Activity) : CloudSaveService
         return try {
             val result = gamesSignInClient.isAuthenticated.await()
             result.isAuthenticated
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             false
         }
     }

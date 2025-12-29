@@ -44,6 +44,7 @@ class WritingGameEngine(private val textNormalizer: TextNormalizer? = null) {
     // Configuration
     var animationSpeed: Float = 1.0f
 
+    @Suppress("unused") // Kept for potential future use (game restart feature)
     fun resetState() {
         isGameInitialized = false
         allKanjiDetails.clear()

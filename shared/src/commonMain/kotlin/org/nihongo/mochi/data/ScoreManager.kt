@@ -13,6 +13,7 @@ import org.nihongo.mochi.settings.REMOVE_GOOD_ANSWERS_PREF_KEY
 
 object ScoreManager : ScoreRepository {
 
+    private const val DEFAULT_LIST_NAME = "Default"
     private lateinit var scoresSettings: Settings
     private lateinit var userListSettings: Settings
     private lateinit var appSettings: Settings
@@ -57,7 +58,7 @@ object ScoreManager : ScoreRepository {
         if (serialized.isEmpty()) return mutableSetOf()
         return try {
              Json.decodeFromString<Set<String>>(serialized).toMutableSet()
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             // Fallback for CSV if we used that, or empty
             mutableSetOf()
         }
@@ -69,18 +70,16 @@ object ScoreManager : ScoreRepository {
     }
 
     private fun addToUserList(key: String) {
-        val listName = "Default"
-        val currentList = getList(listName)
+        val currentList = getList(DEFAULT_LIST_NAME)
         if (currentList.add(key)) {
-            saveList(listName, currentList)
+            saveList(DEFAULT_LIST_NAME, currentList)
         }
     }
 
     private fun removeFromUserList(key: String) {
-        val listName = "Default"
-        val currentList = getList(listName)
+        val currentList = getList(DEFAULT_LIST_NAME)
         if (currentList.remove(key)) {
-            saveList(listName, currentList)
+            saveList(DEFAULT_LIST_NAME, currentList)
         }
     }
 
@@ -98,7 +97,7 @@ object ScoreManager : ScoreRepository {
             val failures = parts[1].toInt()
             val lastDate = if (parts.size > 2) parts[2].toLong() else 0L
             KanjiScore(successes, failures, lastDate)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             KanjiScore(0, 0, 0L)
         }
     }
@@ -135,7 +134,7 @@ object ScoreManager : ScoreRepository {
                         val failures = parts[1].toInt()
                         val lastDate = if (parts.size > 2) parts[2].toLong() else 0L
                         cleanKey to KanjiScore(successes, failures, lastDate)
-                    } catch (e: Exception) {
+                    } catch (_: Exception) {
                         null
                     }
                 } else {
@@ -166,7 +165,7 @@ object ScoreManager : ScoreRepository {
                         scoresSettings.putString(key, "$successes-$failures-$currentTime")
                         anyScoreDecayed = true
                     }
-                } catch (e: Exception) {
+                } catch (_: Exception) {
                     // Ignore
                 }
             }
@@ -190,7 +189,7 @@ object ScoreManager : ScoreRepository {
                  try {
                      val list = Json.decodeFromString<List<String>>(listJson)
                      userListsMap[key] = list
-                 } catch (e: Exception) {
+                 } catch (_: Exception) {
                      // Could be old format or invalid
                  }
             }

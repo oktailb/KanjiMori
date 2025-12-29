@@ -4,6 +4,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.serialization)
+    // Compose compiler plugin needed for Kotlin 2.0+
+    alias(libs.plugins.kotlin.compose)
     id("androidx.navigation.safeargs.kotlin")
     id("kotlin-parcelize")
 }
@@ -75,17 +77,19 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = "17"
+    
+    kotlin {
+        compilerOptions {
+             jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+        }
     }
+    
     buildFeatures {
         viewBinding = true
         buildConfig = true
         compose = true
     }
-    composeOptions {
-        kotlinCompilerExtensionVersion = libs.versions.composeCompiler.get()
-    }
+    // composeOptions removed as it's deprecated with the new plugin
 }
 
 dependencies {
@@ -99,8 +103,8 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
-    implementation("com.google.android.gms:play-services-games-v2:21.0.0")
-    implementation("com.google.mlkit:digital-ink-recognition:18.1.0")
+    implementation(libs.play.services.games)
+    implementation(libs.mlkit.digital.ink)
     implementation(libs.flexbox)
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.multiplatform.settings)

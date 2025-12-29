@@ -15,6 +15,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.core.content.edit
 import androidx.core.view.isGone
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -260,7 +261,7 @@ class ResultsFragment : Fragment() {
 
         val arrowView = ImageView(context).apply {
             setImageResource(android.R.drawable.arrow_down_float)
-            setColorFilter(resolveThemeAttr(android.R.attr.textColorPrimary))
+            setColorFilter(resolveThemeAttr())
         }
 
         headerLayout.addView(titleView)
@@ -350,7 +351,7 @@ class ResultsFragment : Fragment() {
 
         val arrowView = ImageView(context).apply {
             setImageResource(android.R.drawable.arrow_down_float)
-            setColorFilter(resolveThemeAttr(android.R.attr.textColorPrimary))
+            setColorFilter(resolveThemeAttr())
         }
 
         headerLayout.addView(titleView)
@@ -427,9 +428,8 @@ class ResultsFragment : Fragment() {
             container.visibility = if (newExpandedState) View.VISIBLE else View.GONE
             arrow.animate().rotation(if (newExpandedState) 0f else -90f).start()
 
-            with(sharedPreferences.edit()) {
+            sharedPreferences.edit {
                 putBoolean(preferenceKey, newExpandedState)
-                apply()
             }
         }
     }
@@ -476,7 +476,7 @@ class ResultsFragment : Fragment() {
         return (this * density).toInt()
     }
 
-    private fun resolveThemeAttr(attr: Int): Int {
+    private fun resolveThemeAttr(attr: Int = android.R.attr.textColorPrimary): Int {
         val typedValue = android.util.TypedValue()
         requireContext().theme.resolveAttribute(attr, typedValue, true)
         return if (typedValue.resourceId != 0) {
