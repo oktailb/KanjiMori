@@ -1,14 +1,17 @@
 package org.nihongo.mochi.domain.statistics
 
 data class LevelProgress(
-    val title: String,
-    val xmlName: String, // Keep this as identifier if needed for mapping back to UI specific resources if really necessary, or just as ID
+    val title: String, // Display name (e.g. "JLPT N5")
+    val xmlName: String, // ID for content provider
     val percentage: Int,
-    val type: StatisticsType
+    val type: StatisticsType, // Main section (Recognition, Reading...)
+    val category: String, // Sub-section (JLPT, School, Frequency...)
+    val sortOrder: Int = 0 // To order items within a category
 )
 
 enum class StatisticsType {
     RECOGNITION,
     READING,
-    WRITING
+    WRITING,
+    // Future types can be added here (GRAMMAR, GAMES...)
 }

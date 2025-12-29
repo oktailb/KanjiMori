@@ -9,8 +9,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.ProgressBar
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -20,6 +24,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.google.android.gms.games.SnapshotsClient
 import com.google.android.gms.games.snapshot.SnapshotMetadata
+import com.google.android.material.card.MaterialCardView
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.get
 import org.koin.android.ext.android.inject
@@ -28,6 +33,7 @@ import org.nihongo.mochi.databinding.FragmentResultsBinding
 import org.nihongo.mochi.domain.statistics.LevelProgress
 import org.nihongo.mochi.domain.statistics.ResultsViewModel
 import org.nihongo.mochi.domain.statistics.StatisticsEngine
+import org.nihongo.mochi.domain.statistics.StatisticsType
 import org.nihongo.mochi.domain.util.LevelContentProvider
 import org.nihongo.mochi.services.AndroidCloudSaveService
 
@@ -38,19 +44,14 @@ class ResultsFragment : Fragment() {
     
     private val levelContentProvider: LevelContentProvider by inject()
 
-    // We maintain these references here if needed for direct calls, 
-    // but primarily they are injected into the ViewModel.
-    // However, StatisticsEngine is used directly in updateAllPercentages.
     private lateinit var statisticsEngine: StatisticsEngine
     private lateinit var androidCloudSaveService: AndroidCloudSaveService
 
     private val viewModel: ResultsViewModel by viewModels {
         viewModelFactory {
             initializer {
-                // Instantiate dependencies
                 androidCloudSaveService = AndroidCloudSaveService(requireActivity())
                 statisticsEngine = StatisticsEngine(get())
-                
                 ResultsViewModel(androidCloudSaveService, statisticsEngine)
             }
         }
@@ -66,7 +67,6 @@ class ResultsFragment : Fragment() {
         if (result.resultCode == Activity.RESULT_OK && result.data != null) {
             val intent = result.data!!
             if (intent.hasExtra(SnapshotsClient.EXTRA_SNAPSHOT_METADATA)) {
-                // Load a snapshot.
                 val snapshotMetadata = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                     intent.getParcelableExtra(SnapshotsClient.EXTRA_SNAPSHOT_METADATA, SnapshotMetadata::class.java)
                 } else {
@@ -76,9 +76,6 @@ class ResultsFragment : Fragment() {
                 
                 if (snapshotMetadata != null) {
                     viewModel.setCurrentSaveName(snapshotMetadata.uniqueName)
-                    // We need to load from the service, but since we have the metadata, 
-                    // the service might just need the name.
-                    // However, our current service implementation takes 'name' to open it.
                     lifecycleScope.launch {
                         val data = androidCloudSaveService.loadGame(snapshotMetadata.uniqueName)
                         if (data != null) {
@@ -88,7 +85,6 @@ class ResultsFragment : Fragment() {
                     }
                 }
             } else if (intent.hasExtra(SnapshotsClient.EXTRA_SNAPSHOT_NEW)) {
-                // Create a new snapshot
                 val unique = java.math.BigInteger(281, java.util.Random()).toString(13)
                 viewModel.setCurrentSaveName("NihongoMochiSnapshot-$unique")
                 viewModel.saveGame()
@@ -108,9 +104,6 @@ class ResultsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
-        // We need statisticsEngine for UI population (updateAllPercentages)
-        // It was instantiated in the factory, but that local variable might not be set 
-        // if the VM was restored. So we must ensure it's initialized here too.
         if (!::statisticsEngine.isInitialized) {
              statisticsEngine = StatisticsEngine(levelContentProvider)
         }
@@ -118,7 +111,6 @@ class ResultsFragment : Fragment() {
             androidCloudSaveService = AndroidCloudSaveService(requireActivity())
         }
 
-        setupCollapsibleSections()
         updateAllPercentages()
 
         binding.buttonSignIn.setOnClickListener { viewModel.signIn() }
@@ -155,17 +147,13 @@ class ResultsFragment : Fragment() {
     }
 
     private fun updateSignInUI(isSignedIn: Boolean) {
-        if (isSignedIn) {
-            binding.buttonSignIn.visibility = View.GONE
-            binding.buttonAchievements.visibility = View.VISIBLE
-            binding.buttonBackup.visibility = View.VISIBLE
-            binding.buttonRestore.visibility = View.VISIBLE
-        } else {
-            binding.buttonSignIn.visibility = View.VISIBLE
-            binding.buttonAchievements.visibility = View.GONE
-            binding.buttonBackup.visibility = View.GONE
-            binding.buttonRestore.visibility = View.GONE
-        }
+        val visibility = if (isSignedIn) View.VISIBLE else View.GONE
+        val inverseVisibility = if (isSignedIn) View.GONE else View.VISIBLE
+        
+        binding.buttonSignIn.visibility = inverseVisibility
+        binding.buttonAchievements.visibility = visibility
+        binding.buttonBackup.visibility = visibility
+        binding.buttonRestore.visibility = visibility
     }
 
     private fun showAchievements() {
@@ -190,24 +178,227 @@ class ResultsFragment : Fragment() {
         }
     }
 
-    private fun setupCollapsibleSections() {
-        // Main Sections
-        setupCollapsibleSection(binding.headerRecognitionMain, binding.arrowRecognitionMain, binding.containerRecognitionMain, "recognition_main_expanded")
-        setupCollapsibleSection(binding.headerReadingMain, binding.arrowReadingMain, binding.containerReadingMain, "reading_main_expanded")
-        setupCollapsibleSection(binding.headerWritingMain, binding.arrowWritingMain, binding.containerWritingMain, "writing_main_expanded")
+    private fun updateAllPercentages() {
+        val allStats = statisticsEngine.getAllStatistics()
+        
+        // Group by StatisticsType (Recognition, Reading, Writing...)
+        val groupedStats = allStats.groupBy { it.type }
+        
+        binding.dynamicContentContainer.removeAllViews()
 
-        // Recognition Sub-sections
-        setupCollapsibleSection(binding.headerRecognitionKanas, binding.arrowRecognitionKanas, binding.containerRecognitionKanas, "recognition_kanas_expanded")
-        setupCollapsibleSection(binding.headerRecognitionJlpt, binding.arrowRecognitionJlpt, binding.containerRecognitionJlpt, "recognition_jlpt_expanded")
-        setupCollapsibleSection(binding.headerRecognitionSchool, binding.arrowRecognitionSchool, binding.containerRecognitionSchool, "recognition_school_expanded")
+        // Order of types matters
+        val orderedTypes = listOf(StatisticsType.RECOGNITION, StatisticsType.READING, StatisticsType.WRITING)
+        // Add any future types that might not be in the ordered list yet
+        val otherTypes = groupedStats.keys.filter { it !in orderedTypes }
+        
+        (orderedTypes + otherTypes).forEach { type ->
+            val statsForType = groupedStats[type] ?: return@forEach
+            createMainSection(type, statsForType)
+        }
+    }
 
-        // Reading Sub-sections
-        setupCollapsibleSection(binding.headerReadingJlpt, binding.arrowReadingJlpt, binding.containerReadingJlpt, "reading_jlpt_expanded")
-        setupCollapsibleSection(binding.headerReadingFreq, binding.arrowReadingFreq, binding.containerReadingFreq, "reading_freq_expanded")
+    private fun createMainSection(type: StatisticsType, stats: List<LevelProgress>) {
+        val context = requireContext()
+        val card = MaterialCardView(context).apply {
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                setMargins(0, 0, 0, 16.dpToPx())
+            }
+            radius = 8.dpToPx().toFloat()
+            cardElevation = 4.dpToPx().toFloat()
+            setCardBackgroundColor(ContextCompat.getColor(context, R.color.card_background))
+        }
 
-        // Writing Sub-sections
-        setupCollapsibleSection(binding.headerWritingJlpt, binding.arrowWritingJlpt, binding.containerWritingJlpt, "writing_jlpt_expanded")
-        setupCollapsibleSection(binding.headerWritingSchool, binding.arrowWritingSchool, binding.containerWritingSchool, "writing_school_expanded")
+        val mainContainer = LinearLayout(context).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(16.dpToPx(), 16.dpToPx(), 16.dpToPx(), 16.dpToPx())
+        }
+
+        // --- Main Header ---
+        val headerLayout = LinearLayout(context).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = android.view.Gravity.CENTER_VERTICAL
+            isClickable = true
+            isFocusable = true
+            val outValue = android.util.TypedValue()
+            context.theme.resolveAttribute(android.R.attr.selectableItemBackground, outValue, true)
+            setBackgroundResource(outValue.resourceId)
+        }
+
+        val titleResId = when(type) {
+            StatisticsType.RECOGNITION -> R.string.results_recognition_title
+            StatisticsType.READING -> R.string.results_reading_title
+            StatisticsType.WRITING -> R.string.results_writing_title
+            else -> 0 // Handle future types generically or add resources
+        }
+        
+        val titleText = if (titleResId != 0) getString(titleResId) else type.name.lowercase().replaceFirstChar { it.uppercase() }
+
+        val titleView = TextView(context).apply {
+            text = titleText
+            textSize = 20f
+            setTypeface(null, android.graphics.Typeface.BOLD)
+            setTextColor(ContextCompat.getColor(context, R.color.card_text))
+            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+        }
+
+        val arrowView = ImageView(context).apply {
+            setImageResource(android.R.drawable.arrow_down_float)
+            setColorFilter(resolveThemeAttr(android.R.attr.textColorPrimary))
+        }
+
+        headerLayout.addView(titleView)
+        headerLayout.addView(arrowView)
+        mainContainer.addView(headerLayout)
+
+        // --- Content Container ---
+        val contentContainer = LinearLayout(context).apply {
+            orientation = LinearLayout.VERTICAL
+            visibility = View.VISIBLE
+        }
+
+        // Group by Category (JLPT, School, etc.)
+        val groupedByCategory = stats.groupBy { it.category }
+        
+        // Define category order if needed, otherwise rely on insertion/alphabetical
+        // We can sort categories based on the lowest sortOrder of their items
+        val sortedCategories = groupedByCategory.keys.sortedBy { category ->
+             groupedByCategory[category]?.minOfOrNull { it.sortOrder } ?: Int.MAX_VALUE
+        }
+
+        sortedCategories.forEach { category ->
+            val categoryStats = groupedByCategory[category] ?: return@forEach
+            // Sort items within category
+            val sortedStats = categoryStats.sortedBy { it.sortOrder }
+
+            if (category.isNotEmpty()) {
+                createSubSection(context, contentContainer, category, sortedStats)
+            } else {
+                // Items without category (direct children)
+                sortedStats.forEach { stat ->
+                    createStatItem(context, contentContainer, stat)
+                }
+            }
+        }
+        
+        mainContainer.addView(contentContainer)
+        card.addView(mainContainer)
+        binding.dynamicContentContainer.addView(card)
+
+        // Setup collapse logic
+        val prefKey = "expanded_${type.name}"
+        setupCollapsibleSection(headerLayout, arrowView, contentContainer, prefKey)
+    }
+
+    private fun createSubSection(
+        context: Context,
+        parent: ViewGroup,
+        categoryName: String,
+        stats: List<LevelProgress>
+    ) {
+        // --- Sub Header ---
+        val headerLayout = LinearLayout(context).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = android.view.Gravity.CENTER_VERTICAL
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                topMargin = 16.dpToPx()
+            }
+            isClickable = true
+            isFocusable = true
+            val outValue = android.util.TypedValue()
+            context.theme.resolveAttribute(android.R.attr.selectableItemBackground, outValue, true)
+            setBackgroundResource(outValue.resourceId)
+        }
+
+        // Map category internal names to resources if possible
+        val categoryDisplay = when(categoryName) {
+            "Kanas" -> getString(R.string.results_section_kanas)
+            "JLPT" -> getString(R.string.results_section_jlpt)
+            "School" -> getString(R.string.results_section_school)
+            "Frequency" -> getString(R.string.results_section_frequency)
+            "Challenges" -> "Challenges" // TODO: Add localized string for Challenges if needed
+            // Fallback
+            else -> categoryName
+        }
+
+        val titleView = TextView(context).apply {
+            text = categoryDisplay
+            textSize = 18f
+            setTypeface(null, android.graphics.Typeface.BOLD)
+            setTextColor(ContextCompat.getColor(context, R.color.card_text))
+            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+        }
+
+        val arrowView = ImageView(context).apply {
+            setImageResource(android.R.drawable.arrow_down_float)
+            setColorFilter(resolveThemeAttr(android.R.attr.textColorPrimary))
+        }
+
+        headerLayout.addView(titleView)
+        headerLayout.addView(arrowView)
+        parent.addView(headerLayout)
+
+        // --- Sub Content ---
+        val contentContainer = LinearLayout(context).apply {
+            orientation = LinearLayout.VERTICAL
+            visibility = View.VISIBLE
+        }
+
+        stats.forEach { stat ->
+            createStatItem(context, contentContainer, stat)
+        }
+
+        parent.addView(contentContainer)
+        
+        // Setup collapse logic
+        // Use a unique key based on category and type if possible, but category names are unique enough per main section usually
+        val prefKey = "expanded_sub_${categoryName}_${stats.firstOrNull()?.type?.name ?: ""}"
+        setupCollapsibleSection(headerLayout, arrowView, contentContainer, prefKey)
+    }
+
+    private fun createStatItem(context: Context, parent: ViewGroup, stat: LevelProgress) {
+        val titleView = TextView(context).apply {
+            // We might need to resolve the dynamic title more nicely
+            // For now, we rely on the title from StatisticsEngine, which already has localized-like strings
+            // But ideally, we should pass resource IDs or do mapping here if the engine returns keys.
+            // The current engine returns display strings like "JLPT N5" or localized strings if we updated it.
+            // Since the previous implementation used a huge WHEN to map to string resources, 
+            // we should ideally try to map back or have the engine return string keys.
+            // For this iteration, we'll try to use the title from the object, 
+            // but we can improve localization by using xmlName or a new field.
+            
+            // Temporary fix to match previous string resources if possible based on xmlName/title pattern
+            text = getLocalizedTitle(stat)
+            
+            textSize = 16f
+            setTypeface(null, android.graphics.Typeface.BOLD)
+            setTextColor(ContextCompat.getColor(context, R.color.card_text))
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT, 
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                topMargin = 8.dpToPx()
+            }
+        }
+
+        val progressBar = ProgressBar(context, null, android.R.attr.progressBarStyleHorizontal).apply {
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                topMargin = 4.dpToPx()
+            }
+            max = 100
+            progress = stat.percentage
+        }
+
+        parent.addView(titleView)
+        parent.addView(progressBar)
     }
 
     private fun setupCollapsibleSection(header: View, arrow: ImageView, container: ViewGroup, preferenceKey: String) {
@@ -229,189 +420,55 @@ class ResultsFragment : Fragment() {
         }
     }
 
-    private fun updateAllPercentages() {
-        val allStats = statisticsEngine.getAllStatistics()
-        
-        for (stat in allStats) {
-            updateCategoryUI(stat)
+    private fun getLocalizedTitle(stat: LevelProgress): String {
+        // This is a helper to map static names from Engine to localized strings
+        // Ideally Engine should provide resource IDs or KMP equivalent
+        return when (stat.xmlName) {
+            "Hiragana" -> getString(R.string.results_hiragana, stat.percentage)
+            "Katakana" -> getString(R.string.results_katakana, stat.percentage)
+            "N5" -> getString(R.string.results_jlpt_n5, stat.percentage)
+            "N4" -> getString(R.string.results_jlpt_n4, stat.percentage)
+            "N3" -> getString(R.string.results_jlpt_n3, stat.percentage)
+            "N2" -> getString(R.string.results_jlpt_n2, stat.percentage)
+            "N1" -> getString(R.string.results_jlpt_n1, stat.percentage)
+            "Grade 1" -> getString(R.string.results_grade_1, stat.percentage)
+            "Grade 2" -> getString(R.string.results_grade_2, stat.percentage)
+            "Grade 3" -> getString(R.string.results_grade_3, stat.percentage)
+            "Grade 4" -> getString(R.string.results_grade_4, stat.percentage)
+            "Grade 5" -> getString(R.string.results_grade_5, stat.percentage)
+            "Grade 6" -> getString(R.string.results_grade_6, stat.percentage)
+            "Grade 7" -> getString(R.string.results_college, stat.percentage)
+            "Grade 8" -> getString(R.string.results_high_school, stat.percentage)
+            "user_list" -> getString(R.string.reading_user_list) + " - ${stat.percentage}%"
+            "reading_n5" -> getString(R.string.results_jlpt_n5, stat.percentage)
+            "reading_n4" -> getString(R.string.results_jlpt_n4, stat.percentage)
+            "reading_n3" -> getString(R.string.results_jlpt_n3, stat.percentage)
+            "reading_n2" -> getString(R.string.results_jlpt_n2, stat.percentage)
+            "reading_n1" -> getString(R.string.results_jlpt_n1, stat.percentage)
+            // Frequency lists pattern
+            else -> {
+                if (stat.xmlName.startsWith("bccwj_wordlist_")) {
+                    val number = stat.xmlName.removePrefix("bccwj_wordlist_")
+                    getString(R.string.results_frequency_x_words, number.toIntOrNull() ?: 0) + " - ${stat.percentage}%"
+                } else {
+                    "${stat.title} - ${stat.percentage}%"
+                }
+            }
         }
     }
-    
-    private fun updateCategoryUI(info: LevelProgress) {
-        val percentageInt = info.percentage
-        when (info.title) {
-            "Hiragana" -> {
-                binding.progressRecognitionHiragana.progress = percentageInt
-                binding.titleRecognitionHiragana.text = getString(R.string.results_hiragana, percentageInt)
-            }
-            "Katakana" -> {
-                binding.progressRecognitionKatakana.progress = percentageInt
-                binding.titleRecognitionKatakana.text = getString(R.string.results_katakana, percentageInt)
-            }
-            "JLPT N5" -> {
-                binding.progressRecognitionN5.progress = percentageInt
-                binding.titleRecognitionN5.text = getString(R.string.results_jlpt_n5, percentageInt)
-            }
-            "JLPT N4" -> {
-                binding.progressRecognitionN4.progress = percentageInt
-                binding.titleRecognitionN4.text = getString(R.string.results_jlpt_n4, percentageInt)
-            }
-            "JLPT N3" -> {
-                binding.progressRecognitionN3.progress = percentageInt
-                binding.titleRecognitionN3.text = getString(R.string.results_jlpt_n3, percentageInt)
-            }
-            "JLPT N2" -> {
-                binding.progressRecognitionN2.progress = percentageInt
-                binding.titleRecognitionN2.text = getString(R.string.results_jlpt_n2, percentageInt)
-            }
-            "JLPT N1" -> {
-                binding.progressRecognitionN1.progress = percentageInt
-                binding.titleRecognitionN1.text = getString(R.string.results_jlpt_n1, percentageInt)
-            }
-            "Grade 1" -> {
-                binding.progressRecognitionGrade1.progress = percentageInt
-                binding.titleRecognitionGrade1.text = getString(R.string.results_grade_1, percentageInt)
-            }
-            "Grade 2" -> {
-                binding.progressRecognitionGrade2.progress = percentageInt
-                binding.titleRecognitionGrade2.text = getString(R.string.results_grade_2, percentageInt)
-            }
-            "Grade 3" -> {
-                binding.progressRecognitionGrade3.progress = percentageInt
-                binding.titleRecognitionGrade3.text = getString(R.string.results_grade_3, percentageInt)
-            }
-            "Grade 4" -> {
-                binding.progressRecognitionGrade4.progress = percentageInt
-                binding.titleRecognitionGrade4.text = getString(R.string.results_grade_4, percentageInt)
-            }
-            "Grade 5" -> {
-                binding.progressRecognitionGrade5.progress = percentageInt
-                binding.titleRecognitionGrade5.text = getString(R.string.results_grade_5, percentageInt)
-            }
-            "Grade 6" -> {
-                binding.progressRecognitionGrade6.progress = percentageInt
-                binding.titleRecognitionGrade6.text = getString(R.string.results_grade_6, percentageInt)
-            }
-            "Collège" -> {
-                binding.progressRecognitionCollege.progress = percentageInt
-                binding.titleRecognitionCollege.text = getString(R.string.results_college, percentageInt)
-            }
-            "Lycée" -> {
-                binding.progressRecognitionLycee.progress = percentageInt
-                binding.titleRecognitionLycee.text = getString(R.string.results_high_school, percentageInt)
-            }
-            "Reading User" -> {
-                binding.progressReadingUser.progress = percentageInt
-                binding.titleReadingUser.text = getString(R.string.reading_user_list) + " - $percentageInt%"
-            }
-            "Reading N5" -> {
-                binding.progressReadingN5.progress = percentageInt
-                binding.titleReadingN5.text = getString(R.string.results_jlpt_n5, percentageInt)
-            }
-            "Reading N4" -> {
-                binding.progressReadingN4.progress = percentageInt
-                binding.titleReadingN4.text = getString(R.string.results_jlpt_n4, percentageInt)
-            }
-            "Reading N3" -> {
-                binding.progressReadingN3.progress = percentageInt
-                binding.titleReadingN3.text = getString(R.string.results_jlpt_n3, percentageInt)
-            }
-            "Reading N2" -> {
-                binding.progressReadingN2.progress = percentageInt
-                binding.titleReadingN2.text = getString(R.string.results_jlpt_n2, percentageInt)
-            }
-            "Reading N1" -> {
-                binding.progressReadingN1.progress = percentageInt
-                binding.titleReadingN1.text = getString(R.string.results_jlpt_n1, percentageInt)
-            }
-            "Reading 1000" -> {
-                binding.progressReading1000.progress = percentageInt
-                binding.titleReading1000.text = getString(R.string.results_frequency_x_words, 1000) + " - $percentageInt%"
-            }
-            "Reading 2000" -> {
-                binding.progressReading2000.progress = percentageInt
-                binding.titleReading2000.text = getString(R.string.results_frequency_x_words, 2000) + " - $percentageInt%"
-            }
-            "Reading 3000" -> {
-                binding.progressReading3000.progress = percentageInt
-                binding.titleReading3000.text = getString(R.string.results_frequency_x_words, 3000) + " - $percentageInt%"
-            }
-            "Reading 4000" -> {
-                binding.progressReading4000.progress = percentageInt
-                binding.titleReading4000.text = getString(R.string.results_frequency_x_words, 4000) + " - $percentageInt%"
-            }
-            "Reading 5000" -> {
-                binding.progressReading5000.progress = percentageInt
-                binding.titleReading5000.text = getString(R.string.results_frequency_x_words, 5000) + " - $percentageInt%"
-            }
-            "Reading 6000" -> {
-                binding.progressReading6000.progress = percentageInt
-                binding.titleReading6000.text = getString(R.string.results_frequency_x_words, 6000) + " - $percentageInt%"
-            }
-            "Reading 7000" -> {
-                binding.progressReading7000.progress = percentageInt
-                binding.titleReading7000.text = getString(R.string.results_frequency_x_words, 7000) + " - $percentageInt%"
-            }
-            "Reading 8000" -> {
-                binding.progressReading8000.progress = percentageInt
-                binding.titleReading8000.text = getString(R.string.results_frequency_x_words, 8000) + " - $percentageInt%"
-            }
-            "Writing User" -> {
-                binding.progressWritingUser.progress = percentageInt
-                binding.titleWritingUser.text = getString(R.string.reading_user_list) + " - $percentageInt%"
-            }
-            "Writing JLPT N5" -> {
-                binding.progressWritingN5.progress = percentageInt
-                binding.titleWritingN5.text = getString(R.string.results_jlpt_n5, percentageInt)
-            }
-            "Writing JLPT N4" -> {
-                binding.progressWritingN4.progress = percentageInt
-                binding.titleWritingN4.text = getString(R.string.results_jlpt_n4, percentageInt)
-            }
-            "Writing JLPT N3" -> {
-                binding.progressWritingN3.progress = percentageInt
-                binding.titleWritingN3.text = getString(R.string.results_jlpt_n3, percentageInt)
-            }
-            "Writing JLPT N2" -> {
-                binding.progressWritingN2.progress = percentageInt
-                binding.titleWritingN2.text = getString(R.string.results_jlpt_n2, percentageInt)
-            }
-            "Writing JLPT N1" -> {
-                binding.progressWritingN1.progress = percentageInt
-                binding.titleWritingN1.text = getString(R.string.results_jlpt_n1, percentageInt)
-            }
-            "Writing Grade 1" -> {
-                binding.progressWritingGrade1.progress = percentageInt
-                binding.titleWritingGrade1.text = getString(R.string.results_grade_1, percentageInt)
-            }
-            "Writing Grade 2" -> {
-                binding.progressWritingGrade2.progress = percentageInt
-                binding.titleWritingGrade2.text = getString(R.string.results_grade_2, percentageInt)
-            }
-            "Writing Grade 3" -> {
-                binding.progressWritingGrade3.progress = percentageInt
-                binding.titleWritingGrade3.text = getString(R.string.results_grade_3, percentageInt)
-            }
-            "Writing Grade 4" -> {
-                binding.progressWritingGrade4.progress = percentageInt
-                binding.titleWritingGrade4.text = getString(R.string.results_grade_4, percentageInt)
-            }
-            "Writing Grade 5" -> {
-                binding.progressWritingGrade5.progress = percentageInt
-                binding.titleWritingGrade5.text = getString(R.string.results_grade_5, percentageInt)
-            }
-            "Writing Grade 6" -> {
-                binding.progressWritingGrade6.progress = percentageInt
-                binding.titleWritingGrade6.text = getString(R.string.results_grade_6, percentageInt)
-            }
-            "Writing Collège" -> {
-                binding.progressWritingCollege.progress = percentageInt
-                binding.titleWritingCollege.text = getString(R.string.results_college, percentageInt)
-            }
-            "Writing Lycée" -> {
-                binding.progressWritingLycee.progress = percentageInt
-                binding.titleWritingLycee.text = getString(R.string.results_high_school, percentageInt)
-            }
+
+    private fun Int.dpToPx(): Int {
+        val density = resources.displayMetrics.density
+        return (this * density).toInt()
+    }
+
+    private fun resolveThemeAttr(attr: Int): Int {
+        val typedValue = android.util.TypedValue()
+        requireContext().theme.resolveAttribute(attr, typedValue, true)
+        return if (typedValue.resourceId != 0) {
+            ContextCompat.getColor(requireContext(), typedValue.resourceId)
+        } else {
+            typedValue.data
         }
     }
 }

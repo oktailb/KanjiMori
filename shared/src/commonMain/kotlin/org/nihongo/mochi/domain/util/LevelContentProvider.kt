@@ -1,5 +1,6 @@
 package org.nihongo.mochi.domain.util
 
+import org.nihongo.mochi.data.ScoreManager
 import org.nihongo.mochi.domain.kana.KanaRepository
 import org.nihongo.mochi.domain.kana.KanaType
 import org.nihongo.mochi.domain.kanji.KanjiRepository
@@ -18,6 +19,7 @@ class LevelContentProvider(
             levelKey == "Native Challenge" -> kanjiRepository.getNativeKanji().map { it.character }
             levelKey == "No Reading" -> kanjiRepository.getNoReadingKanji().map { it.character }
             levelKey == "No Meaning" -> kanjiRepository.getNoMeaningKanji().map { it.character }
+            levelKey == "user_custom_list" -> ScoreManager.getAllScores(ScoreManager.ScoreType.READING).keys.toList()
             levelKey.startsWith("bccwj_wordlist_") || levelKey.startsWith("reading_") -> {
                  val cleanKey = if (levelKey.startsWith("reading_n")) "jlpt_wordlist_${levelKey.removePrefix("reading_")}" else levelKey
                  wordRepository.getWordsForLevel(cleanKey)
