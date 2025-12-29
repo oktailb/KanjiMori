@@ -1,5 +1,7 @@
 package org.nihongo.mochi.domain.kana
 
+import org.jetbrains.compose.resources.ExperimentalResourceApi
+
 interface ResourceLoader {
-    fun loadJson(fileName: String): String
+    suspend fun loadJson(fileName: String): String
 }

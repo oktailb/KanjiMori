@@ -161,7 +161,7 @@ class WritingGameEngine(private val textNormalizer: TextNormalizer? = null) {
             // To mimic original behavior where feedback time depended on length:
             // The logic was in Fragment. We can move it here or just use a standard delay + factor
             
-            var delayMs = 2000L
+            var delayMs: Long
             if (currentQuestionType == QuestionType.MEANING) {
                  val len = currentKanji.meanings.joinToString(", ").length
                  delayMs = kotlin.math.max(2000L, len * 100L)

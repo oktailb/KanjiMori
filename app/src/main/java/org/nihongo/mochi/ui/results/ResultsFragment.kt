@@ -15,6 +15,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.core.view.isGone
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -49,10 +50,12 @@ class ResultsFragment : Fragment() {
 
     private val viewModel: ResultsViewModel by viewModels {
         viewModelFactory {
-            initializer {
-                androidCloudSaveService = AndroidCloudSaveService(requireActivity())
-                statisticsEngine = StatisticsEngine(get())
-                ResultsViewModel(androidCloudSaveService, statisticsEngine)
+            initializer<ResultsViewModel> {
+                // Initialize dependencies for the ViewModel
+                val saveService = AndroidCloudSaveService(requireActivity())
+                // We use get() here to retrieve LevelContentProvider from Koin context
+                val statsEngine = StatisticsEngine(get())
+                ResultsViewModel(saveService, statsEngine)
             }
         }
     }
@@ -104,6 +107,7 @@ class ResultsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
+        // Init Fragment properties if needed (e.g. for updateAllPercentages called outside ViewModel observation)
         if (!::statisticsEngine.isInitialized) {
              statisticsEngine = StatisticsEngine(levelContentProvider)
         }
@@ -170,7 +174,12 @@ class ResultsFragment : Fragment() {
     private fun showSavedGamesUI() {
         lifecycleScope.launch {
             try {
-                val intent = androidCloudSaveService.getSavedGamesIntent("Sauvegardes", true, true, 5)
+                val intent = androidCloudSaveService.getSavedGamesIntent(
+                    "Sauvegardes", 
+                    allowAdd = true, 
+                    allowDelete = true, 
+                    maxSnapshots = 5
+                )
                 savedGamesLauncher.launch(intent)
             } catch (e: Exception) {
                  Toast.makeText(requireContext(), getString(R.string.about_coming_soon) + ": " + e.message, Toast.LENGTH_SHORT).show()
@@ -179,6 +188,11 @@ class ResultsFragment : Fragment() {
     }
 
     private fun updateAllPercentages() {
+        // Ensure engine is initialized
+        if (!::statisticsEngine.isInitialized) {
+             statisticsEngine = StatisticsEngine(levelContentProvider)
+        }
+
         val allStats = statisticsEngine.getAllStatistics()
         
         // Group by StatisticsType (Recognition, Reading, Writing...)
@@ -231,7 +245,7 @@ class ResultsFragment : Fragment() {
             StatisticsType.RECOGNITION -> R.string.results_recognition_title
             StatisticsType.READING -> R.string.results_reading_title
             StatisticsType.WRITING -> R.string.results_writing_title
-            else -> 0 // Handle future types generically or add resources
+            // Handle future types generically or add resources
         }
         
         val titleText = if (titleResId != 0) getString(titleResId) else type.name.lowercase().replaceFirstChar { it.uppercase() }
@@ -409,7 +423,7 @@ class ResultsFragment : Fragment() {
         arrow.rotation = if (isExpanded) 0f else -90f
 
         header.setOnClickListener {
-            val newExpandedState = container.visibility == View.GONE
+            val newExpandedState = container.isGone
             container.visibility = if (newExpandedState) View.VISIBLE else View.GONE
             arrow.animate().rotation(if (newExpandedState) 0f else -90f).start()
 

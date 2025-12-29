@@ -3,6 +3,7 @@ package org.nihongo.mochi.domain.words
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import kotlinx.coroutines.runBlocking
 import org.nihongo.mochi.domain.kana.ResourceLoader
 
 @Serializable
@@ -41,6 +42,13 @@ class WordRepository(private val resourceLoader: ResourceLoader) {
     }
 
     fun getWordEntriesForLevel(fileName: String): List<WordEntry> {
+        // RunBlocking used as a temporary bridge to synchronous code
+        return runBlocking {
+             getWordEntriesForLevelSuspend(fileName)
+        }
+    }
+
+    suspend fun getWordEntriesForLevelSuspend(fileName: String): List<WordEntry> {
         if (cachedWords.containsKey(fileName)) {
             return cachedWords[fileName]!!
         }
@@ -57,18 +65,26 @@ class WordRepository(private val resourceLoader: ResourceLoader) {
     }
 
     fun getAllWordEntries(): List<WordEntry> {
+        // RunBlocking used as a temporary bridge to synchronous code
+        return runBlocking {
+            getAllWordEntriesSuspend()
+        }
+    }
+
+    suspend fun getAllWordEntriesSuspend(): List<WordEntry> {
         if (allWordsCache != null) {
             return allWordsCache!!
         }
         val allEntries = mutableListOf<WordEntry>()
         for (listName in allKnownLists) {
-            allEntries.addAll(getWordEntriesForLevel(listName))
+            allEntries.addAll(getWordEntriesForLevelSuspend(listName))
         }
         allWordsCache = allEntries
         return allEntries
     }
 
     fun getWordsContainingKanji(kanji: String): List<WordEntry> {
+        // This one might be heavy if not cached, be careful calling it on UI thread
         return getAllWordEntries().filter { it.text.contains(kanji) }
     }
 }

@@ -93,8 +93,6 @@ class StatisticsEngine(
                 StatisticsType.READING -> ScoreManager.ScoreType.READING
                 StatisticsType.WRITING -> ScoreManager.ScoreType.WRITING
                 StatisticsType.RECOGNITION -> ScoreManager.ScoreType.RECOGNITION
-                // Default to RECOGNITION for unknown types
-                else -> ScoreManager.ScoreType.RECOGNITION
             }
 
             val percentage = if (level.xmlName == "user_list") {

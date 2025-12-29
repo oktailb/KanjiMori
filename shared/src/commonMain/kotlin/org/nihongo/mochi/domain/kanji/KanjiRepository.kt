@@ -1,6 +1,7 @@
 package org.nihongo.mochi.domain.kanji
 
 import kotlinx.serialization.json.Json
+import kotlinx.coroutines.runBlocking
 import org.nihongo.mochi.domain.kana.ResourceLoader
 import org.nihongo.mochi.domain.meaning.MeaningRepository
 import org.nihongo.mochi.domain.settings.SettingsRepository
@@ -15,6 +16,13 @@ class KanjiRepository(
     private var cachedKanji: List<KanjiEntry>? = null
 
     fun getAllKanji(): List<KanjiEntry> {
+        // RunBlocking used as a temporary bridge to synchronous code
+        return runBlocking {
+            getAllKanjiSuspend()
+        }
+    }
+
+    suspend fun getAllKanjiSuspend(): List<KanjiEntry> {
         if (cachedKanji != null) return cachedKanji!!
         
         val jsonString = resourceLoader.loadJson("kanji/kanji_details.json")

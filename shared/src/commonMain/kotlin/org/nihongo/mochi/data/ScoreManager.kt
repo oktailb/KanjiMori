@@ -212,9 +212,9 @@ object ScoreManager : ScoreRepository {
         return Json.encodeToString(jsonObject)
     }
 
-    override fun restoreDataFromJson(jsonString: String) {
+    override fun restoreDataFromJson(json: String) {
         try {
-            val jsonElement = Json.parseToJsonElement(jsonString)
+            val jsonElement = Json.parseToJsonElement(json)
             if (jsonElement is JsonObject) {
                 
                 val scoresElement = jsonElement["scores"]

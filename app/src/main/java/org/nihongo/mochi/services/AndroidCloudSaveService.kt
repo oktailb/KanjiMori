@@ -63,7 +63,7 @@ class AndroidCloudSaveService(private val activity: Activity) : CloudSaveService
             val snapshot = openResult.data ?: return null
             
             val data = snapshot.snapshotContents.readFully()
-            if (data != null) String(data) else null
+            String(data)
         } catch (e: Exception) {
             Log.e("AndroidCloudSave", "Load game failed", e)
             null

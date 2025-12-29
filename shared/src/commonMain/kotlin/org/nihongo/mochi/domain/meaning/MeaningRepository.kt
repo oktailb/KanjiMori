@@ -1,6 +1,7 @@
 package org.nihongo.mochi.domain.meaning
 
 import kotlinx.serialization.json.Json
+import kotlinx.coroutines.runBlocking
 import org.nihongo.mochi.domain.kana.ResourceLoader
 
 class MeaningRepository(private val resourceLoader: ResourceLoader) {
@@ -9,6 +10,13 @@ class MeaningRepository(private val resourceLoader: ResourceLoader) {
     private val cachedMeanings = mutableMapOf<String, Map<String, List<String>>>()
 
     fun getMeanings(locale: String): Map<String, List<String>> {
+        // RunBlocking used as a temporary bridge to synchronous code
+        return runBlocking {
+            getMeaningsSuspend(locale)
+        }
+    }
+
+    suspend fun getMeaningsSuspend(locale: String): Map<String, List<String>> {
         val fileName = getFileName(locale)
         if (cachedMeanings.containsKey(locale)) {
             return cachedMeanings[locale]!!
@@ -26,7 +34,7 @@ class MeaningRepository(private val resourceLoader: ResourceLoader) {
             println("Error parsing meaning list for $locale (file: $fileName): ${e.message}")
             // Fallback to english (GB) if the locale is not found
             if (locale != "en_GB") {
-                getMeanings("en_GB")
+                getMeaningsSuspend("en_GB")
             } else {
                 emptyMap()
             }

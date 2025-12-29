@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Nihongo Mochi"
+rootProject.name = "NihongoMochi"
 include(":app")
 include(":shared")
