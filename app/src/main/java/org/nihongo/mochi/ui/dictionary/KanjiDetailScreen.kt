@@ -66,9 +66,9 @@ fun KanjiDetailScreen(
                 // Kanji Card
                 Card(
                     modifier = Modifier
-                        .size(160.dp)
+                        .size(300.dp)
                         .padding(bottom = 24.dp)
-                        .shadow(4.dp, RoundedCornerShape(16.dp)),
+                        .shadow(16.dp, RoundedCornerShape(16.dp)),
                     shape = RoundedCornerShape(16.dp),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
                 ) {
@@ -83,7 +83,7 @@ fun KanjiDetailScreen(
 
                         Text(
                             text = character,
-                            fontSize = 100.sp,
+                            fontSize = 200.sp,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary,
                             fontFamily = fontToUse,
