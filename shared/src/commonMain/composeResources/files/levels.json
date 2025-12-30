@@ -1,0 +1,372 @@
+{
+  "definitions": [
+    {
+      "name": "Hiragana",
+      "xmlName": "Hiragana",
+      "type": "RECOGNITION",
+      "category": "Kanas",
+      "sortOrder": 1,
+      "globalStep": 0
+    },
+    {
+      "name": "Katakana",
+      "xmlName": "Katakana",
+      "type": "RECOGNITION",
+      "category": "Kanas",
+      "sortOrder": 1,
+      "globalStep": 0
+    },
+    {
+      "name": "JLPT N5",
+      "xmlName": "N5",
+      "type": "RECOGNITION",
+      "category": "JLPT",
+      "sortOrder": 1,
+      "globalStep": 10
+    },
+    {
+      "name": "JLPT N4",
+      "xmlName": "N4",
+      "type": "RECOGNITION",
+      "category": "JLPT",
+      "sortOrder": 2,
+      "globalStep": 11
+    },
+    {
+      "name": "JLPT N3",
+      "xmlName": "N3",
+      "type": "RECOGNITION",
+      "category": "JLPT",
+      "sortOrder": 3,
+      "globalStep": 12
+    },
+    {
+      "name": "JLPT N2",
+      "xmlName": "N2",
+      "type": "RECOGNITION",
+      "category": "JLPT",
+      "sortOrder": 4,
+      "globalStep": 13
+    },
+    {
+      "name": "JLPT N1",
+      "xmlName": "N1",
+      "type": "RECOGNITION",
+      "category": "JLPT",
+      "sortOrder": 5,
+      "globalStep": 14
+    },
+    {
+      "name": "Grade 1",
+      "xmlName": "Grade 1",
+      "type": "RECOGNITION",
+      "category": "School",
+      "sortOrder": 1,
+      "globalStep": 10
+    },
+    {
+      "name": "Grade 2",
+      "xmlName": "Grade 2",
+      "type": "RECOGNITION",
+      "category": "School",
+      "sortOrder": 2,
+      "globalStep": 11
+    },
+    {
+      "name": "Grade 3",
+      "xmlName": "Grade 3",
+      "type": "RECOGNITION",
+      "category": "School",
+      "sortOrder": 3,
+      "globalStep": 12
+    },
+    {
+      "name": "Grade 4",
+      "xmlName": "Grade 4",
+      "type": "RECOGNITION",
+      "category": "School",
+      "sortOrder": 4,
+      "globalStep": 13
+    },
+    {
+      "name": "Grade 5",
+      "xmlName": "Grade 5",
+      "type": "RECOGNITION",
+      "category": "School",
+      "sortOrder": 5,
+      "globalStep": 14
+    },
+    {
+      "name": "Grade 6",
+      "xmlName": "Grade 6",
+      "type": "RECOGNITION",
+      "category": "School",
+      "sortOrder": 6,
+      "globalStep": 15
+    },
+    {
+      "name": "Collège",
+      "xmlName": "Grade 7",
+      "type": "RECOGNITION",
+      "category": "School",
+      "sortOrder": 7,
+      "globalStep": 16
+    },
+    {
+      "name": "Lycée",
+      "xmlName": "Grade 8",
+      "type": "RECOGNITION",
+      "category": "School",
+      "sortOrder": 8,
+      "globalStep": 17
+    },
+    {
+      "name": "Native Challenge",
+      "xmlName": "Native Challenge",
+      "type": "RECOGNITION",
+      "category": "Challenges",
+      "sortOrder": 1,
+      "globalStep": 50
+    },
+    {
+      "name": "No Reading",
+      "xmlName": "No Reading",
+      "type": "RECOGNITION",
+      "category": "Challenges",
+      "sortOrder": 2,
+      "globalStep": 51
+    },
+    {
+      "name": "No Meaning",
+      "xmlName": "No Meaning",
+      "type": "RECOGNITION",
+      "category": "Challenges",
+      "sortOrder": 3,
+      "globalStep": 52
+    },
+    {
+      "name": "Reading User",
+      "xmlName": "user_list",
+      "type": "READING",
+      "category": "User",
+      "sortOrder": 1,
+      "globalStep": 5
+    },
+    {
+      "name": "Reading N5",
+      "xmlName": "reading_n5",
+      "type": "READING",
+      "category": "JLPT",
+      "sortOrder": 1,
+      "globalStep": 10
+    },
+    {
+      "name": "Reading N4",
+      "xmlName": "reading_n4",
+      "type": "READING",
+      "category": "JLPT",
+      "sortOrder": 2,
+      "globalStep": 11
+    },
+    {
+      "name": "Reading N3",
+      "xmlName": "reading_n3",
+      "type": "READING",
+      "category": "JLPT",
+      "sortOrder": 3,
+      "globalStep": 12
+    },
+    {
+      "name": "Reading N2",
+      "xmlName": "reading_n2",
+      "type": "READING",
+      "category": "JLPT",
+      "sortOrder": 4,
+      "globalStep": 13
+    },
+    {
+      "name": "Reading N1",
+      "xmlName": "reading_n1",
+      "type": "READING",
+      "category": "JLPT",
+      "sortOrder": 5,
+      "globalStep": 14
+    },
+    {
+      "name": "Reading 1000",
+      "xmlName": "bccwj_wordlist_1000",
+      "type": "READING",
+      "category": "Frequency",
+      "sortOrder": 1,
+      "globalStep": 12
+    },
+    {
+      "name": "Reading 2000",
+      "xmlName": "bccwj_wordlist_2000",
+      "type": "READING",
+      "category": "Frequency",
+      "sortOrder": 2,
+      "globalStep": 13
+    },
+    {
+      "name": "Reading 3000",
+      "xmlName": "bccwj_wordlist_3000",
+      "type": "READING",
+      "category": "Frequency",
+      "sortOrder": 3,
+      "globalStep": 14
+    },
+    {
+      "name": "Reading 4000",
+      "xmlName": "bccwj_wordlist_4000",
+      "type": "READING",
+      "category": "Frequency",
+      "sortOrder": 4,
+      "globalStep": 15
+    },
+    {
+      "name": "Reading 5000",
+      "xmlName": "bccwj_wordlist_5000",
+      "type": "READING",
+      "category": "Frequency",
+      "sortOrder": 5,
+      "globalStep": 16
+    },
+    {
+      "name": "Reading 6000",
+      "xmlName": "bccwj_wordlist_6000",
+      "type": "READING",
+      "category": "Frequency",
+      "sortOrder": 6,
+      "globalStep": 17
+    },
+    {
+      "name": "Reading 7000",
+      "xmlName": "bccwj_wordlist_7000",
+      "type": "READING",
+      "category": "Frequency",
+      "sortOrder": 7,
+      "globalStep": 18
+    },
+    {
+      "name": "Reading 8000",
+      "xmlName": "bccwj_wordlist_8000",
+      "type": "READING",
+      "category": "Frequency",
+      "sortOrder": 8,
+      "globalStep": 19
+    },
+    {
+      "name": "Writing User",
+      "xmlName": "user_list",
+      "type": "WRITING",
+      "category": "User",
+      "sortOrder": 1,
+      "globalStep": 5
+    },
+    {
+      "name": "Writing JLPT N5",
+      "xmlName": "N5",
+      "type": "WRITING",
+      "category": "JLPT",
+      "sortOrder": 1,
+      "globalStep": 10
+    },
+    {
+      "name": "Writing JLPT N4",
+      "xmlName": "N4",
+      "type": "WRITING",
+      "category": "JLPT",
+      "sortOrder": 2,
+      "globalStep": 11
+    },
+    {
+      "name": "Writing JLPT N3",
+      "xmlName": "N3",
+      "type": "WRITING",
+      "category": "JLPT",
+      "sortOrder": 3,
+      "globalStep": 12
+    },
+    {
+      "name": "Writing JLPT N2",
+      "xmlName": "N2",
+      "type": "WRITING",
+      "category": "JLPT",
+      "sortOrder": 4,
+      "globalStep": 13
+    },
+    {
+      "name": "Writing JLPT N1",
+      "xmlName": "N1",
+      "type": "WRITING",
+      "category": "JLPT",
+      "sortOrder": 5,
+      "globalStep": 14
+    },
+    {
+      "name": "Writing Grade 1",
+      "xmlName": "Grade 1",
+      "type": "WRITING",
+      "category": "School",
+      "sortOrder": 1,
+      "globalStep": 10
+    },
+    {
+      "name": "Writing Grade 2",
+      "xmlName": "Grade 2",
+      "type": "WRITING",
+      "category": "School",
+      "sortOrder": 2,
+      "globalStep": 11
+    },
+    {
+      "name": "Writing Grade 3",
+      "xmlName": "Grade 3",
+      "type": "WRITING",
+      "category": "School",
+      "sortOrder": 3,
+      "globalStep": 12
+    },
+    {
+      "name": "Writing Grade 4",
+      "xmlName": "Grade 4",
+      "type": "WRITING",
+      "category": "School",
+      "sortOrder": 4,
+      "globalStep": 13
+    },
+    {
+      "name": "Writing Grade 5",
+      "xmlName": "Grade 5",
+      "type": "WRITING",
+      "category": "School",
+      "sortOrder": 5,
+      "globalStep": 14
+    },
+    {
+      "name": "Writing Grade 6",
+      "xmlName": "Grade 6",
+      "type": "WRITING",
+      "category": "School",
+      "sortOrder": 6,
+      "globalStep": 15
+    },
+    {
+      "name": "Writing Collège",
+      "xmlName": "Grade 7",
+      "type": "WRITING",
+      "category": "School",
+      "sortOrder": 7,
+      "globalStep": 16
+    },
+    {
+      "name": "Writing Lycée",
+      "xmlName": "Grade 8",
+      "type": "WRITING",
+      "category": "School",
+      "sortOrder": 8,
+      "globalStep": 17
+    }
+  ]
+}

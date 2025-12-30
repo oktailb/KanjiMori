@@ -86,6 +86,13 @@ enum class SagaAction {
     SIGN_IN, ACHIEVEMENTS, BACKUP, RESTORE
 }
 
+private data class BillboardSpec(
+    val type: StatisticsType,
+    val progress: Int,
+    val t: Float = 0f,
+    val horizontalOffset: Float = 0f
+)
+
 @OptIn(ExperimentalResourceApi::class)
 @Composable
 fun SagaMapScreen(
@@ -383,26 +390,35 @@ fun SagaMapContent(
                              val startY = nodeSpacingPx / 2
                              val endY = nodeSpacingPx * 1.5f 
                              
-                             nodePositionsX.forEach { startX ->
-                                 nextPositionsX.forEach { endX ->
-                                     val path = Path().apply {
-                                         moveTo(startX, startY)
-                                         cubicTo(
-                                             startX, startY + nodeSpacingPx * 0.5f,
-                                             endX, endY - nodeSpacingPx * 0.5f,
-                                             endX, endY
-                                         )
+                             // If multiple nodes connect to multiple nodes (Graph Mesh Issue)
+                             // Logic: Connect left to left, right to right (parallel) if possible
+                             // Or simplify: connect everything to everything if ambiguous
+                             
+                             // Current issue: "maillage complet" -> every node in step N connects to every node in step N+1
+                             
+                             // FIX: Simple heuristic
+                             // 1 -> 1 : Single line
+                             // 2 -> 2 : Parallel lines (0->0, 1->1)
+                             // 1 -> 2 : Fork (0->0, 0->1)
+                             // 2 -> 1 : Merge (0->0, 1->0)
+                             
+                             val currentCount = nodePositionsX.size
+                             val nextCount = nextPositionsX.size
+                             
+                             if (currentCount == nextCount) {
+                                 // 1-to-1 or 2-to-2 (Parallel)
+                                 for (i in 0 until currentCount) {
+                                     val startX = nodePositionsX[i]
+                                     val endX = nextPositionsX[i]
+                                     drawCurvedPath(this, startX, startY, endX, endY, nodeSpacingPx, pathColor)
+                                 }
+                             } else {
+                                 // Fork or Merge: Connect all to all (standard graph behavior)
+                                 // OR try to be smart: if 1->2, connect 0->0 and 0->1
+                                 nodePositionsX.forEach { startX ->
+                                     nextPositionsX.forEach { endX ->
+                                         drawCurvedPath(this, startX, startY, endX, endY, nodeSpacingPx, pathColor)
                                      }
-                                     
-                                     drawPath(
-                                         path = path,
-                                         color = pathColor,
-                                         style = Stroke(
-                                             width = 6.dp.toPx(),
-                                             cap = StrokeCap.Round,
-                                             join = StrokeJoin.Round
-                                         )
-                                     )
                                  }
                              }
                         }
@@ -411,10 +427,17 @@ fun SagaMapContent(
                         step.nodes.forEachIndexed { nodeIndex, node ->
                             val progress = viewModel.getSagaProgress(node)
                             val startX = nodePositionsX[nodeIndex]
-                            val avgTargetX = nextPositionsX.average().toFloat()
+                            
+                            // Determine target for billboard path interpolation
+                            // If 2->2, target is same index. If others, average or first.
+                            val targetX = if (nodePositionsX.size == nextPositionsX.size) {
+                                nextPositionsX[nodeIndex]
+                            } else {
+                                nextPositionsX.average().toFloat()
+                            }
                             
                             val p0 = Offset(startX, nodeSpacingPx / 2)
-                            val p3 = Offset(avgTargetX, nodeSpacingPx * 1.5f)
+                            val p3 = Offset(targetX, nodeSpacingPx * 1.5f)
                             val p1 = Offset(p0.x, p0.y + nodeSpacingPx * 0.5f)
                             val p2 = Offset(p3.x, p3.y - nodeSpacingPx * 0.5f)
                             
@@ -444,7 +467,7 @@ fun SagaMapContent(
                                 }
                                 
                                 cluster.forEachIndexed { clusterIdx, item ->
-                                    val offset = if (clusterIdx % 2 == 0) -130f else 130f
+                                    val offset = if (clusterIdx % 2 == 0) -200f else 50f
                                     finalBillboards.add(item.copy(horizontalOffset = offset))
                                 }
                                 i = j
@@ -522,13 +545,6 @@ fun SagaMapContent(
     }
 }
 
-private data class BillboardSpec(
-    val type: StatisticsType,
-    val progress: Int,
-    val t: Float = 0f,
-    val horizontalOffset: Float = 0f
-)
-
 fun getBezierPoint(t: Float, p0: Offset, p1: Offset, p2: Offset, p3: Offset): Offset {
     val u = 1 - t
     val tt = t * t
@@ -599,7 +615,7 @@ fun BillboardContent(
             Image(
                 painter = painterResource(drawable),
                 contentDescription = description,
-                modifier = Modifier.size(64.dp)
+                modifier = Modifier.size(48.dp)
             )
             Text(
                 text = "$progress%",
@@ -688,6 +704,32 @@ fun SagaNodeItem(
             }
         }
     }
+}
+
+// Helper function to draw curved path to keep code cleaner
+fun androidx.compose.ui.graphics.drawscope.DrawScope.drawCurvedPath(
+    drawScope: androidx.compose.ui.graphics.drawscope.DrawScope,
+    startX: Float, startY: Float, endX: Float, endY: Float, 
+    spacingPx: Float, color: Color
+) {
+    val path = Path().apply {
+         moveTo(startX, startY)
+         cubicTo(
+             startX, startY + spacingPx * 0.5f,
+             endX, endY - spacingPx * 0.5f,
+             endX, endY
+         )
+     }
+     
+     drawPath(
+         path = path,
+         color = color,
+         style = Stroke(
+             width = 6.dp.toPx(),
+             cap = StrokeCap.Round,
+             join = StrokeJoin.Round
+         )
+     )
 }
 
 fun Modifier.zIndex(zIndex: Float): Modifier = this

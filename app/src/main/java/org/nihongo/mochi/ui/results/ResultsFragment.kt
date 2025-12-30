@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -22,26 +23,17 @@ import com.google.android.gms.games.SnapshotsClient
 import com.google.android.gms.games.snapshot.SnapshotMetadata
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.get
-import org.koin.android.ext.android.inject
 import org.nihongo.mochi.R
-import org.nihongo.mochi.databinding.FragmentResultsBinding
 import org.nihongo.mochi.domain.statistics.ResultsViewModel
 import org.nihongo.mochi.domain.statistics.StatisticsEngine
 import org.nihongo.mochi.domain.statistics.StatisticsType
-import org.nihongo.mochi.domain.util.LevelContentProvider
 import org.nihongo.mochi.presentation.SagaAction
 import org.nihongo.mochi.presentation.SagaMapScreen
 import org.nihongo.mochi.services.AndroidCloudSaveService
-import org.nihongo.mochi.ui.theme.AppTheme // Import du nouveau thème
+import org.nihongo.mochi.ui.theme.AppTheme
 
 class ResultsFragment : Fragment() {
 
-    private var _binding: FragmentResultsBinding? = null
-    private val binding get() = _binding!!
-    
-    private val levelContentProvider: LevelContentProvider by inject()
-
-    private lateinit var statisticsEngine: StatisticsEngine
     private lateinit var androidCloudSaveService: AndroidCloudSaveService
 
     private val viewModel: ResultsViewModel by viewModels {
@@ -93,21 +85,7 @@ class ResultsFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentResultsBinding.inflate(inflater, container, false)
-        return binding.root
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        
-        if (!::statisticsEngine.isInitialized) {
-             statisticsEngine = StatisticsEngine(levelContentProvider)
-        }
-        if (!::androidCloudSaveService.isInitialized) {
-            androidCloudSaveService = AndroidCloudSaveService(requireActivity())
-        }
-
-        binding.composeView.apply {
+        return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
                 AppTheme {
@@ -122,6 +100,14 @@ class ResultsFragment : Fragment() {
                     )
                 }
             }
+        }
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        
+        if (!::androidCloudSaveService.isInitialized) {
+            androidCloudSaveService = AndroidCloudSaveService(requireActivity())
         }
         
         setupObservers()

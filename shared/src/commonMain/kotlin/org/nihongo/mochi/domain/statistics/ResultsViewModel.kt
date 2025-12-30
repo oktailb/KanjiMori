@@ -34,7 +34,10 @@ class ResultsViewModel(
 
     init {
         checkSignInStatus()
-        refreshSagaMap()
+        viewModelScope.launch {
+            statisticsEngine.loadLevelDefinitions()
+            refreshSagaMap()
+        }
     }
     
     fun setTab(tab: SagaTab) {
