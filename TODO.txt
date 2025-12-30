@@ -6,6 +6,9 @@ Refactoring:
 L'interface est actuellement en XML / Fragments Android. C'est le frein principal au portage rapide.
  • Action : Migrer progressivement vers Jetpack Compose.
  • Stratégie : Une fois en Jetpack Compose, le passage à Compose Multiplatform (pour iOS/Desktop/Web) est beaucoup plus simple car le code UI devient du code Kotlin partageable.
+ Contraintes: Respecter le plus possible le visuel d origine et les comportements, l objectif est que je soit pas capable de distinguer le rendu xml du rendu compose en utilisant l application.
+ -> Tespecter le theme jour/nuit, le comportement, le data model dans le shared etc ...
+ On migre en partant du bas de l arbre de depedendances, par un parcours en profondeur. Le dernier fragement a porter sera donc certainement fragment_home.xml
 
 2. Prévoir l'intégration "Social" (comparaison de progression) pour plus tard.
 
