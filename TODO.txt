@@ -7,17 +7,7 @@ L'interface est actuellement en XML / Fragments Android. C'est le frein principa
  • Action : Migrer progressivement vers Jetpack Compose.
  • Stratégie : Une fois en Jetpack Compose, le passage à Compose Multiplatform (pour iOS/Desktop/Web) est beaucoup plus simple car le code UI devient du code Kotlin partageable.
 
-2. Evolution UI - "Saga Map" (ResultsFragment):
-L'objectif est de remplacer la liste des résultats par une carte de progression ludique (style Candy Crush).
- • Technologie cible : Jetpack Compose (obligatoire pour la complexité graphique et portabilité). [FAIT]
- • Stratégie de migration hybride :
-    1. Activer Compose dans le projet Android (:app). [FAIT]
-    2. Remplacer le contenu de ResultsFragment par une ComposeView.[FAIT]
-    3. Créer les composants UI dans :shared (si possible) ou :app avec l'optique KMP.[FAIT]
-    4. Intégration des billboards (icônes d'activités) sur les chemins sinueux (style Candy Crush). [FAIT]
- • Logique de progression :
-    1. Enrichir StatisticsEngine (KMP) pour gérer les dépendances entre niveaux (graphe de progression).[FAIT]
-    2. Prévoir l'intégration "Social" (comparaison de progression) pour plus tard.
+2. Prévoir l'intégration "Social" (comparaison de progression) pour plus tard.
 
 Features:
  - Grammar section with typical JLTP exercises
