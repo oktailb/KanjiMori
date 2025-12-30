@@ -41,7 +41,8 @@ kotlin {
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material3)
-            implementation(compose.components.resources)
+            // Export resources API so app module can use painterResource and Res
+            api(compose.components.resources)
             implementation(libs.androidx.compose.material.icons.extended)
         }
         commonTest.dependencies {
