@@ -12,6 +12,7 @@ L'interface est actuellement en XML / Fragments Android. C'est le frein principa
  - [x] Migrer fragment_recognitions.xml vers Jetpack Compose
  - [x] Migrer fragment_reading.xml vers Jetpack Compose
  - [x] Migrer fragment_writing.xml vers Jetpack Compose
+ - [x] Migrer fragment_home.xml vers Jetpack Compose
 
 2. Prévoir l'intégration "Social" (comparaison de progression) pour plus tard.
 

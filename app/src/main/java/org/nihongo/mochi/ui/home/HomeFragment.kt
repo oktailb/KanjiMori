@@ -4,57 +4,49 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import org.nihongo.mochi.R
-import org.nihongo.mochi.databinding.FragmentHomeBinding
+import org.nihongo.mochi.ui.theme.AppTheme
 
 class HomeFragment : Fragment() {
-
-    private var _binding: FragmentHomeBinding? = null
-    private val binding get() = _binding!!
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentHomeBinding.inflate(inflater, container, false)
-        val root: View = binding.root
-
-        binding.buttonRecognition.setOnClickListener {
-            findNavController().navigate(R.id.action_nav_home_to_nav_recognition)
+        return ComposeView(requireContext()).apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+            setContent {
+                AppTheme {
+                    HomeScreen(
+                        onRecognitionClick = {
+                            findNavController().navigate(R.id.action_nav_home_to_nav_recognition)
+                        },
+                        onReadingClick = {
+                            findNavController().navigate(R.id.action_nav_home_to_nav_reading)
+                        },
+                        onWritingClick = {
+                            findNavController().navigate(R.id.action_nav_home_to_nav_writing)
+                        },
+                        onDictionaryClick = {
+                            findNavController().navigate(R.id.action_nav_home_to_nav_dictionary)
+                        },
+                        onResultsClick = {
+                            findNavController().navigate(R.id.action_nav_home_to_nav_results)
+                        },
+                        onOptionsClick = {
+                            findNavController().navigate(R.id.action_nav_home_to_nav_options)
+                        },
+                        onAboutClick = {
+                            findNavController().navigate(R.id.action_nav_home_to_nav_about)
+                        }
+                    )
+                }
+            }
         }
-
-        binding.buttonReading.setOnClickListener {
-            findNavController().navigate(R.id.action_nav_home_to_nav_reading)
-        }
-
-        binding.buttonWriting.setOnClickListener {
-            findNavController().navigate(R.id.action_nav_home_to_nav_writing)
-        }
-
-        binding.buttonDictionary.setOnClickListener {
-            findNavController().navigate(R.id.action_nav_home_to_nav_dictionary)
-        }
-
-        binding.buttonOptions.setOnClickListener {
-            findNavController().navigate(R.id.action_nav_home_to_nav_options)
-        }
-
-        binding.buttonResults.setOnClickListener {
-            findNavController().navigate(R.id.action_nav_home_to_nav_results)
-        }
-
-        binding.buttonAbout.setOnClickListener {
-            findNavController().navigate(R.id.action_nav_home_to_nav_about)
-        }
-
-        return root
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 }
