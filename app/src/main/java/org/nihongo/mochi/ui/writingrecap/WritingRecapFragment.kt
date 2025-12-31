@@ -1,145 +1,158 @@
 package org.nihongo.mochi.ui.writingrecap
 
-import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.nihongo.mochi.R
 import org.nihongo.mochi.data.ScoreManager
 import org.nihongo.mochi.data.ScoreManager.ScoreType
-import org.nihongo.mochi.databinding.FragmentWritingRecapBinding
 import org.nihongo.mochi.domain.kanji.KanjiEntry
 import org.nihongo.mochi.domain.kanji.KanjiRepository
 import org.nihongo.mochi.domain.util.LevelContentProvider
 import org.nihongo.mochi.presentation.ScorePresentationUtils
+import org.nihongo.mochi.ui.theme.AppTheme
+
+class WritingRecapViewModel(
+    private val levelContentProvider: LevelContentProvider,
+    private val kanjiRepository: KanjiRepository,
+    private val baseColorInt: Int
+) : ViewModel() {
+
+    private val _kanjiList = MutableStateFlow<List<Pair<KanjiEntry, Color>>>(emptyList())
+    val kanjiList: StateFlow<List<Pair<KanjiEntry, Color>>> = _kanjiList.asStateFlow()
+
+    private val _currentPage = MutableStateFlow(0)
+    val currentPage: StateFlow<Int> = _currentPage.asStateFlow()
+
+    private val _totalPages = MutableStateFlow(0)
+    val totalPages: StateFlow<Int> = _totalPages.asStateFlow()
+
+    private val pageSize = 80
+    private var allKanjiEntries: List<KanjiEntry> = emptyList()
+
+    fun loadLevel(levelKey: String) {
+        viewModelScope.launch {
+            val characters = levelContentProvider.getCharactersForLevel(levelKey)
+            allKanjiEntries = characters.mapNotNull { kanjiRepository.getKanjiByCharacter(it) }
+            
+            _totalPages.value = if (allKanjiEntries.isEmpty()) 0 else (allKanjiEntries.size + pageSize - 1) / pageSize
+            updateCurrentPageItems()
+        }
+    }
+
+    fun nextPage() {
+        if (_currentPage.value < _totalPages.value - 1) {
+            _currentPage.value++
+            updateCurrentPageItems()
+        }
+    }
+
+    fun prevPage() {
+        if (_currentPage.value > 0) {
+            _currentPage.value--
+            updateCurrentPageItems()
+        }
+    }
+
+    private fun updateCurrentPageItems() {
+        val startIndex = _currentPage.value * pageSize
+        val endIndex = (startIndex + pageSize).coerceAtMost(allKanjiEntries.size)
+        
+        if (startIndex < allKanjiEntries.size) {
+            val pageItems = allKanjiEntries.subList(startIndex, endIndex)
+            _kanjiList.value = pageItems.map { kanji ->
+                val score = ScoreManager.getScore(kanji.character, ScoreType.WRITING)
+                val colorInt = ScorePresentationUtils.getScoreColor(score, baseColorInt)
+                kanji to Color(colorInt)
+            }
+        } else {
+             _kanjiList.value = emptyList()
+        }
+    }
+}
 
 class WritingRecapFragment : Fragment() {
 
-    private var _binding: FragmentWritingRecapBinding? = null
-    private val binding get() = _binding!!
     private val args: WritingRecapFragmentArgs by navArgs()
-    
     private val levelContentProvider: LevelContentProvider by inject()
     private val kanjiRepository: KanjiRepository by inject()
-
-    private var kanjiList: List<KanjiEntry> = emptyList()
-    private var currentPage = 0
-    private val pageSize = 80
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentWritingRecapBinding.inflate(inflater, container, false)
-        return binding.root
-    }
+        return ComposeView(requireContext()).apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+            
+            setContent {
+                AppTheme {
+                    val baseColor = ContextCompat.getColor(context, R.color.recap_grid_base_color)
+                    val viewModel: WritingRecapViewModel = viewModel {
+                        WritingRecapViewModel(levelContentProvider, kanjiRepository, baseColor)
+                    }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+                    // Initial load
+                    androidx.compose.runtime.LaunchedEffect(args.level) {
+                        viewModel.loadLevel(args.level)
+                    }
+                    
+                    val lifecycleOwner = LocalLifecycleOwner.current
+                    androidx.compose.runtime.DisposableEffect(lifecycleOwner) {
+                        val observer = LifecycleEventObserver { _, event ->
+                            if (event == Lifecycle.Event.ON_RESUME) {
+                                viewModel.loadLevel(args.level)
+                            }
+                        }
+                        lifecycleOwner.lifecycle.addObserver(observer)
+                        onDispose {
+                             lifecycleOwner.lifecycle.removeObserver(observer)
+                        }
+                    }
 
-        binding.textGameTitle.text = getString(R.string.title_game_recap)
+                    val kanjiList by viewModel.kanjiList.collectAsState()
+                    val currentPage by viewModel.currentPage.collectAsState()
+                    val totalPages by viewModel.totalPages.collectAsState()
 
-        val level = args.level
-        binding.textLevelTitle.text = level
-
-        // Load Kanji list for the level
-        kanjiList = loadKanjiForLevel(level)
-        
-        // Initial UI Update
-        updateUi()
-
-        binding.buttonPlay.setOnClickListener {
-            val action = WritingRecapFragmentDirections.actionWritingRecapToWritingGame(level, null)
-            findNavController().navigate(action)
-        }
-        
-        binding.buttonPlay.isEnabled = true
-
-        // Pagination controls
-        binding.buttonNextPage.setOnClickListener {
-            if ((currentPage + 1) * pageSize < kanjiList.size) {
-                currentPage++
-                updateUi()
-            }
-        }
-
-        binding.buttonPrevPage.setOnClickListener {
-            if (currentPage > 0) {
-                currentPage--
-                updateUi()
-            }
-        }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        updateUi()
-    }
-
-    private fun updateUi() {
-        if (kanjiList.isEmpty()) {
-            binding.gridKanji.removeAllViews()
-            binding.textPagination.text = "0..0 / 0"
-            return
-        }
-
-        val startIndex = currentPage * pageSize
-        val endIndex = (startIndex + pageSize).coerceAtMost(kanjiList.size)
-
-        // Pre-fetch base color
-        val baseColor = ContextCompat.getColor(requireContext(), R.color.recap_grid_base_color)
-
-        binding.gridKanji.removeAllViews()
-        for (i in startIndex until endIndex) {
-            val kanjiEntry = kanjiList[i]
-            // Use WRITING score type here
-            val score = ScoreManager.getScore(kanjiEntry.character, ScoreType.WRITING)
-
-            val textView = TextView(context).apply {
-                text = kanjiEntry.character
-                textSize = 24f
-                textAlignment = View.TEXT_ALIGNMENT_CENTER
-                setTextColor(Color.BLACK)
-                setBackgroundColor(ScorePresentationUtils.getScoreColor(score, baseColor))
-                val params = android.widget.GridLayout.LayoutParams().apply {
-                    width = 0
-                    height = android.widget.GridLayout.LayoutParams.WRAP_CONTENT
-                    columnSpec = android.widget.GridLayout.spec(android.widget.GridLayout.UNDEFINED, 1f)
-                    setMargins(4, 4, 4, 4)
-                }
-                layoutParams = params
-                
-                // Add click listener to see details
-                setOnClickListener {
-                    val action = WritingRecapFragmentDirections.actionWritingRecapToKanjiDetail(kanjiEntry.id)
-                    findNavController().navigate(action)
+                    WritingRecapScreen(
+                        levelTitle = args.level,
+                        kanjiListWithColors = kanjiList,
+                        currentPage = currentPage,
+                        totalPages = totalPages,
+                        onKanjiClick = { kanjiEntry ->
+                            val action = WritingRecapFragmentDirections.actionWritingRecapToKanjiDetail(kanjiEntry.id)
+                            findNavController().navigate(action)
+                        },
+                        onPrevPage = { viewModel.prevPage() },
+                        onNextPage = { viewModel.nextPage() },
+                        onPlayClick = {
+                            val action = WritingRecapFragmentDirections.actionWritingRecapToWritingGame(args.level, null)
+                            findNavController().navigate(action)
+                        }
+                    )
                 }
             }
-            binding.gridKanji.addView(textView)
         }
-
-        binding.textPagination.text = "${startIndex + 1}..${endIndex} / ${kanjiList.size}"
-        binding.buttonPrevPage.isEnabled = currentPage > 0
-        binding.buttonPrevPage.alpha = if (currentPage > 0) 1.0f else 0.5f
-        binding.buttonNextPage.isEnabled = endIndex < kanjiList.size
-        binding.buttonNextPage.alpha = if (endIndex < kanjiList.size) 1.0f else 0.5f
-    }
-
-    private fun loadKanjiForLevel(levelKey: String): List<KanjiEntry> {
-        val characters = levelContentProvider.getCharactersForLevel(levelKey)
-        return characters.mapNotNull { kanjiRepository.getKanjiByCharacter(it) }
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 }

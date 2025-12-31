@@ -1,6 +1,5 @@
-package org.nihongo.mochi.ui.gamerecap
+package org.nihongo.mochi.ui.writingrecap
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,25 +22,18 @@ import androidx.compose.ui.unit.sp
 import org.nihongo.mochi.R
 import org.nihongo.mochi.domain.kanji.KanjiEntry
 import org.nihongo.mochi.presentation.MochiBackground
-import org.nihongo.mochi.ui.components.ModeSelector
 import org.nihongo.mochi.ui.components.PaginationControls
 import org.nihongo.mochi.ui.components.RecapKanjiGrid
 
 @Composable
-fun GameRecapScreen(
+fun WritingRecapScreen(
     levelTitle: String,
     kanjiListWithColors: List<Pair<KanjiEntry, Color>>,
     currentPage: Int,
     totalPages: Int,
-    gameMode: String,
-    readingMode: String,
-    isMeaningEnabled: Boolean,
-    isReadingEnabled: Boolean,
     onKanjiClick: (KanjiEntry) -> Unit,
     onPrevPage: () -> Unit,
     onNextPage: () -> Unit,
-    onGameModeChange: (String) -> Unit,
-    onReadingModeChange: (String) -> Unit,
     onPlayClick: () -> Unit
 ) {
     MochiBackground {
@@ -52,7 +44,7 @@ fun GameRecapScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = stringResource(R.string.game_recap_title),
+                text = stringResource(R.string.title_game_recap),
                 style = MaterialTheme.typography.headlineSmall,
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onBackground
@@ -66,7 +58,7 @@ fun GameRecapScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Kanji Grid
+            // Kanji Grid (reuse from RecapComponents)
             Column(modifier = Modifier.weight(1f)) {
                 RecapKanjiGrid(
                     kanjiList = kanjiListWithColors,
@@ -74,7 +66,7 @@ fun GameRecapScreen(
                 )
             }
 
-            // Bottom Controls
+            // Pagination Controls (reuse from RecapComponents)
             PaginationControls(
                 currentPage = currentPage,
                 totalPages = totalPages,
@@ -82,36 +74,14 @@ fun GameRecapScreen(
                 onNextClick = onNextPage
             )
 
-            ModeSelector(
-                options = listOf(
-                    stringResource(R.string.game_recap_meaning) to "meaning",
-                    stringResource(R.string.game_recap_reading) to "reading"
-                ),
-                selectedOption = gameMode,
-                onOptionSelected = onGameModeChange,
-                // This is a simplified enabled logic. The original disabled specific buttons.
-                // We might need to pass individual enabled states if that's required.
-                enabled = isMeaningEnabled || isReadingEnabled 
-            )
-            
-            AnimatedVisibility(visible = gameMode == "reading") {
-                ModeSelector(
-                    options = listOf(
-                        stringResource(R.string.game_recap_common_pronunciations) to "common",
-                        stringResource(R.string.game_recap_random_pronunciations) to "random"
-                    ),
-                    selectedOption = readingMode,
-                    onOptionSelected = onReadingModeChange
-                )
-            }
-            
             Spacer(modifier = Modifier.height(8.dp))
 
+            // Play Button
             Button(
                 onClick = onPlayClick,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(120.dp), // Height adjusted for a big button feel
+                    .height(120.dp),
                 elevation = ButtonDefaults.buttonElevation(defaultElevation = 16.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
             ) {

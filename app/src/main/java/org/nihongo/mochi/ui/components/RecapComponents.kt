@@ -26,6 +26,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.font.Typeface
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -89,15 +92,16 @@ fun PaginationControls(
         horizontalArrangement = Arrangement.Center
     ) {
         IconButton(onClick = onPrevClick, enabled = currentPage > 0) {
-            Icon(Icons.Default.ArrowBack, contentDescription = "Previous Page")
+            Icon(Icons.Default.ArrowBack, contentDescription = "Previous Page", tint = MaterialTheme.colorScheme.onBackground)
         }
         Text(
             text = "Page ${currentPage + 1} of $totalPages",
             modifier = Modifier.padding(horizontal = 16.dp),
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onBackground
         )
         IconButton(onClick = onNextClick, enabled = currentPage < totalPages - 1) {
-            Icon(Icons.Default.ArrowForward, contentDescription = "Next Page")
+            Icon(Icons.Default.ArrowForward, contentDescription = "Next Page", tint = MaterialTheme.colorScheme.onBackground)
         }
     }
 }
@@ -112,28 +116,38 @@ fun <T> ModeSelector(
 ) {
     Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
         title?.let {
-            Text(text = it, style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(bottom = 4.dp))
+            Text(text = it, style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(bottom = 4.dp), color = MaterialTheme.colorScheme.onBackground)
         }
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)
+        
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(Color.White.copy(alpha = 0.8f)) // Semi-transparent white background
         ) {
-            options.forEach { (text, value) ->
-                Row(
-                    modifier = Modifier
-                        .weight(1f) // Give equal space to each option
-                        .clip(RoundedCornerShape(8.dp))
-                        .clickable(enabled = enabled) { onOptionSelected(value) }
-                        .padding(vertical = 4.dp, horizontal = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center // Center content inside the weighted space
-                ) {
-                    RadioButton(
-                        selected = (value == selectedOption),
-                        onClick = { onOptionSelected(value) },
-                        enabled = enabled
-                    )
-                    Text(text = text)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                options.forEach { (text, value) ->
+                    Row(
+                        modifier = Modifier
+                            .weight(1f) // Give equal space to each option
+                            .clip(RoundedCornerShape(8.dp))
+                            .clickable(enabled = enabled) { onOptionSelected(value) }
+                            .padding(vertical = 4.dp, horizontal = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center // Center content inside the weighted space
+                    ) {
+                        RadioButton(
+                            selected = (value == selectedOption),
+                            onClick = { onOptionSelected(value) },
+                            enabled = enabled
+                        )
+                        // Use pure black for text inside the white box for maximum contrast
+                        Text(text = text, color = Color.Black, fontWeight = FontWeight.Bold)
+                    }
                 }
             }
         }
