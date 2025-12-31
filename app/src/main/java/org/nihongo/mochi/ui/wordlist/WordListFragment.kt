@@ -1,213 +1,170 @@
 package org.nihongo.mochi.ui.wordlist
 
-import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import com.google.android.material.chip.Chip
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.nihongo.mochi.R
 import org.nihongo.mochi.data.ScoreManager
-import org.nihongo.mochi.databinding.FragmentWordListBinding
 import org.nihongo.mochi.domain.kanji.KanjiRepository
 import org.nihongo.mochi.domain.meaning.MeaningRepository
 import org.nihongo.mochi.domain.models.KanjiDetail
 import org.nihongo.mochi.domain.models.Reading
 import org.nihongo.mochi.domain.settings.SettingsRepository
+import org.nihongo.mochi.domain.words.WordEntry
 import org.nihongo.mochi.domain.words.WordListEngine
 import org.nihongo.mochi.domain.words.WordRepository
 import org.nihongo.mochi.presentation.ScorePresentationUtils
+import org.nihongo.mochi.ui.theme.AppTheme
 
-class WordListFragment : Fragment() {
+class WordListViewModel(
+    private val wordRepository: WordRepository,
+    private val meaningRepository: MeaningRepository,
+    private val kanjiRepository: KanjiRepository,
+    private val settingsRepository: SettingsRepository,
+    private val baseColorInt: Int
+) : ViewModel() {
 
-    private var _binding: FragmentWordListBinding? = null
-    private val binding get() = _binding!!
-    private val args: WordListFragmentArgs by navArgs()
+    private val engine = WordListEngine(wordRepository)
 
-    private val wordRepository: WordRepository by inject()
-    private val settingsRepository: SettingsRepository by inject()
-    private val meaningRepository: MeaningRepository by inject()
-    private val kanjiRepository: KanjiRepository by inject()
+    private val _displayedWords = MutableStateFlow<List<Triple<WordEntry, Color, Boolean>>>(emptyList())
+    val displayedWords: StateFlow<List<Triple<WordEntry, Color, Boolean>>> = _displayedWords.asStateFlow()
+
+    private val _currentPage = MutableStateFlow(0)
+    val currentPage: StateFlow<Int> = _currentPage.asStateFlow()
+
+    private val _totalPages = MutableStateFlow(0)
+    val totalPages: StateFlow<Int> = _totalPages.asStateFlow()
+
+    // Filters state
+    private val _filterKanjiOnly = MutableStateFlow(false)
+    val filterKanjiOnly = _filterKanjiOnly.asStateFlow()
     
-    // Engine instance
-    private lateinit var engine: WordListEngine
+    private val _filterSimpleWords = MutableStateFlow(false)
+    val filterSimpleWords = _filterSimpleWords.asStateFlow()
+    
+    private val _filterCompoundWords = MutableStateFlow(false)
+    val filterCompoundWords = _filterCompoundWords.asStateFlow()
+    
+    private val _filterIgnoreKnown = MutableStateFlow(false)
+    val filterIgnoreKnown = _filterIgnoreKnown.asStateFlow()
 
-    private var currentPage = 0
+    private val _selectedWordType = MutableStateFlow("Tous" to "All") // Internal Key, Display Value
+    val selectedWordType = _selectedWordType.asStateFlow()
+
     private val pageSize = 80
-    private val allKanjiDetails = mutableListOf<KanjiDetail>()
-    private val wordTypes = mutableListOf<Pair<String, String>>()
+    private var allKanjiDetails = listOf<KanjiDetail>()
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        _binding = FragmentWordListBinding.inflate(inflater, container, false)
-        return binding.root
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        
-        // Init Engine
-        engine = WordListEngine(wordRepository)
-
-        val wordListName = args.wordList
-        if (wordListName == "user_custom_list") {
-            binding.textListTitle.text = getString(R.string.reading_user_list)
-        } else {
-            binding.textListTitle.text = wordListName.replace("bccwj_wordlist_", "Common Words ").replace(".json", "")
-        }
-
-        // Load data via Engine
-        engine.loadList(wordListName)
-        
-        // Load Kanji Details for tooltips/display logic (kept local for now as it seems purely UI decoration related)
-        loadAllKanjiDetails()
-
-        setupFilters()
-        // Initial application of filters
-        updateDisplayedList()
-
-        binding.buttonNextPage.setOnClickListener {
-            val displayedWords = engine.getDisplayedWords()
-            if ((currentPage + 1) * pageSize < displayedWords.size) {
-                currentPage++
-                updateUi()
-            }
-        }
-
-        binding.buttonPrevPage.setOnClickListener {
-            if (currentPage > 0) {
-                currentPage--
-                updateUi()
-            }
-        }
-
-        binding.buttonPlay.setOnClickListener {
-            val displayedWords = engine.getDisplayedWords()
-            val customWordList = displayedWords.map { it.text }.toTypedArray()
-            val action = WordListFragmentDirections.actionNavWordListToNavWordQuiz(customWordList)
-            findNavController().navigate(action)
-        }
-    }
-
-    private fun setupFilters() {
-        binding.checkboxKanjiOnly.setOnCheckedChangeListener { _, isChecked -> 
-            engine.filterKanjiOnly = isChecked
-            updateDisplayedList() 
-        }
-        binding.checkboxSimpleWords.setOnCheckedChangeListener { _, isChecked -> 
-            engine.filterSimpleWords = isChecked
-            updateDisplayedList() 
-        }
-        binding.checkboxCompoundWords.setOnCheckedChangeListener { _, isChecked -> 
-            engine.filterCompoundWords = isChecked
-            updateDisplayedList() 
-        }
-        binding.checkboxIgnoreKnown.setOnCheckedChangeListener { _, isChecked -> 
-            engine.filterIgnoreKnown = isChecked
-            updateDisplayedList() 
-        }
-
-        wordTypes.clear()
-        wordTypes.add("Tous" to getString(R.string.word_type_all))
-        wordTypes.add("和" to getString(R.string.word_type_wa))
-        wordTypes.add("固" to getString(R.string.word_type_ko))
-        wordTypes.add("外" to getString(R.string.word_type_gai))
-        wordTypes.add("混" to getString(R.string.word_type_kon))
-        wordTypes.add("漢" to getString(R.string.word_type_kan))
-        wordTypes.add("記号" to getString(R.string.word_type_kigo))
-
-        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, wordTypes.map { it.second })
-        adapter.setDropDownViewResource(R.layout.spinner_dropdown_item)
-        binding.spinnerWordType.adapter = adapter
-        binding.spinnerWordType.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
-                if (position >= 0 && position < wordTypes.size) {
-                    engine.filterWordType = wordTypes[position].first
-                    updateDisplayedList()
-                }
-            }
-
-            override fun onNothingSelected(parent: AdapterView<*>) {}
+    fun loadList(listName: String) {
+        viewModelScope.launch {
+            loadAllKanjiDetails()
+            engine.loadList(listName)
+            applyFilters()
         }
     }
     
-    private fun updateDisplayedList() {
+    fun setFilterKanjiOnly(enabled: Boolean) {
+        _filterKanjiOnly.value = enabled
+        engine.filterKanjiOnly = enabled
+        applyFilters()
+    }
+    
+    fun setFilterSimpleWords(enabled: Boolean) {
+        _filterSimpleWords.value = enabled
+        engine.filterSimpleWords = enabled
+        applyFilters()
+    }
+    
+    fun setFilterCompoundWords(enabled: Boolean) {
+        _filterCompoundWords.value = enabled
+        engine.filterCompoundWords = enabled
+        applyFilters()
+    }
+    
+    fun setFilterIgnoreKnown(enabled: Boolean) {
+        _filterIgnoreKnown.value = enabled
+        engine.filterIgnoreKnown = enabled
+        applyFilters()
+    }
+    
+    fun setWordType(type: Pair<String, String>) {
+        _selectedWordType.value = type
+        engine.filterWordType = type.first
+        applyFilters()
+    }
+
+    private fun applyFilters() {
         engine.applyFilters()
-        currentPage = 0
-        updateUi()
+        _currentPage.value = 0
+        updateCurrentPageItems()
     }
 
-    override fun onResume() {
-        super.onResume()
-        if (args.wordList == "user_custom_list") {
-             engine.loadList(args.wordList)
-             updateDisplayedList()
+    fun nextPage() {
+        if (_currentPage.value < _totalPages.value - 1) {
+            _currentPage.value++
+            updateCurrentPageItems()
         }
     }
 
-    private fun updateUi() {
-        val displayedWords = engine.getDisplayedWords()
+    fun prevPage() {
+        if (_currentPage.value > 0) {
+            _currentPage.value--
+            updateCurrentPageItems()
+        }
+    }
+    
+    fun getGameWordList(): Array<String> {
+         return engine.getDisplayedWords().map { it.text }.toTypedArray()
+    }
+
+    private fun updateCurrentPageItems() {
+        val allDisplayed = engine.getDisplayedWords()
+        _totalPages.value = if (allDisplayed.isEmpty()) 0 else (allDisplayed.size + pageSize - 1) / pageSize
         
-        if (displayedWords.isEmpty()) {
-            binding.wordsContainer.removeAllViews()
-            binding.textPagination.text = "0..0 / 0"
-            binding.buttonPrevPage.isEnabled = false
-            binding.buttonNextPage.isEnabled = false
-            return
-        }
-
-        val wordScores = displayedWords.map { ScoreManager.getScore(it.text, ScoreManager.ScoreType.READING) }
-
-        val startIndex = currentPage * pageSize
-        val endIndex = (startIndex + pageSize).coerceAtMost(displayedWords.size)
-
-        // Pre-fetch base color
-        val baseColor = ContextCompat.getColor(requireContext(), R.color.recap_grid_base_color)
-
-        binding.wordsContainer.removeAllViews()
-        for (i in startIndex until endIndex) {
-            val word = displayedWords[i]
-            val score = wordScores[i]
-            val kanjiDetail = allKanjiDetails.firstOrNull { it.character == word.text }
-
-            val chip = Chip(context).apply {
-                text = word.text
-                textSize = 18f
-                chipBackgroundColor = android.content.res.ColorStateList.valueOf(ScorePresentationUtils.getScoreColor(score, baseColor))
-                setTextColor(Color.BLACK)
-
-                if (kanjiDetail != null && kanjiDetail.meanings.isEmpty()) {
-                    chipStrokeWidth = 4f
-                    chipStrokeColor = android.content.res.ColorStateList.valueOf(Color.RED)
-                }
+        val startIndex = _currentPage.value * pageSize
+        val endIndex = (startIndex + pageSize).coerceAtMost(allDisplayed.size)
+        
+        if (startIndex < allDisplayed.size) {
+            val pageItems = allDisplayed.subList(startIndex, endIndex)
+            _displayedWords.value = pageItems.map { word ->
+                val score = ScoreManager.getScore(word.text, ScoreManager.ScoreType.READING)
+                val colorInt = ScorePresentationUtils.getScoreColor(score, baseColorInt)
+                val kanjiDetail = allKanjiDetails.firstOrNull { it.character == word.text }
+                // Red border logic: kanji found but no meanings (implies potential issue or specific state)
+                val isRedBorder = kanjiDetail != null && kanjiDetail.meanings.isEmpty()
+                Triple(word, Color(colorInt), isRedBorder)
             }
-            binding.wordsContainer.addView(chip)
+        } else {
+             _displayedWords.value = emptyList()
         }
-
-        binding.textPagination.text = "${startIndex + 1}..${endIndex} / ${displayedWords.size}"
-        binding.buttonPrevPage.isEnabled = currentPage > 0
-        binding.buttonPrevPage.alpha = if (currentPage > 0) 1.0f else 0.5f
-        binding.buttonNextPage.isEnabled = endIndex < displayedWords.size
-        binding.buttonNextPage.alpha = if (endIndex < displayedWords.size) 1.0f else 0.5f
     }
-
+    
     private fun loadAllKanjiDetails() {
         val locale = settingsRepository.getAppLocale()
         val meanings = meaningRepository.getMeanings(locale)
         val allKanjiEntries = kanjiRepository.getAllKanji()
         
-        allKanjiDetails.clear()
-        
+        val details = mutableListOf<KanjiDetail>()
         for (entry in allKanjiEntries) {
             val id = entry.id
             val character = entry.character
@@ -218,14 +175,106 @@ class WordListFragment : Fragment() {
                  val freq = readingEntry.frequency?.toIntOrNull() ?: 0
                  readingsList.add(Reading(readingEntry.value, readingEntry.type, freq))
             }
-            
-            val kanjiDetail = KanjiDetail(id, character, kanjiMeanings, readingsList)
-            allKanjiDetails.add(kanjiDetail)
+            details.add(KanjiDetail(id, character, kanjiMeanings, readingsList))
         }
+        allKanjiDetails = details
     }
+}
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
+class WordListFragment : Fragment() {
+
+    private val args: WordListFragmentArgs by navArgs()
+    private val wordRepository: WordRepository by inject()
+    private val settingsRepository: SettingsRepository by inject()
+    private val meaningRepository: MeaningRepository by inject()
+    private val kanjiRepository: KanjiRepository by inject()
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        return ComposeView(requireContext()).apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+            
+            setContent {
+                AppTheme {
+                    val baseColor = ContextCompat.getColor(context, R.color.recap_grid_base_color)
+                    val viewModel: WordListViewModel = viewModel {
+                        WordListViewModel(wordRepository, meaningRepository, kanjiRepository, settingsRepository, baseColor)
+                    }
+
+                    // Initial load
+                    androidx.compose.runtime.LaunchedEffect(args.wordList) {
+                        viewModel.loadList(args.wordList)
+                    }
+                    
+                     val lifecycleOwner = LocalLifecycleOwner.current
+                     androidx.compose.runtime.DisposableEffect(lifecycleOwner) {
+                        val observer = LifecycleEventObserver { _, event ->
+                            if (event == Lifecycle.Event.ON_RESUME) {
+                                // Reload to refresh scores if coming back from game
+                                viewModel.loadList(args.wordList)
+                            }
+                        }
+                        lifecycleOwner.lifecycle.addObserver(observer)
+                        onDispose {
+                             lifecycleOwner.lifecycle.removeObserver(observer)
+                        }
+                    }
+
+                    val displayedWords by viewModel.displayedWords.collectAsState()
+                    val currentPage by viewModel.currentPage.collectAsState()
+                    val totalPages by viewModel.totalPages.collectAsState()
+                    
+                    val filterKanjiOnly by viewModel.filterKanjiOnly.collectAsState()
+                    val filterSimpleWords by viewModel.filterSimpleWords.collectAsState()
+                    val filterCompoundWords by viewModel.filterCompoundWords.collectAsState()
+                    val filterIgnoreKnown by viewModel.filterIgnoreKnown.collectAsState()
+                    val selectedWordType by viewModel.selectedWordType.collectAsState()
+                    
+                    val wordTypeOptions = listOf(
+                        "Tous" to getString(R.string.word_type_all),
+                        "和" to getString(R.string.word_type_wa),
+                        "固" to getString(R.string.word_type_ko),
+                        "外" to getString(R.string.word_type_gai),
+                        "混" to getString(R.string.word_type_kon),
+                        "漢" to getString(R.string.word_type_kan),
+                        "記号" to getString(R.string.word_type_kigo)
+                    )
+                    
+                    val listTitle = if (args.wordList == "user_custom_list") {
+                        getString(R.string.reading_user_list)
+                    } else {
+                        args.wordList.replace("bccwj_wordlist_", "Common Words ").replace(".json", "")
+                    }
+
+                    WordListScreen(
+                        listTitle = listTitle,
+                        wordsWithColors = displayedWords,
+                        currentPage = currentPage,
+                        totalPages = totalPages,
+                        filterKanjiOnly = filterKanjiOnly,
+                        filterSimpleWords = filterSimpleWords,
+                        filterCompoundWords = filterCompoundWords,
+                        filterIgnoreKnown = filterIgnoreKnown,
+                        selectedWordType = selectedWordType,
+                        wordTypeOptions = wordTypeOptions,
+                        onFilterKanjiOnlyChange = { viewModel.setFilterKanjiOnly(it) },
+                        onFilterSimpleWordsChange = { viewModel.setFilterSimpleWords(it) },
+                        onFilterCompoundWordsChange = { viewModel.setFilterCompoundWords(it) },
+                        onFilterIgnoreKnownChange = { viewModel.setFilterIgnoreKnown(it) },
+                        onWordTypeChange = { viewModel.setWordType(it) },
+                        onPrevPage = { viewModel.prevPage() },
+                        onNextPage = { viewModel.nextPage() },
+                        onPlayClick = {
+                            val customWordList = viewModel.getGameWordList()
+                            val action = WordListFragmentDirections.actionNavWordListToNavWordQuiz(customWordList)
+                            findNavController().navigate(action)
+                        }
+                    )
+                }
+            }
+        }
     }
 }
