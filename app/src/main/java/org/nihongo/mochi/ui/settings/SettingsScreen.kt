@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.nihongo.mochi.R
 import org.nihongo.mochi.presentation.MochiBackground
+import org.nihongo.mochi.presentation.settings.SettingsViewModel
 import java.util.Locale
 
 // Data class for language items, now used in Compose

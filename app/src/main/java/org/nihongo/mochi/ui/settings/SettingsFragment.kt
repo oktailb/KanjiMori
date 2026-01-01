@@ -10,6 +10,7 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.os.LocaleListCompat
 import androidx.fragment.app.Fragment
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.nihongo.mochi.presentation.settings.SettingsViewModel
 import org.nihongo.mochi.ui.theme.AppTheme
 
 class SettingsFragment : Fragment() {

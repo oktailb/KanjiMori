@@ -11,8 +11,8 @@ import org.koin.android.ext.koin.androidContext
 import org.nihongo.mochi.presentation.dictionary.KanjiDetailViewModel
 import org.nihongo.mochi.presentation.reading.ReadingViewModel
 import org.nihongo.mochi.presentation.recognition.RecognitionViewModel
+import org.nihongo.mochi.presentation.settings.SettingsViewModel
 import org.nihongo.mochi.presentation.writing.WritingViewModel
-import org.nihongo.mochi.ui.settings.SettingsViewModel
 
 val appModule = module {
     // Switched to ComposeResourceLoader which is KMP compatible and uses the new resources system
