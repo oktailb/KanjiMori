@@ -243,10 +243,17 @@ class WordListFragment : Fragment() {
                         "記号" to getString(R.string.word_type_kigo)
                     )
                     
-                    val listTitle = if (args.wordList == "user_custom_list") {
-                        getString(R.string.reading_user_list)
-                    } else {
-                        args.wordList.replace("bccwj_wordlist_", "Common Words ").replace(".json", "")
+                    val listTitle = when {
+                        args.wordList == "user_custom_list" -> getString(R.string.reading_user_list)
+                        args.wordList.startsWith("jlpt_wordlist_") -> {
+                            val level = args.wordList.removePrefix("jlpt_wordlist_").uppercase()
+                            "JLPT $level"
+                        }
+                        args.wordList.startsWith("bccwj_wordlist_") -> {
+                            val level = args.wordList.removePrefix("bccwj_wordlist_").replace(".json", "")
+                            "Common Words $level"
+                        }
+                        else -> args.wordList
                     }
 
                     WordListScreen(

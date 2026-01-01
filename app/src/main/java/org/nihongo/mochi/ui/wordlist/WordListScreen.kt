@@ -17,13 +17,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -87,7 +90,7 @@ fun WordListScreen(
                     .fillMaxWidth()
                     .padding(vertical = 8.dp)
                     .clip(RoundedCornerShape(8.dp))
-                    .background(Color.White.copy(alpha = 0.8f))
+                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.8f))
             ) {
                 Column(modifier = Modifier.padding(8.dp)) {
                     Row(
@@ -113,44 +116,24 @@ fun WordListScreen(
                             modifier = Modifier.weight(1f)
                         )
                     }
-
-                    // Custom Dropdown for Word Type
+                    
                     var expanded by remember { mutableStateOf(false) }
-                    ExposedDropdownMenuBox(
-                        expanded = expanded,
-                        onExpandedChange = { expanded = !expanded },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp)
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .menuAnchor() // menuAnchor handles interactions (click/focus)
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(4.dp))
-                                .background(Color.White)
-                                .border(1.dp, Color.LightGray, RoundedCornerShape(4.dp))
-                                .clickable { expanded = !expanded }
-                                .padding(horizontal = 12.dp, vertical = 12.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
+                    Box(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+                        OutlinedButton(
+                            onClick = { expanded = true },
+                            modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text(
-                                text = selectedWordType.second,
-                                color = Color.Black,
-                                fontSize = 16.sp
-                            )
-                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+                            Text(text = selectedWordType.second)
+                            Icon(Icons.Default.ArrowDropDown, contentDescription = null)
                         }
-                        
-                        ExposedDropdownMenu(
+
+                        DropdownMenu(
                             expanded = expanded,
-                            onDismissRequest = { expanded = false },
-                            modifier = Modifier.background(Color.White)
+                            onDismissRequest = { expanded = false }
                         ) {
                             wordTypeOptions.forEach { option ->
                                 DropdownMenuItem(
-                                    text = { Text(option.second, color = Color.Black) },
+                                    text = { Text(option.second) },
                                     onClick = {
                                         onWordTypeChange(option)
                                         expanded = false
@@ -225,14 +208,14 @@ fun FilterCheckbox(
             onCheckedChange = null, // Handled by Row click
             colors = CheckboxDefaults.colors(
                 checkedColor = MaterialTheme.colorScheme.primary,
-                uncheckedColor = Color.Gray,
-                checkmarkColor = Color.White
+                uncheckedColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                checkmarkColor = MaterialTheme.colorScheme.surface
             )
         )
         Text(
             text = text,
             fontSize = 12.sp,
-            color = Color.Black // Ensuring contrast on white bg
+            color = MaterialTheme.colorScheme.onSurface
         )
     }
 }
@@ -247,13 +230,13 @@ fun WordChip(
         modifier = Modifier
             .clip(RoundedCornerShape(16.dp)) // Chip shape
             .background(backgroundColor)
-            .then(if (isRedBorder) Modifier.border(2.dp, Color.Red, RoundedCornerShape(16.dp)) else Modifier)
+            .then(if (isRedBorder) Modifier.border(2.dp, MaterialTheme.colorScheme.error, RoundedCornerShape(16.dp)) else Modifier)
             .padding(horizontal = 12.dp, vertical = 6.dp)
     ) {
         Text(
             text = text,
             fontSize = 18.sp,
-            color = Color.Black
+            color = MaterialTheme.colorScheme.onSurface
         )
     }
 }
