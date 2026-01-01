@@ -11,34 +11,21 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.fragment.findNavController
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import org.nihongo.mochi.R
 import org.nihongo.mochi.domain.statistics.ReadingViewModel
+import org.nihongo.mochi.presentation.models.ReadingLevelInfoState
 import org.nihongo.mochi.ui.theme.AppTheme
 
 // Wrapper to expose state flow to Compose
 class ReadingComposeViewModel : ViewModel() {
-    // We can't easily reuse the existing ReadingViewModel as is because it's not exposing flows
-    // But we can wrap it or just re-implement the state logic for Compose.
-    // Given the simplicity, let's just make a bridge or copy the logic if it's simple.
-    // The original ViewModel is in commonMain but uses basic var properties.
-    // Let's create a StateFlow that updates when we tell it to.
 
     private val _state = MutableStateFlow(ReadingScreenState())
     val state: StateFlow<ReadingScreenState> = _state.asStateFlow()
-    
-    // We will delegate to the domain ViewModel logic if possible, or just re-implement the percentage calculation 
-    // here if the domain VM is not easily observable.
-    // The domain VM "ReadingViewModel" is very simple and just holds vars and calculates them on demand.
-    // We can just use an instance of it and sync our state.
     
     private val domainViewModel = ReadingViewModel()
 

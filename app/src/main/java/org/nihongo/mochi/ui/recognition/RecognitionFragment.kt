@@ -19,6 +19,7 @@ import org.nihongo.mochi.R
 import org.nihongo.mochi.data.ScoreManager
 import org.nihongo.mochi.data.ScoreManager.ScoreType
 import org.nihongo.mochi.domain.util.LevelContentProvider
+import org.nihongo.mochi.presentation.models.LevelInfoState
 import org.nihongo.mochi.ui.theme.AppTheme
 
 data class LevelDef(val levelKey: String, val stringResId: Int? = null)

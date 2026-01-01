@@ -25,12 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.nihongo.mochi.R
 import org.nihongo.mochi.presentation.MochiBackground
-
-data class LevelInfoState(
-    val levelKey: String,
-    val displayName: String,
-    val percentage: Int
-)
+import org.nihongo.mochi.presentation.models.LevelInfoState
 
 @Composable
 fun RecognitionScreen(
@@ -227,62 +222,6 @@ fun LevelButton(
     hidePercentage: Boolean = false
 ) {
     if (info == null) return
-
-    // Original XML used:
-    // android:textColor="?attr/colorOnSecondary"
-    // android:backgroundTint="?attr/colorSecondary"
-    // In Theme.kt:
-    // LightSecondary = Color(0xFF8BC34A) (leaf_green)
-    // DarkSecondary = Color(0xFF8BC34A) (leaf_green)
-    //
-    // However, the XML colors.xml suggests:
-    // <color name="button_background">#4DB6AC</color> (Teal 400) for Day
-    // <color name="button_background">#FF6D00</color> (Dark Orange) for Night
-    //
-    // If the original buttons were using ?attr/colorSecondary, then they were Green in both modes?
-    // Let's re-read the original XML.
-    // android:backgroundTint="?attr/colorSecondary"
-    //
-    // And let's check Theme.kt again.
-    // LightSecondary = Color(0xFF8BC34A) // leaf_green
-    // DarkSecondary = Color(0xFF8BC34A) // leaf_green
-    //
-    // Wait, the user said "les boutons on la mauvaise couleur , en particulier en mode nuit".
-    // If I used Secondary (Green), it stays Green in Night mode.
-    //
-    // But colors.xml says:
-    // Day: button_background = Teal 400
-    // Night: button_background = Dark Orange
-    //
-    // And Theme.kt maps Primary to these colors!
-    // LightPrimary = Color(0xFF4DB6AC) // button_background
-    // DarkPrimary = Color(0xFFFF6D00) // button_background
-    //
-    // So if the intention is to follow the "button_background" color which changes from Teal to Orange,
-    // we should use Primary, not Secondary.
-    //
-    // However, the original XML explicitly said: android:backgroundTint="?attr/colorSecondary"
-    // Let's check if the original XML had overrides or if I misread it.
-    //
-    // <Button ... android:backgroundTint="?attr/colorSecondary" ... />
-    //
-    // If the original XML used Secondary, then the original buttons were Green (leaf_green) in both modes.
-    // Unless the theme definition in themes.xml maps colorSecondary to something else.
-    // I don't have access to themes.xml content right now, only file list.
-    //
-    // But Theme.kt seems to try to replicate the logic.
-    //
-    // Let's look at colors.xml again.
-    // <color name="button_background">#4DB6AC</color>
-    //
-    // If the user complains about wrong color especially in night mode, maybe they expect the Orange color (DarkPrimary)
-    // which is defined as "button_background" in the comment in Theme.kt.
-    //
-    // Let's switch to Primary color for buttons.
-    // LightPrimary is Teal (Day button background)
-    // DarkPrimary is Orange (Night button background)
-    //
-    // This seems to match the "button_background" comment in Theme.kt better than Secondary (leaf_green).
 
     Button(
         onClick = { onClick(info.levelKey) },

@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.nihongo.mochi.R
 import org.nihongo.mochi.presentation.MochiBackground
+import org.nihongo.mochi.presentation.dictionary.KanjiDetailViewModel
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -174,12 +175,15 @@ fun KanjiDetailScreen(
                             
                             Row {
                                 uiState.components.forEach { component ->
+                                    // Capture kanjiRef in a local variable for smart cast safety
+                                    val currentKanjiRef = component.kanjiRef
+                                    
                                     Column(
                                         modifier = Modifier
                                             .padding(horizontal = 16.dp)
                                             .let {
-                                                if (!component.kanjiRef.isNullOrEmpty()) {
-                                                    it.clickable { onKanjiClick(component.kanjiRef) }
+                                                if (!currentKanjiRef.isNullOrEmpty()) {
+                                                    it.clickable { onKanjiClick(currentKanjiRef) }
                                                 } else it
                                             },
                                         horizontalAlignment = Alignment.CenterHorizontally
@@ -197,14 +201,14 @@ fun KanjiDetailScreen(
                                             fontFamily = compFont
                                         )
                                         
-                                        if (!component.kanjiRef.isNullOrEmpty() && component.kanjiRef != component.character) {
-                                            val refFont = if (kanjiStrokeOrderTypeface != null && canFontDisplay(kanjiStrokeOrderTypeface, component.kanjiRef)) {
+                                        if (!currentKanjiRef.isNullOrEmpty() && currentKanjiRef != component.character) {
+                                            val refFont = if (kanjiStrokeOrderTypeface != null && canFontDisplay(kanjiStrokeOrderTypeface, currentKanjiRef)) {
                                                 customFontFamily
                                             } else {
                                                 FontFamily.Default
                                             }
                                             Text(
-                                                text = "(${component.kanjiRef})",
+                                                text = "($currentKanjiRef)",
                                                 fontSize = 12.sp,
                                                 color = MaterialTheme.colorScheme.onSurface,
                                                 fontFamily = refFont

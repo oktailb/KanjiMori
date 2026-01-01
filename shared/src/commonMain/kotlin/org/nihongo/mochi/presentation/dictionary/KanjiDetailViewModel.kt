@@ -1,8 +1,9 @@
-package org.nihongo.mochi.ui.dictionary
+package org.nihongo.mochi.presentation.dictionary
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -98,6 +99,11 @@ class KanjiDetailViewModel(
     
     // Helper needed for navigation logic from UI
     fun findKanjiIdByCharacter(character: String): String? {
+        // Warning: This blocking call might be risky if getKanjiByCharacter does heavy DB work.
+        // In the original it was running on IO via launch, but the return value logic was tricky.
+        // Actually, the original 'navigateToKanji' in Fragment launched a coroutine to call this.
+        // Since this method just returns data, it's fine as is, provided the caller handles threads.
+        // But getKanjiByCharacter in repo should be thread-safe.
         val entry = kanjiRepository.getKanjiByCharacter(character)
         return entry?.id
     }

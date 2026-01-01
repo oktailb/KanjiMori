@@ -25,12 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.nihongo.mochi.R
 import org.nihongo.mochi.presentation.MochiBackground
-
-data class ReadingLevelInfoState(
-    val id: String,
-    val displayName: String,
-    val percentage: Int
-)
+import org.nihongo.mochi.presentation.models.ReadingLevelInfoState
 
 @Composable
 fun ReadingScreen(

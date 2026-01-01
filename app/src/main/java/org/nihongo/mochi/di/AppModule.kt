@@ -8,7 +8,7 @@ import org.koin.dsl.module
 import org.nihongo.mochi.domain.kana.ComposeResourceLoader
 import org.nihongo.mochi.domain.kana.ResourceLoader
 import org.koin.android.ext.koin.androidContext
-import org.nihongo.mochi.ui.dictionary.KanjiDetailViewModel
+import org.nihongo.mochi.presentation.dictionary.KanjiDetailViewModel
 import org.nihongo.mochi.ui.settings.SettingsViewModel
 
 val appModule = module {

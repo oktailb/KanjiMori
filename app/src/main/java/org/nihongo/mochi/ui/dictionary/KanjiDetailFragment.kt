@@ -12,12 +12,12 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.nihongo.mochi.R
 import org.nihongo.mochi.ui.theme.AppTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import androidx.lifecycle.lifecycleScope
+import org.nihongo.mochi.presentation.dictionary.KanjiDetailViewModel
 
 class KanjiDetailFragment : Fragment() {
 
