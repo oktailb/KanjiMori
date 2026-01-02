@@ -27,6 +27,7 @@ import org.koin.android.ext.android.inject
 import org.nihongo.mochi.R
 import org.nihongo.mochi.data.ScoreManager
 import org.nihongo.mochi.domain.kanji.KanjiRepository
+import org.nihongo.mochi.domain.levels.LevelsRepository
 import org.nihongo.mochi.domain.meaning.MeaningRepository
 import org.nihongo.mochi.domain.models.KanjiDetail
 import org.nihongo.mochi.domain.models.Reading
@@ -42,6 +43,7 @@ class WordListViewModel(
     private val meaningRepository: MeaningRepository,
     private val kanjiRepository: KanjiRepository,
     private val settingsRepository: SettingsRepository,
+    private val levelsRepository: LevelsRepository,
     private val baseColorInt: Int
 ) : ViewModel() {
 
@@ -72,11 +74,35 @@ class WordListViewModel(
     private val _selectedWordType = MutableStateFlow("Tous" to "All") // Internal Key, Display Value
     val selectedWordType = _selectedWordType.asStateFlow()
 
+    private val _screenTitleKey = MutableStateFlow<String?>(null)
+    val screenTitleKey = _screenTitleKey.asStateFlow()
+
     private val pageSize = 80
     private var allKanjiDetails = listOf<KanjiDetail>()
 
     fun loadList(listName: String) {
         viewModelScope.launch {
+            if (listName == "user_custom_list") {
+                _screenTitleKey.value = "reading_user_list"
+            } else {
+                val defs = levelsRepository.loadLevelDefinitions()
+                // Find level that has this dataFile in any activity
+                var foundKey: String? = null
+                
+                outer@ for (section in defs.sections.values) {
+                    for (level in section.levels) {
+                        for (activity in level.activities.values) {
+                            if (activity.dataFile == listName) {
+                                foundKey = level.name // This is the resource key, e.g. "level_n5"
+                                break@outer
+                            }
+                        }
+                    }
+                }
+                
+                _screenTitleKey.value = foundKey
+            }
+
             loadAllKanjiDetails()
             engine.loadList(listName)
             applyFilters()
@@ -188,6 +214,7 @@ class WordListFragment : Fragment() {
     private val settingsRepository: SettingsRepository by inject()
     private val meaningRepository: MeaningRepository by inject()
     private val kanjiRepository: KanjiRepository by inject()
+    private val levelsRepository: LevelsRepository by inject()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -201,7 +228,7 @@ class WordListFragment : Fragment() {
                 AppTheme {
                     val baseColor = ContextCompat.getColor(context, R.color.recap_grid_base_color)
                     val viewModel: WordListViewModel = viewModel {
-                        WordListViewModel(wordRepository, meaningRepository, kanjiRepository, settingsRepository, baseColor)
+                        WordListViewModel(wordRepository, meaningRepository, kanjiRepository, settingsRepository, levelsRepository, baseColor)
                     }
 
                     // Initial load
@@ -232,6 +259,7 @@ class WordListFragment : Fragment() {
                     val filterCompoundWords by viewModel.filterCompoundWords.collectAsState()
                     val filterIgnoreKnown by viewModel.filterIgnoreKnown.collectAsState()
                     val selectedWordType by viewModel.selectedWordType.collectAsState()
+                    val screenTitleKey by viewModel.screenTitleKey.collectAsState()
                     
                     val wordTypeOptions = listOf(
                         "Tous" to getString(R.string.word_type_all),
@@ -243,17 +271,11 @@ class WordListFragment : Fragment() {
                         "記号" to getString(R.string.word_type_kigo)
                     )
                     
-                    val listTitle = when {
-                        args.wordList == "user_custom_list" -> getString(R.string.reading_user_list)
-                        args.wordList.startsWith("jlpt_wordlist_") -> {
-                            val level = args.wordList.removePrefix("jlpt_wordlist_").uppercase()
-                            "JLPT $level"
-                        }
-                        args.wordList.startsWith("bccwj_wordlist_") -> {
-                            val level = args.wordList.removePrefix("bccwj_wordlist_").replace(".json", "")
-                            "Common Words $level"
-                        }
-                        else -> args.wordList
+                    val listTitle = if (screenTitleKey != null) {
+                        val resId = context.resources.getIdentifier(screenTitleKey, "string", context.packageName)
+                        if (resId != 0) getString(resId) else args.wordList
+                    } else {
+                        args.wordList
                     }
 
                     WordListScreen(
