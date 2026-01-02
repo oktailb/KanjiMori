@@ -78,15 +78,14 @@ class DictionaryViewModel(
             val defs = levelsRepository.loadLevelDefinitions()
             val options = mutableListOf(LevelFilterOption("ALL", "word_type_all")) // Fallback key for "ALL" or handle in UI
             
-            // Extract JLPT levels
-            defs.sections["jlpt"]?.levels?.forEach { level ->
-                options.add(LevelFilterOption(level.id, level.name))
-            }
-            
-            // Extract School levels
-            defs.sections["school"]?.levels?.forEach { level ->
-                 options.add(LevelFilterOption(level.id, level.name))
-            }
+            defs.sections.values
+                .flatMap { it.levels }
+                // We only want to filter by Kanji levels in the dictionary
+                .filter { level -> level.activities.any { it.value.dataFile == "kanji_details" } }
+                .sortedBy { it.globalStep }
+                .forEach { level ->
+                    options.add(LevelFilterOption(level.id, level.name))
+                }
             
             _availableLevelOptions.value = options
         }
@@ -172,8 +171,28 @@ class DictionaryViewModel(
 
         // 0. Level Category Filter
         if (selectedLevelId != "ALL") {
-            filteredList = filteredList.filter { item ->
-                item.levelIds.any { it.equals(selectedLevelId, ignoreCase = true) }
+            when (selectedLevelId.lowercase()) {
+                "native_challenge" -> {
+                    filteredList = filteredList.filter { item ->
+                        item.levelIds.isEmpty() && item.readings.isNotEmpty()
+                    }
+                }
+                "no_reading" -> {
+                    filteredList = filteredList.filter { item ->
+                        item.levelIds.isEmpty() && item.readings.isEmpty() && item.meanings.isNotEmpty()
+                    }
+                }
+                "no_meaning" -> {
+                    filteredList = filteredList.filter { item ->
+                        item.levelIds.isEmpty() && item.meanings.isEmpty()
+                    }
+                }
+                else -> {
+                    // Standard level filter for JLPT, School Grades, etc.
+                    filteredList = filteredList.filter { item ->
+                        item.levelIds.any { it.equals(selectedLevelId, ignoreCase = true) }
+                    }
+                }
             }
         }
 

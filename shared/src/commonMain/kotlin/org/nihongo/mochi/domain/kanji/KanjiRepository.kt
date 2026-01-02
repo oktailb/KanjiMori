@@ -71,7 +71,9 @@ class KanjiRepository(
         val locale = settingsRepository.getAppLocale()
         val meanings = meaningRepository.getMeanings(locale)
         return getAllKanji().filter { 
-            it.category.isEmpty() && it.readings?.reading?.isEmpty() == true && meanings.containsKey(it.id)
+            // Must have meanings (not null and not empty)
+            val hasMeanings = meanings[it.id]?.isNotEmpty() == true
+            it.category.isEmpty() && it.readings?.reading?.isEmpty() == true && hasMeanings
         }
     }
 
@@ -79,7 +81,9 @@ class KanjiRepository(
         val locale = settingsRepository.getAppLocale()
         val meanings = meaningRepository.getMeanings(locale)
         return getAllKanji().filter { 
-            it.category.isEmpty() && !meanings.containsKey(it.id)
+            // Must NOT have meanings (null or empty)
+            val hasMeanings = meanings[it.id]?.isNotEmpty() == true
+            it.category.isEmpty() && !hasMeanings
         }
     }
 }
