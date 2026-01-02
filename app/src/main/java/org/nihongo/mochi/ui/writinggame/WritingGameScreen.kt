@@ -82,23 +82,7 @@ fun WritingGameScreen(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Kanji Card (Top part)
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        if (kanji != null) {
-                            GameQuestionCard(
-                                text = kanji.character,
-                                fontSize = 200.sp,
-                                modifier = Modifier.size(300.dp)
-                            )
-                        }
-                    }
-
-                    // Input Area (Bottom part)
+                    // Input Area (Bottom part) - MOVED UP
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -189,6 +173,22 @@ fun WritingGameScreen(
                             colors = ButtonDefaults.buttonColors(containerColor = buttonColor)
                         ) {
                             Text(stringResource(R.string.submit))
+                        }
+                    }
+
+                    // Kanji Card (Top part) - MOVED DOWN
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth(),
+                        contentAlignment = Alignment.TopCenter // CHANGED to TopCenter
+                    ) {
+                        if (kanji != null) {
+                            GameQuestionCard(
+                                text = kanji.character,
+                                fontSize = 200.sp,
+                                modifier = Modifier.size(300.dp)
+                            )
                         }
                     }
                 }
