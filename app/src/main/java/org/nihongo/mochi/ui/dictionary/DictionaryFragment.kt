@@ -44,7 +44,8 @@ class DictionaryFragment : Fragment() {
                     handwritingRecognizer = androidRecognizer,
                     kanjiRepository = get(),
                     meaningRepository = get(),
-                    settingsRepository = get()
+                    settingsRepository = get(),
+                    levelsRepository = get() // Added levelsRepository here
                 )
             }
         }

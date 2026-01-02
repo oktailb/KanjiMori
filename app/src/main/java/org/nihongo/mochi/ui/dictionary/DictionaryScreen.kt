@@ -30,7 +30,6 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -48,6 +47,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -61,7 +61,6 @@ import org.nihongo.mochi.domain.dictionary.DictionaryItem
 import org.nihongo.mochi.domain.dictionary.SearchMode
 import org.nihongo.mochi.presentation.MochiBackground
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DictionaryScreen(
     viewModel: org.nihongo.mochi.domain.dictionary.DictionaryViewModel,
@@ -71,10 +70,19 @@ fun DictionaryScreen(
     onItemClick: (DictionaryItem) -> Unit
 ) {
     val results by viewModel.lastResults.collectAsState()
+    // Using availableLevelOptions which contains pairs of (ID, ResourceKey)
+    val availableLevelOptions by viewModel.availableLevelOptions.collectAsState()
     val focusManager = LocalFocusManager.current
+    val context = LocalContext.current
     
     // State for Filter Dropdown
     var filterExpanded by remember { mutableStateOf(false) }
+    
+    // Helper to resolve string resource dynamically
+    fun resolveStringResource(key: String): String {
+        val resId = context.resources.getIdentifier(key, "string", context.packageName)
+        return if (resId != 0) context.getString(resId) else key
+    }
     
     MochiBackground {
         Column(
@@ -133,10 +141,14 @@ fun DictionaryScreen(
                         Box {
                             OutlinedButton(
                                 onClick = { filterExpanded = true },
-                                modifier = Modifier.width(120.dp)
+                                modifier = Modifier.width(160.dp)
                             ) {
+                                // Find the label key for the currently selected ID
+                                val selectedOption = availableLevelOptions.find { it.id == viewModel.selectedLevelId }
+                                val displayLabel = selectedOption?.labelKey?.let { resolveStringResource(it) } ?: viewModel.selectedLevelId
+                                
                                 Text(
-                                    text = if (viewModel.selectedLevelCategory == "ALL") "Level" else viewModel.selectedLevelCategory,
+                                    text = displayLabel,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis
                                 )
@@ -147,11 +159,11 @@ fun DictionaryScreen(
                                 expanded = filterExpanded,
                                 onDismissRequest = { filterExpanded = false }
                             ) {
-                                viewModel.availableCategories.forEach { category ->
+                                availableLevelOptions.forEach { option ->
                                     DropdownMenuItem(
-                                        text = { Text(category) },
+                                        text = { Text(resolveStringResource(option.labelKey)) },
                                         onClick = {
-                                            viewModel.selectedLevelCategory = category
+                                            viewModel.selectedLevelId = option.id
                                             viewModel.applyFilters()
                                             filterExpanded = false
                                         }
@@ -246,11 +258,6 @@ fun DictionaryScreen(
                         }
 
                         Spacer(modifier = Modifier.weight(1f))
-
-                        // Drawing Thumbnail
-//                        if (drawingCandidates != null) { // Or check viewModel.drawingCandidates if exposed
-//                            // We don't have access to viewModel.drawingCandidates here as state, but checking drawingBitmap is usually enough for UI feedback
-//                        }
                         
                         if (drawingBitmap != null) {
                             Card(
@@ -309,6 +316,20 @@ fun DictionaryItemRow(
     item: DictionaryItem,
     onClick: (DictionaryItem) -> Unit
 ) {
+    val context = LocalContext.current
+    
+    // Resolve labels dynamically from provided keys in displayLabelKeys
+    val levelText = remember(item.displayLabelKeys) {
+        if (item.displayLabelKeys.isNotEmpty()) {
+            item.displayLabelKeys.map { key ->
+                val resId = context.resources.getIdentifier(key, "string", context.packageName)
+                if (resId != 0) context.getString(resId) else key
+            }.joinToString(" • ")
+        } else {
+            ""
+        }
+    }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -364,10 +385,10 @@ fun DictionaryItemRow(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             
-            // Level Badge (Optional)
-            if (item.jlptLevel != null || item.schoolGrade != null) {
+            // Level Badge
+            if (levelText.isNotEmpty()) {
                 Text(
-                    text = listOfNotNull(item.jlptLevel, item.schoolGrade?.let { "G$it" }).joinToString(" • "),
+                    text = levelText,
                     fontSize = 12.sp,
                     color = MaterialTheme.colorScheme.secondary,
                     modifier = Modifier.padding(top = 4.dp)

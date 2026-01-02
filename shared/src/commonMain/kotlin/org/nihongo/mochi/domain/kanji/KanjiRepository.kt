@@ -16,7 +16,6 @@ class KanjiRepository(
     private var cachedKanji: List<KanjiEntry>? = null
 
     fun getAllKanji(): List<KanjiEntry> {
-        // RunBlocking used as a temporary bridge to synchronous code
         return runBlocking {
             getAllKanjiSuspend()
         }
@@ -44,19 +43,27 @@ class KanjiRepository(
         return getAllKanji().find { it.character == char }
     }
     
-    fun getKanjiByLevel(levelType: String, levelValue: String): List<KanjiEntry> {
-        return getAllKanji().filter { 
-            when(levelType) {
-                "jlpt" -> it.jlptLevel == levelValue
-                "grade" -> it.schoolGrade == levelValue
-                else -> false
-            }
+    /**
+     * Finds Kanji that match a specific level tag (e.g. "n5", "grade1").
+     * Since level tags are unique across categories in our data, we don't need the category.
+     */
+    fun getKanjiByLevel(levelId: String): List<KanjiEntry> {
+        return getAllKanji().filter { kanji ->
+            kanji.level.any { it.equals(levelId, ignoreCase = true) }
         }
+    }
+    
+    // Legacy support if needed, but redirects to simple level check if category is ignored
+    fun getKanjiByLevel(levelType: String, levelValue: String): List<KanjiEntry> {
+        // If strict category check is needed:
+        // return getAllKanji().filter { it.category.contains(levelType) && it.level.contains(levelValue) }
+        // But for now, simple level check is enough as IDs are unique enough
+        return getKanjiByLevel(levelValue)
     }
 
     fun getNativeKanji(): List<KanjiEntry> {
         return getAllKanji().filter { 
-            it.jlptLevel == null && it.schoolGrade == null && it.readings?.reading?.isNotEmpty() == true
+            it.category.isEmpty() && it.readings?.reading?.isNotEmpty() == true
         }
     }
 
@@ -64,7 +71,7 @@ class KanjiRepository(
         val locale = settingsRepository.getAppLocale()
         val meanings = meaningRepository.getMeanings(locale)
         return getAllKanji().filter { 
-            it.jlptLevel == null && it.schoolGrade == null && it.readings?.reading?.isEmpty() == true && meanings.containsKey(it.id)
+            it.category.isEmpty() && it.readings?.reading?.isEmpty() == true && meanings.containsKey(it.id)
         }
     }
 
@@ -72,7 +79,7 @@ class KanjiRepository(
         val locale = settingsRepository.getAppLocale()
         val meanings = meaningRepository.getMeanings(locale)
         return getAllKanji().filter { 
-            it.jlptLevel == null && it.schoolGrade == null && !meanings.containsKey(it.id)
+            it.category.isEmpty() && !meanings.containsKey(it.id)
         }
     }
 }

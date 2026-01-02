@@ -116,21 +116,29 @@
     <string name="level_n3">JLPT N3</string>
     <string name="level_n2">JLPT N2</string>
     <string name="level_n1">JLPT N1</string>
+    
+    <!-- Unified Grade Strings -->
     <string name="level_grade_1">Grade 1</string>
     <string name="level_grade_2">Grade 2</string>
     <string name="level_grade_3">Grade 3</string>
     <string name="level_grade_4">Grade 4</string>
     <string name="level_grade_5">Grade 5</string>
     <string name="level_grade_6">Grade 6</string>
-    <string name="level_college_1">Collège 1</string>
-    <string name="level_college_2">Collège 2</string>
-    <string name="level_lycee_1">Lycée 1</string>
-    <string name="level_lycee_2">Lycée 2</string>
+    <string name="level_grade_7">Collège 1</string>
+    <string name="level_grade_8">Collège 2</string>
+    <string name="level_grade_9">Lycée 1</string>
+    <string name="level_grade_10">Lycée 2</string>
+
     <string name="level_native_challenge">Native Challenge</string>
     <string name="level_no_reading">No Reading</string>
     <string name="level_no_meaning">No Meaning</string>
     
     <!-- Legacy/Unused maybe? -->
+    <string name="level_college_1">Collège 1</string>
+    <string name="level_college_2">Collège 2</string>
+    <string name="level_lycee_1">Lycée 1</string>
+    <string name="level_lycee_2">Lycée 2</string>
+    
     <string name="level_class_1">Classe 1</string>
     <string name="level_class_2">Classe 2</string>
     <string name="level_class_3">Classe 3</string>

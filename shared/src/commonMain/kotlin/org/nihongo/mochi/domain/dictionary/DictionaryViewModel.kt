@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.nihongo.mochi.domain.kanji.KanjiRepository
+import org.nihongo.mochi.domain.levels.LevelsRepository
 import org.nihongo.mochi.domain.meaning.MeaningRepository
 import org.nihongo.mochi.domain.recognition.HandwritingRecognizer
 import org.nihongo.mochi.domain.recognition.ModelStatus
@@ -21,17 +22,25 @@ data class DictionaryItem(
     val readings: List<ReadingInfo>,
     val strokeCount: Int,
     val meanings: MutableList<String>,
-    val jlptLevel: String?,
-    val schoolGrade: String?
+    // Logic IDs (e.g. "grade1", "n5")
+    val levelIds: List<String> = emptyList(),
+    // Display keys from levels.json (e.g. "level_grade_1", "level_n5")
+    val displayLabelKeys: List<String> = emptyList()
 )
 
 data class ReadingInfo(val text: String, val type: String)
+
+data class LevelFilterOption(
+    val id: String,
+    val labelKey: String
+)
 
 class DictionaryViewModel(
     private val handwritingRecognizer: HandwritingRecognizer,
     private val kanjiRepository: KanjiRepository,
     private val meaningRepository: MeaningRepository,
-    private val settingsRepository: SettingsRepository
+    private val settingsRepository: SettingsRepository,
+    private val levelsRepository: LevelsRepository
 ) : ViewModel() {
 
     // --- Dictionary Data ---
@@ -47,12 +56,11 @@ class DictionaryViewModel(
     var textQuery: String = ""
     var strokeQuery: String = ""
     var exactMatch: Boolean = false
-    var selectedLevelCategory: String = "ALL" // "ALL", "N5", "N4", "G1", etc.
     
-    val availableCategories = listOf(
-        "ALL", "N5", "N4", "N3", "N2", "N1", 
-        "Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5", "Grade 6", "Secondary"
-    )
+    var selectedLevelId: String = "ALL" 
+    
+    private val _availableLevelOptions = MutableStateFlow<List<LevelFilterOption>>(listOf(LevelFilterOption("ALL", "word_type_all")))
+    val availableLevelOptions: StateFlow<List<LevelFilterOption>> = _availableLevelOptions.asStateFlow()
     
     private var drawingCandidates: List<String>? = null
 
@@ -63,6 +71,26 @@ class DictionaryViewModel(
     val recognitionResults: StateFlow<List<String>?> = _recognitionResults.asStateFlow()
     
     var lastStrokes: List<RecognitionStroke>? = null
+
+    init {
+        // Load categories dynamically on init
+        viewModelScope.launch {
+            val defs = levelsRepository.loadLevelDefinitions()
+            val options = mutableListOf(LevelFilterOption("ALL", "word_type_all")) // Fallback key for "ALL" or handle in UI
+            
+            // Extract JLPT levels
+            defs.sections["jlpt"]?.levels?.forEach { level ->
+                options.add(LevelFilterOption(level.id, level.name))
+            }
+            
+            // Extract School levels
+            defs.sections["school"]?.levels?.forEach { level ->
+                 options.add(LevelFilterOption(level.id, level.name))
+            }
+            
+            _availableLevelOptions.value = options
+        }
+    }
 
     fun downloadModel() {
         handwritingRecognizer.downloadModel()
@@ -95,7 +123,6 @@ class DictionaryViewModel(
         applyFilters()
     }
     
-    // Logic to load data (ported from old ViewModel)
     fun loadDictionaryData() {
         if (isDataLoaded) return
         
@@ -103,6 +130,11 @@ class DictionaryViewModel(
             val locale = settingsRepository.getAppLocale()
             val meanings = meaningRepository.getMeanings(locale)
             val allKanji = kanjiRepository.getAllKanji()
+            
+            // Map ID -> Resource Key name from levels.json
+            val defs = levelsRepository.loadLevelDefinitions()
+            val levelIdToKey = defs.sections.values.flatMap { it.levels }
+                .associate { it.id to it.name }
             
             kanjiDataMap.clear()
             allKanjiList.clear()
@@ -115,14 +147,17 @@ class DictionaryViewModel(
                 val strokes = kanjiEntry.strokes?.toIntOrNull() ?: 0
                 val itemMeanings = meanings[kanjiEntry.id] ?: emptyList()
                 
+                // Map the level IDs found in KanjiEntry to the resource keys
+                val labels = kanjiEntry.level.mapNotNull { id -> levelIdToKey[id] }
+                
                 val item = DictionaryItem(
                     id = kanjiEntry.id,
                     character = kanjiEntry.character,
                     readings = readings,
                     strokeCount = strokes,
                     meanings = itemMeanings.toMutableList(),
-                    jlptLevel = kanjiEntry.jlptLevel,
-                    schoolGrade = kanjiEntry.schoolGrade
+                    levelIds = kanjiEntry.level,
+                    displayLabelKeys = labels
                 )
                 kanjiDataMap[kanjiEntry.id] = item
             }
@@ -136,21 +171,9 @@ class DictionaryViewModel(
         var filteredList = allKanjiList.toList()
 
         // 0. Level Category Filter
-        if (selectedLevelCategory != "ALL") {
+        if (selectedLevelId != "ALL") {
             filteredList = filteredList.filter { item ->
-                when {
-                    selectedLevelCategory.startsWith("N") -> item.jlptLevel == selectedLevelCategory
-                    selectedLevelCategory.startsWith("Grade") -> {
-                        val gradeNum = selectedLevelCategory.removePrefix("Grade ").trim()
-                        item.schoolGrade == gradeNum
-                    }
-                    selectedLevelCategory == "Secondary" -> {
-                        // Assuming Secondary is grade > 6 or specific code
-                        val g = item.schoolGrade?.toIntOrNull()
-                        g != null && g > 6
-                    }
-                    else -> true
-                }
+                item.levelIds.any { it.equals(selectedLevelId, ignoreCase = true) }
             }
         }
 

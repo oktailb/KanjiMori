@@ -5,6 +5,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.coroutines.runBlocking
 import org.nihongo.mochi.domain.kana.ResourceLoader
+import org.nihongo.mochi.domain.levels.LevelsRepository
 
 @Serializable
 data class WordEntry(
@@ -23,26 +24,47 @@ data class WordListRoot(
     val words: WordsList
 )
 
-class WordRepository(private val resourceLoader: ResourceLoader) {
+class WordRepository(
+    private val resourceLoader: ResourceLoader,
+    private val levelsRepository: LevelsRepository
+) {
     
     private val json = Json { ignoreUnknownKeys = true }
     private val cachedWords = mutableMapOf<String, List<WordEntry>>()
     private var allWordsCache: List<WordEntry>? = null
+    
+    private var knownListsLoaded = false
+    private val _knownLists = mutableListOf<String>()
 
-    private val allKnownLists = listOf(
-        "bccwj_wordlist_1000", "bccwj_wordlist_2000", "bccwj_wordlist_3000", 
-        "bccwj_wordlist_4000", "bccwj_wordlist_5000", "bccwj_wordlist_6000", 
-        "bccwj_wordlist_7000", "bccwj_wordlist_8000",
-        "jlpt_wordlist_n5", "jlpt_wordlist_n4", "jlpt_wordlist_n3",
-        "jlpt_wordlist_n2", "jlpt_wordlist_n1"
-    )
-
+    private suspend fun ensureKnownListsLoaded() {
+        if (knownListsLoaded) return
+        try {
+            val files = levelsRepository.getAllDataFilesForActivity("READING")
+            
+            _knownLists.clear()
+            _knownLists.addAll(files)
+            knownListsLoaded = true
+            
+        } catch (e: Exception) {
+            // Fallback to defaults if something goes wrong
+             if (_knownLists.isEmpty()) {
+                _knownLists.addAll(listOf(
+                    "bccwj_wordlist_1000", "bccwj_wordlist_2000", "bccwj_wordlist_3000", 
+                    "bccwj_wordlist_4000", "bccwj_wordlist_5000", "bccwj_wordlist_6000", 
+                    "bccwj_wordlist_7000", "bccwj_wordlist_8000",
+                    "jlpt_wordlist_n5", "jlpt_wordlist_n4", "jlpt_wordlist_n3",
+                    "jlpt_wordlist_n2", "jlpt_wordlist_n1"
+                ))
+            }
+            e.printStackTrace()
+        }
+    }
+    
     fun getWordsForLevel(fileName: String): List<String> {
         return getWordEntriesForLevel(fileName).map { it.text }
     }
 
     fun getWordEntriesForLevel(fileName: String): List<WordEntry> {
-        // RunBlocking used as a temporary bridge to synchronous code
         return runBlocking {
              getWordEntriesForLevelSuspend(fileName)
         }
@@ -59,13 +81,11 @@ class WordRepository(private val resourceLoader: ResourceLoader) {
             cachedWords[fileName] = root.words.word
             root.words.word
         } catch (e: Exception) {
-            println("Error parsing word list $fileName: ${e.message}")
             emptyList()
         }
     }
 
     fun getAllWordEntries(): List<WordEntry> {
-        // RunBlocking used as a temporary bridge to synchronous code
         return runBlocking {
             getAllWordEntriesSuspend()
         }
@@ -75,16 +95,19 @@ class WordRepository(private val resourceLoader: ResourceLoader) {
         if (allWordsCache != null) {
             return allWordsCache!!
         }
+        
+        ensureKnownListsLoaded()
+        
         val allEntries = mutableListOf<WordEntry>()
-        for (listName in allKnownLists) {
-            allEntries.addAll(getWordEntriesForLevelSuspend(listName))
+        for (listName in _knownLists) {
+            val entries = getWordEntriesForLevelSuspend(listName)
+            allEntries.addAll(entries)
         }
         allWordsCache = allEntries
         return allEntries
     }
 
     fun getWordsContainingKanji(kanji: String): List<WordEntry> {
-        // This one might be heavy if not cached, be careful calling it on UI thread
         return getAllWordEntries().filter { it.text.contains(kanji) }
     }
 }

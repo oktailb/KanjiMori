@@ -40,7 +40,7 @@ class ResultsFragment : Fragment() {
         viewModelFactory {
             initializer<ResultsViewModel> {
                 val saveService = AndroidCloudSaveService(requireActivity())
-                val statsEngine = StatisticsEngine(get())
+                val statsEngine = StatisticsEngine(get(), get()) // Added levelsRepository = get()
                 ResultsViewModel(saveService, statsEngine)
             }
         }

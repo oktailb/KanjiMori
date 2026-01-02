@@ -1,72 +1,27 @@
 package org.nihongo.mochi.domain.statistics
 
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
-import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.nihongo.mochi.data.ScoreManager
+import org.nihongo.mochi.domain.levels.LevelsRepository
+import org.nihongo.mochi.domain.levels.LevelDefinition
 import org.nihongo.mochi.domain.util.LevelContentProvider
-import org.nihongo.mochi.shared.generated.resources.Res
 
 class StatisticsEngine(
-    private val levelContentProvider: LevelContentProvider
+    private val levelContentProvider: LevelContentProvider,
+    private val levelsRepository: LevelsRepository
 ) {
 
-    private val jsonParser = Json {
-        ignoreUnknownKeys = true
-        isLenient = true
-        coerceInputValues = true
-    }
-
-    @Serializable
-    data class ActivityConfig(
-        val dataFile: String,
-        val enabled: Boolean = false
-    )
-
-    @Serializable
-    data class LevelDefinition(
-        val id: String,
-        val name: String,
-        val description: String = "",
-        val sortOrder: Int = 0,
-        val globalStep: Int = 0,
-        val dependencies: List<String> = emptyList(),
-        val activities: Map<StatisticsType, ActivityConfig> = emptyMap()
-    )
-
-    @Serializable
-    data class SectionDefinition(
-        val name: String,
-        val description: String = "",
-        val prerequisiteFor: List<String> = emptyList(),
-        val sortOrder: Int = 0,
-        val levels: List<LevelDefinition> = emptyList()
-    )
-
-    @Serializable
-    data class LevelDefinitions(
-        val version: String = "1.0",
-        val sections: Map<String, SectionDefinition> = emptyMap(),
-        val activityTypes: Map<String, String> = emptyMap()
-    )
-
-    private var cachedSections: Map<String, SectionDefinition> = emptyMap()
-
-    @OptIn(ExperimentalResourceApi::class)
     suspend fun loadLevelDefinitions() {
-        if (cachedSections.isNotEmpty()) return
-        try {
-            val jsonString = Res.readBytes("files/levels.json").decodeToString()
-            val data = jsonParser.decodeFromString<LevelDefinitions>(jsonString)
-            cachedSections = data.sections
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        levelsRepository.loadLevelDefinitions()
     }
 
     private fun getAllLevels(): List<LevelDefinition> {
-        return cachedSections.values.flatMap { it.levels }.sortedBy { it.globalStep }
+        val defs = levelsRepository.getDefinitions() ?: return emptyList()
+        return defs.sections.values.flatMap { it.levels }.sortedBy { it.globalStep }
     }
+    
+    // Returns cached definitions directly if needed for low-level access
+    private fun getDefinitionsOrEmpty() = levelsRepository.getDefinitions() 
+        ?: org.nihongo.mochi.domain.levels.LevelDefinitions()
 
     fun getAllStatistics(): List<LevelProgress> {
         val levels = getAllLevels()
@@ -93,19 +48,22 @@ class StatisticsEngine(
     }
     
     private fun getCategoryForLevel(level: LevelDefinition): String {
-        return cachedSections.entries.find { (_, section) -> 
+        val defs = levelsRepository.getDefinitions() ?: return "Unknown"
+        return defs.sections.entries.find { (_, section) -> 
             section.levels.any { it.id == level.id } 
         }?.value?.name ?: "Unknown"
     }
     
     fun getSagaMapSteps(tab: SagaTab): List<SagaStep> {
+        val defs = levelsRepository.getDefinitions() ?: return emptyList()
+        
         val sectionKeys = when(tab) {
             SagaTab.JLPT -> listOf("fundamentals", "jlpt") 
             SagaTab.SCHOOL -> listOf("fundamentals", "school")
             SagaTab.CHALLENGES -> listOf("challenge") 
         }
         
-        val relevantLevels = sectionKeys.mapNotNull { cachedSections[it] }
+        val relevantLevels = sectionKeys.mapNotNull { defs.sections[it] }
             .flatMap { it.levels }
         
         if (relevantLevels.isEmpty()) return emptyList()
