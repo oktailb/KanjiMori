@@ -60,6 +60,7 @@ import org.nihongo.mochi.domain.dictionary.DictionaryViewModel
 import org.nihongo.mochi.presentation.MochiBackground
 import org.nihongo.mochi.shared.generated.resources.Res
 import org.nihongo.mochi.shared.generated.resources.*
+import org.nihongo.mochi.ui.ResourceUtils
 
 @Composable
 fun DictionaryScreen(
@@ -77,9 +78,15 @@ fun DictionaryScreen(
     // State for Filter Dropdown
     var filterExpanded by remember { mutableStateOf(false) }
     
-    // Helper to resolve string resource dynamically (placeholder)
+    // Helper to resolve string resource dynamically
+    @Composable
     fun resolveStringResource(key: String): String {
-        return key.replace("_", " ").replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+        val resource = ResourceUtils.resolveStringResource(key.lowercase())
+        return if (resource != null) {
+            stringResource(resource)
+        } else {
+            key.replace("_", " ").replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+        }
     }
     
     MochiBackground {
@@ -143,7 +150,8 @@ fun DictionaryScreen(
                             ) {
                                 // Find the label key for the currently selected ID
                                 val selectedOption = availableLevelOptions.find { it.id == viewModel.selectedLevelId }
-                                val displayLabel = selectedOption?.labelKey?.let { resolveStringResource(it) } ?: viewModel.selectedLevelId
+                                val displayLabelKey = selectedOption?.labelKey ?: viewModel.selectedLevelId
+                                val displayLabel = resolveStringResource(displayLabelKey)
                                 
                                 Text(
                                     text = displayLabel,
@@ -317,16 +325,16 @@ fun DictionaryItemRow(
     onClick: (DictionaryItem) -> Unit
 ) {
     // Resolve labels dynamically from provided keys in displayLabelKeys
-    val levelText = remember(item.displayLabelKeys) {
-        if (item.displayLabelKeys.isNotEmpty()) {
-            item.displayLabelKeys.map { key ->
-                // Placeholder resolution
-                key.replace("_", " ").replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
-            }.joinToString(" • ")
+    val levelTextList = item.displayLabelKeys.map { key ->
+        val resource = ResourceUtils.resolveStringResource(key.lowercase())
+        if (resource != null) {
+            stringResource(resource)
         } else {
-            ""
+            key.replace("_", " ").replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
         }
     }
+    
+    val levelText = levelTextList.joinToString(" • ")
 
     Row(
         modifier = Modifier

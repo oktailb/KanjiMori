@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.sp
 import org.nihongo.mochi.presentation.MochiBackground
 import org.nihongo.mochi.presentation.settings.SettingsViewModel
 import org.nihongo.mochi.shared.generated.resources.*
+import org.nihongo.mochi.ui.ResourceUtils
 
 // Data class for language items, now used in Compose
 data class LanguageItem(val code: String, val name: String, val flagRes: DrawableResource)
@@ -175,15 +176,20 @@ fun SettingsScreen(
                 // Fallback to first if current mode is not in list
                 val rawSelectedMode = if (learningModes.contains(uiState.currentMode)) uiState.currentMode else learningModes.firstOrNull() ?: ""
 
-                // Helper to resolve string resource dynamically - Needs platform implementation or string map
-                // For KMP, `getIdentifier` is not available. 
-                // We should ideally use a mapping or `stringResource` with a known key construction if keys are static.
-                // Assuming modes are just strings for now or we map them manually.
-                
-                // Simple workaround: just display the mode string directly capitalized
+                @Composable
                 fun getModeLabel(mode: String): String {
-                    // This is a temporary limitation of KMP resources if dynamic keys are needed
-                    return mode.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+                    // Try to resolve using ResourceUtils first
+                    // The keys for sections are usually mapped like "section_jlpt", "section_school" in ResourceUtils
+                    // We try to normalize the mode string to match potential keys.
+                    val key = "section_" + mode.lowercase()
+                    val resource = ResourceUtils.resolveStringResource(key) ?: ResourceUtils.resolveStringResource(mode.lowercase())
+                    
+                    return if (resource != null) {
+                        stringResource(resource)
+                    } else {
+                        // Fallback
+                        mode.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+                    }
                 }
 
                 ExposedDropdownMenuBox(

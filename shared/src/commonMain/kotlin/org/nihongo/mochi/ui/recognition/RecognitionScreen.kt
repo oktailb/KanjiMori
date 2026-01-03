@@ -28,6 +28,7 @@ import org.nihongo.mochi.presentation.models.LevelInfoState
 import org.nihongo.mochi.presentation.recognition.RecognitionCategory
 import org.nihongo.mochi.shared.generated.resources.Res
 import org.nihongo.mochi.shared.generated.resources.*
+import org.nihongo.mochi.ui.ResourceUtils
 
 @Composable
 fun RecognitionScreen(
@@ -35,13 +36,15 @@ fun RecognitionScreen(
     onLevelClick: (String) -> Unit
 ) {
     val scrollState = rememberScrollState()
-    
-    // TODO: Implement proper dynamic resource resolution for KMP
-    // For now, we display the key or a basic transformation.
-    // Ideally, we should map `key` to `Res.string.key` using a generated map or expect/actual.
-    fun getCategoryTitle(key: String): String {
-        // Temporary: Capitalize key and replace underscores for better readability if translation missing
-        return key.replace("_", " ").replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+
+    @Composable
+    fun resolveTitle(key: String): String {
+        val resource = ResourceUtils.resolveStringResource(key.lowercase())
+        return if (resource != null) {
+            stringResource(resource)
+        } else {
+            key.replace("_", " ").replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+        }
     }
 
     MochiBackground {
@@ -68,18 +71,20 @@ fun RecognitionScreen(
 
             // Dynamic Categories from JSON
             categories.forEach { category ->
-                RecognitionCard(title = getCategoryTitle(category.name)) {
+                RecognitionCard(title = resolveTitle(category.name)) {
                     Column {
                         for (i in category.levels.indices step 2) {
                             Row(modifier = Modifier.fillMaxWidth()) {
                                 RecognitionLevelButton(
                                     info = category.levels[i],
+                                    displayName = resolveTitle(category.levels[i].displayName),
                                     onClick = onLevelClick,
                                     modifier = Modifier.weight(1f).padding(4.dp)
                                 )
                                 if (i + 1 < category.levels.size) {
                                     RecognitionLevelButton(
                                         info = category.levels[i + 1],
+                                        displayName = resolveTitle(category.levels[i+1].displayName),
                                         onClick = onLevelClick,
                                         modifier = Modifier.weight(1f).padding(4.dp)
                                     )
@@ -127,6 +132,7 @@ fun RecognitionCard(
 @Composable
 fun RecognitionLevelButton(
     info: LevelInfoState,
+    displayName: String,
     onClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -141,7 +147,7 @@ fun RecognitionLevelButton(
         shape = RoundedCornerShape(4.dp)
     ) {
         Text(
-            text = "${info.displayName}\n${info.percentage}%",
+            text = "$displayName\n${info.percentage}%",
             textAlign = TextAlign.Center
         )
     }

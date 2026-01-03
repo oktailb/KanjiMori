@@ -28,6 +28,7 @@ import org.nihongo.mochi.presentation.models.ReadingLevelInfoState
 import org.nihongo.mochi.presentation.reading.ReadingCategory
 import org.nihongo.mochi.shared.generated.resources.Res
 import org.nihongo.mochi.shared.generated.resources.*
+import org.nihongo.mochi.ui.ResourceUtils
 
 @Composable
 fun ReadingScreen(
@@ -36,10 +37,15 @@ fun ReadingScreen(
     onLevelClick: (String) -> Unit
 ) {
     val scrollState = rememberScrollState()
-    
-    // TODO: Implement proper dynamic resource resolution for KMP
-    fun getCategoryTitle(key: String): String {
-        return key.replace("_", " ").replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+
+    @Composable
+    fun resolveTitle(key: String): String {
+        val resource = ResourceUtils.resolveStringResource(key.lowercase())
+        return if (resource != null) {
+            stringResource(resource)
+        } else {
+            key.replace("_", " ").replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+        }
     }
 
     MochiBackground {
@@ -66,19 +72,21 @@ fun ReadingScreen(
 
             // Dynamic Categories from JSON
             categories.forEach { category ->
-                ReadingCard(title = getCategoryTitle(category.name)) {
+                ReadingCard(title = resolveTitle(category.name)) {
                     // GridLayout logic (2 columns for example)
                     Column {
                         for (i in category.levels.indices step 2) {
                             Row(modifier = Modifier.fillMaxWidth()) {
                                 ReadingLevelButton(
                                     info = category.levels[i],
+                                    displayName = resolveTitle(category.levels[i].displayName),
                                     onClick = onLevelClick,
                                     modifier = Modifier.weight(1f).padding(4.dp)
                                 )
                                 if (i + 1 < category.levels.size) {
                                     ReadingLevelButton(
                                         info = category.levels[i + 1],
+                                        displayName = resolveTitle(category.levels[i+1].displayName),
                                         onClick = onLevelClick,
                                         modifier = Modifier.weight(1f).padding(4.dp)
                                     )
@@ -93,9 +101,10 @@ fun ReadingScreen(
             }
 
             // User Lists Section (Always present)
-            ReadingCard(title = stringResource(Res.string.writing_user_lists)) {
+            ReadingCard(title = stringResource(Res.string.reading_user_list)) {
                 ReadingLevelButton(
                     info = userListInfo,
+                    displayName = stringResource(Res.string.reading_user_list),
                     onClick = onLevelClick,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -135,6 +144,7 @@ fun ReadingCard(
 @Composable
 fun ReadingLevelButton(
     info: ReadingLevelInfoState,
+    displayName: String,
     onClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -149,7 +159,7 @@ fun ReadingLevelButton(
         shape = RoundedCornerShape(4.dp)
     ) {
         Text(
-            text = "${info.displayName}\n${info.percentage}%",
+            text = "$displayName\n${info.percentage}%",
             textAlign = TextAlign.Center
         )
     }

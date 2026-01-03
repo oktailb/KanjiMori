@@ -28,6 +28,7 @@ import org.nihongo.mochi.presentation.models.WritingLevelInfoState
 import org.nihongo.mochi.presentation.writing.WritingCategory
 import org.nihongo.mochi.shared.generated.resources.Res
 import org.nihongo.mochi.shared.generated.resources.*
+import org.nihongo.mochi.ui.ResourceUtils
 
 @Composable
 fun WritingScreen(
@@ -36,15 +37,15 @@ fun WritingScreen(
     onLevelClick: (String) -> Unit
 ) {
     val scrollState = rememberScrollState()
-    
-    // TODO: Implement proper dynamic resource resolution for KMP
-    fun getCategoryTitle(key: String): String {
-        return key.replace("_", " ").replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
-    }
-    
-    // Helper to resolve string resource for levels dynamically
-    fun getLevelTitle(key: String): String {
-        return key.replace("_", " ").replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+
+    @Composable
+    fun resolveTitle(key: String): String {
+        val resource = ResourceUtils.resolveStringResource(key.lowercase())
+        return if (resource != null) {
+            stringResource(resource)
+        } else {
+            key.replace("_", " ").replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+        }
     }
 
     MochiBackground {
@@ -71,20 +72,20 @@ fun WritingScreen(
 
             // Dynamic Categories from JSON
             categories.forEach { category ->
-                WritingCard(title = getCategoryTitle(category.name)) {
+                WritingCard(title = resolveTitle(category.name)) {
                     Column {
                         for (i in category.levels.indices step 2) {
                             Row(modifier = Modifier.fillMaxWidth()) {
                                 WritingLevelButton(
                                     info = category.levels[i],
-                                    displayName = getLevelTitle(category.levels[i].displayName),
+                                    displayName = resolveTitle(category.levels[i].displayName),
                                     onClick = onLevelClick,
                                     modifier = Modifier.weight(1f).padding(4.dp)
                                 )
                                 if (i + 1 < category.levels.size) {
                                     WritingLevelButton(
                                         info = category.levels[i + 1],
-                                        displayName = getLevelTitle(category.levels[i+1].displayName),
+                                        displayName = resolveTitle(category.levels[i+1].displayName),
                                         onClick = onLevelClick,
                                         modifier = Modifier.weight(1f).padding(4.dp)
                                     )
