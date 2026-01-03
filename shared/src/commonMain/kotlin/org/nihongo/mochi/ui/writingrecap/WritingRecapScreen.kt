@@ -11,15 +11,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import org.nihongo.mochi.R
 import org.nihongo.mochi.domain.kanji.KanjiEntry
 import org.nihongo.mochi.presentation.MochiBackground
 import org.nihongo.mochi.ui.components.PaginationControls
 import org.nihongo.mochi.ui.components.PlayButton
 import org.nihongo.mochi.ui.components.RecapKanjiGrid
+import org.nihongo.mochi.shared.generated.resources.Res
+import org.nihongo.mochi.shared.generated.resources.game_recap_title
 
 @Composable
 fun WritingRecapScreen(
@@ -40,7 +41,7 @@ fun WritingRecapScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = stringResource(R.string.title_game_recap),
+                text = stringResource(Res.string.game_recap_title),
                 style = MaterialTheme.typography.headlineSmall,
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onBackground
