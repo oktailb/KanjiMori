@@ -19,6 +19,7 @@ import org.nihongo.mochi.presentation.reading.ReadingViewModel
 import org.nihongo.mochi.presentation.recognition.RecognitionViewModel
 import org.nihongo.mochi.presentation.settings.SettingsViewModel
 import org.nihongo.mochi.presentation.writing.WritingViewModel
+import org.nihongo.mochi.ui.gamerecap.GameRecapViewModel
 import org.nihongo.mochi.ui.wordlist.WordListViewModel
 
 val sharedModule = module {
@@ -39,7 +40,16 @@ val sharedModule = module {
     factoryOf(::RecognitionViewModel)
     factoryOf(::ReadingViewModel)
     factoryOf(::WritingViewModel)
-    factoryOf(::WordListViewModel) // Added this line
+    factoryOf(::WordListViewModel)
+    
+    // ViewModel with parameters
+    factory { params ->
+        GameRecapViewModel(
+            levelContentProvider = get(),
+            kanjiRepository = get(),
+            baseColorInt = params.get()
+        )
+    }
     
     // DictionaryViewModel requires HandwritingRecognizer which is platform specific.
     factory { DictionaryViewModel(get(), get(), get(), get(), get()) }

@@ -6,33 +6,26 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import org.koin.android.ext.android.inject
+import org.koin.android.ext.android.get
+import org.koin.core.parameter.parametersOf
 import org.nihongo.mochi.R
-import org.nihongo.mochi.data.ScoreManager
-import org.nihongo.mochi.domain.kanji.KanjiEntry
-import org.nihongo.mochi.domain.kanji.KanjiRepository
-import org.nihongo.mochi.domain.util.LevelContentProvider
-import org.nihongo.mochi.presentation.ScorePresentationUtils
 import org.nihongo.mochi.ui.theme.AppTheme
 
 class GameRecapFragment : Fragment() {
 
     private val args: GameRecapFragmentArgs by navArgs()
-    private val levelContentProvider: LevelContentProvider by inject()
-    private val kanjiRepository: KanjiRepository by inject()
-
-    private val pageSize = 80 // 8 columns * 10 rows
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -41,39 +34,31 @@ class GameRecapFragment : Fragment() {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
                 AppTheme {
-                    GameRecapFragmentContent()
+                    val baseColor = ContextCompat.getColor(requireContext(), R.color.recap_grid_base_color)
+                    val viewModel: GameRecapViewModel = get { parametersOf(baseColor) }
+                    
+                    GameRecapFragmentContent(viewModel)
                 }
             }
         }
     }
 
     @Composable
-    private fun GameRecapFragmentContent() {
-        var kanjiList by remember { mutableStateOf<List<KanjiEntry>>(emptyList()) }
-        var currentPage by remember { mutableStateOf(0) }
+    private fun GameRecapFragmentContent(viewModel: GameRecapViewModel) {
+        val kanjiWithColors by viewModel.kanjiListWithColors.collectAsState()
+        val currentPage by viewModel.currentPage.collectAsState()
+        val totalPages by viewModel.totalPages.collectAsState()
+        
         var gameMode by remember { mutableStateOf("meaning") }
         var readingMode by remember { mutableStateOf("common") }
         
-        // Determine initial and enabled states for selectors
         val isMeaningEnabled = args.level != "No Meaning"
         val isReadingEnabled = args.level != "No Reading"
 
-        LaunchedEffect(args.level) {
-            kanjiList = loadKanjiForLevel(args.level)
-            // Set initial game mode based on what's available
+        LaunchedEffect(args.level, gameMode) {
+            viewModel.loadLevel(args.level, gameMode)
             if (!isMeaningEnabled) gameMode = "reading"
             if (!isReadingEnabled) gameMode = "meaning"
-        }
-        
-        val totalPages = if (kanjiList.isEmpty()) 0 else (kanjiList.size - 1) / pageSize + 1
-        val startIndex = currentPage * pageSize
-        val endIndex = (startIndex + pageSize).coerceAtMost(kanjiList.size)
-        val currentKanjiSublist = kanjiList.subList(startIndex, endIndex)
-
-        val baseColor = ContextCompat.getColor(requireContext(), R.color.recap_grid_base_color)
-        val kanjiWithColors = currentKanjiSublist.map { kanjiEntry ->
-            val score = ScoreManager.getScore(kanjiEntry.character, ScoreManager.ScoreType.RECOGNITION)
-            kanjiEntry to Color(ScorePresentationUtils.getScoreColor(score, baseColor))
         }
         
         GameRecapScreen(
@@ -89,8 +74,8 @@ class GameRecapFragment : Fragment() {
                 val action = GameRecapFragmentDirections.actionGameRecapToKanjiDetail(it.id)
                 findNavController().navigate(action)
             },
-            onPrevPage = { if (currentPage > 0) currentPage-- },
-            onNextPage = { if (endIndex < kanjiList.size) currentPage++ },
+            onPrevPage = { viewModel.prevPage(gameMode) },
+            onNextPage = { viewModel.nextPage(gameMode) },
             onGameModeChange = { gameMode = it },
             onReadingModeChange = { readingMode = it },
             onPlayClick = {
@@ -103,10 +88,5 @@ class GameRecapFragment : Fragment() {
                 findNavController().navigate(action)
             }
         )
-    }
-    
-    private fun loadKanjiForLevel(levelKey: String): List<KanjiEntry> {
-        val characters = levelContentProvider.getCharactersForLevel(levelKey)
-        return characters.mapNotNull { kanjiRepository.getKanjiByCharacter(it) }
     }
 }
