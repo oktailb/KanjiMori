@@ -11,4 +11,5 @@ Features:
 Games:
   - Tetris : achieve words from selected level in Kana to make blocks disappear
   - Simon : enforce kanji remembering by sequence
+  - Taquin : redo the basic gojuon table hiragana/katakana
   - cross words generator

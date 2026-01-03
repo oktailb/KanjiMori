@@ -116,6 +116,7 @@ dependencies {
     implementation(libs.multiplatform.settings)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.koin.android)
+    implementation(libs.koin.androidx.compose)
 
     // Compose Dependencies
     val composeBom = platform(libs.androidx.compose.bom)

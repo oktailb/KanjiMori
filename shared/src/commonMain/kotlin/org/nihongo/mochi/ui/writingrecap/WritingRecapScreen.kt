@@ -16,6 +16,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.nihongo.mochi.domain.kanji.KanjiEntry
 import org.nihongo.mochi.presentation.MochiBackground
+import org.nihongo.mochi.ui.ResourceUtils
 import org.nihongo.mochi.ui.components.PaginationControls
 import org.nihongo.mochi.ui.components.PlayButton
 import org.nihongo.mochi.ui.components.RecapKanjiGrid
@@ -24,7 +25,7 @@ import org.nihongo.mochi.shared.generated.resources.game_recap_title
 
 @Composable
 fun WritingRecapScreen(
-    levelTitle: String,
+    levelTitle: String, // This is the key, e.g. "n5"
     kanjiListWithColors: List<Pair<KanjiEntry, Color>>,
     currentPage: Int,
     totalPages: Int,
@@ -33,6 +34,16 @@ fun WritingRecapScreen(
     onNextPage: () -> Unit,
     onPlayClick: () -> Unit
 ) {
+    @Composable
+    fun resolveTitle(key: String): String {
+        val resource = ResourceUtils.resolveStringResource(key.lowercase())
+        return if (resource != null) {
+            stringResource(resource)
+        } else {
+            key.replace("_", " ").replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+        }
+    }
+
     MochiBackground {
         Column(
             modifier = Modifier
@@ -47,7 +58,7 @@ fun WritingRecapScreen(
                 color = MaterialTheme.colorScheme.onBackground
             )
             Text(
-                text = levelTitle,
+                text = resolveTitle(levelTitle),
                 style = MaterialTheme.typography.titleLarge,
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onBackground

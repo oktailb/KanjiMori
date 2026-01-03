@@ -15,10 +15,9 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import org.koin.android.ext.android.get
+import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 import org.nihongo.mochi.R
 import org.nihongo.mochi.ui.theme.AppTheme
@@ -35,7 +34,7 @@ class GameRecapFragment : Fragment() {
             setContent {
                 AppTheme {
                     val baseColor = ContextCompat.getColor(requireContext(), R.color.recap_grid_base_color)
-                    val viewModel: GameRecapViewModel = get { parametersOf(baseColor) }
+                    val viewModel: GameRecapViewModel = koinViewModel { parametersOf(baseColor) }
                     
                     GameRecapFragmentContent(viewModel)
                 }

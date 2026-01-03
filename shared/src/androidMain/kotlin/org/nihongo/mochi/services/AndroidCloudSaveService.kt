@@ -13,11 +13,11 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
-class AndroidCloudSaveService(activity: Activity) : CloudSaveService {
+class AndroidCloudSaveService(private val activity: Activity) : CloudSaveService {
 
-    private val gamesSignInClient: GamesSignInClient = PlayGames.getGamesSignInClient(activity)
-    private val snapshotsClient: SnapshotsClient = PlayGames.getSnapshotsClient(activity)
-    private val achievementsClient = PlayGames.getAchievementsClient(activity)
+    private val gamesSignInClient: GamesSignInClient by lazy { PlayGames.getGamesSignInClient(activity) }
+    private val snapshotsClient: SnapshotsClient by lazy { PlayGames.getSnapshotsClient(activity) }
+    private val achievementsClient by lazy { PlayGames.getAchievementsClient(activity) }
 
     override suspend fun signIn(): Boolean {
         return try {

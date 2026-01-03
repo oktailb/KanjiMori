@@ -20,7 +20,9 @@ import org.nihongo.mochi.presentation.recognition.RecognitionViewModel
 import org.nihongo.mochi.presentation.settings.SettingsViewModel
 import org.nihongo.mochi.presentation.writing.WritingViewModel
 import org.nihongo.mochi.ui.gamerecap.GameRecapViewModel
+import org.nihongo.mochi.ui.gojuon.KanaRecapViewModel
 import org.nihongo.mochi.ui.wordlist.WordListViewModel
+import org.nihongo.mochi.ui.writingrecap.WritingRecapViewModel
 
 val sharedModule = module {
     // --- Data / Repositories ---
@@ -42,9 +44,24 @@ val sharedModule = module {
     factoryOf(::WritingViewModel)
     factoryOf(::WordListViewModel)
     
-    // ViewModel with parameters
+    // ViewModels with parameters
     factory { params ->
         GameRecapViewModel(
+            levelContentProvider = get(),
+            kanjiRepository = get(),
+            baseColorInt = params.get()
+        )
+    }
+    
+    factory { params ->
+        KanaRecapViewModel(
+            kanaRepository = get(),
+            baseColorInt = params.get()
+        )
+    }
+
+    factory { params ->
+        WritingRecapViewModel(
             levelContentProvider = get(),
             kanjiRepository = get(),
             baseColorInt = params.get()

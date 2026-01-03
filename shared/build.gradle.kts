@@ -49,6 +49,7 @@ kotlin {
             // Android specific dependencies
             implementation(libs.androidx.lifecycle.viewmodel.ktx)
             implementation(libs.mlkit.digital.ink)
+            implementation(libs.play.services.games)
         }
 
         commonTest.dependencies {
