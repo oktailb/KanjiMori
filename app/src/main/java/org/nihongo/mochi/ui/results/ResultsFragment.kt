@@ -9,41 +9,30 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.fragment.findNavController
 import com.google.android.gms.games.SnapshotsClient
 import com.google.android.gms.games.snapshot.SnapshotMetadata
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import org.koin.android.ext.android.get
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 import org.nihongo.mochi.R
+import org.nihongo.mochi.domain.statistics.OneTimeEvent
 import org.nihongo.mochi.domain.statistics.ResultsViewModel
-import org.nihongo.mochi.domain.statistics.StatisticsEngine
 import org.nihongo.mochi.domain.statistics.StatisticsType
-import org.nihongo.mochi.presentation.SagaAction
 import org.nihongo.mochi.presentation.SagaMapScreen
 import org.nihongo.mochi.services.AndroidCloudSaveService
 import org.nihongo.mochi.ui.theme.AppTheme
 
 class ResultsFragment : Fragment() {
 
-    private lateinit var androidCloudSaveService: AndroidCloudSaveService
-
-    private val viewModel: ResultsViewModel by viewModels {
-        viewModelFactory {
-            initializer<ResultsViewModel> {
-                val saveService = AndroidCloudSaveService(requireActivity())
-                val statsEngine = StatisticsEngine(get(), get()) // Added levelsRepository = get()
-                ResultsViewModel(saveService, statsEngine)
-            }
-        }
+    private val viewModel: ResultsViewModel by viewModel { 
+        parametersOf(AndroidCloudSaveService(requireActivity())) 
     }
 
     private val achievementsLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -55,28 +44,19 @@ class ResultsFragment : Fragment() {
     private val savedGamesLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK && result.data != null) {
             val intent = result.data!!
-            if (intent.hasExtra(SnapshotsClient.EXTRA_SNAPSHOT_METADATA)) {
+            val snapshotName = if (intent.hasExtra(SnapshotsClient.EXTRA_SNAPSHOT_METADATA)) {
                 val snapshotMetadata = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                     intent.getParcelableExtra(SnapshotsClient.EXTRA_SNAPSHOT_METADATA, SnapshotMetadata::class.java)
                 } else {
                     @Suppress("DEPRECATION")
                     intent.getParcelableExtra(SnapshotsClient.EXTRA_SNAPSHOT_METADATA)
                 }
-                
-                if (snapshotMetadata != null) {
-                    viewModel.setCurrentSaveName(snapshotMetadata.uniqueName)
-                    lifecycleScope.launch {
-                        val data = androidCloudSaveService.loadGame(snapshotMetadata.uniqueName)
-                        if (data != null) {
-                            viewModel.loadGame(data)
-                        }
-                    }
-                }
-            } else if (intent.hasExtra(SnapshotsClient.EXTRA_SNAPSHOT_NEW)) {
-                val unique = java.math.BigInteger(281, java.util.Random()).toString(13)
-                viewModel.setCurrentSaveName("NihongoMochiSnapshot-$unique")
-                viewModel.saveGame()
-            }
+                snapshotMetadata?.uniqueName
+            } else { null }
+            
+            val isNew = intent.hasExtra(SnapshotsClient.EXTRA_SNAPSHOT_NEW)
+            
+            viewModel.handleSnapshotResult(snapshotName, isNew)
         }
     }
 
@@ -89,36 +69,67 @@ class ResultsFragment : Fragment() {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
                 AppTheme {
+                    // Handle OneTimeEvents from the ViewModel
+                    LaunchedEffect(viewModel) {
+                        viewModel.oneTimeEvent.collectLatest { event ->
+                            when(event) {
+                                is OneTimeEvent.ShowAchievements -> showAchievements()
+                                is OneTimeEvent.ShowSavedGames -> showSavedGamesUI()
+                            }
+                        }
+                    }
+                    
+                    // Show toast messages from the ViewModel
+                    LaunchedEffect(viewModel) {
+                         viewModel.message.collectLatest { msg ->
+                            if (msg != null) {
+                                Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show()
+                                viewModel.clearMessage()
+                            }
+                        }
+                    }
+
                     SagaMapScreen(
                         viewModel = viewModel,
-                        onNodeClick = { nodeId, type ->
-                            navigateToGame(nodeId, type)
-                        },
-                        onAction = { action ->
-                            handleSagaAction(action)
-                        }
+                        onNodeClick = { nodeId, type -> navigateToGame(nodeId, type) },
+                        onAction = { action -> viewModel.handleSagaAction(action) }
                     )
                 }
             }
         }
     }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        
-        if (!::androidCloudSaveService.isInitialized) {
-            androidCloudSaveService = AndroidCloudSaveService(requireActivity())
-        }
-        
-        setupObservers()
-    }
     
-    private fun handleSagaAction(action: SagaAction) {
-        when(action) {
-            SagaAction.SIGN_IN -> viewModel.signIn()
-            SagaAction.ACHIEVEMENTS -> showAchievements()
-            SagaAction.BACKUP -> showSavedGamesUI()
-            SagaAction.RESTORE -> showSavedGamesUI()
+    override fun onResume() {
+        super.onResume()
+        viewModel.checkSignInStatus()
+    }
+
+    private fun showAchievements() {
+        lifecycleScope.launch {
+             try {
+                 val service = AndroidCloudSaveService(requireActivity())
+                 val intent = service.getAchievementsIntent()
+                 achievementsLauncher.launch(intent)
+             } catch (e: Exception) {
+                 Toast.makeText(requireContext(), getString(R.string.about_coming_soon) + ": " + e.message, Toast.LENGTH_SHORT).show()
+             }
+        }
+    }
+
+    private fun showSavedGamesUI() {
+        lifecycleScope.launch {
+            try {
+                val service = AndroidCloudSaveService(requireActivity())
+                val intent = service.getSavedGamesIntent(
+                    "Sauvegardes", 
+                    allowAdd = true, 
+                    allowDelete = true, 
+                    maxSnapshots = 5
+                )
+                savedGamesLauncher.launch(intent)
+            } catch (e: Exception) {
+                 Toast.makeText(requireContext(), getString(R.string.about_coming_soon) + ": " + e.message, Toast.LENGTH_SHORT).show()
+            }
         }
     }
     
@@ -155,54 +166,6 @@ class ResultsFragment : Fragment() {
         } catch (e: Exception) {
             Log.e("ResultsFragment", "Navigation failed: ${e.message}")
             Toast.makeText(requireContext(), "Coming soon or Navigation Error", Toast.LENGTH_SHORT).show()
-        }
-    }
-    
-    private fun setupObservers() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                // isAuthenticated flow is now observed inside Compose screen via ViewModel
-                launch {
-                    viewModel.message.collect { msg ->
-                        if (msg != null) {
-                            Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show()
-                            viewModel.clearMessage()
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        viewModel.checkSignInStatus()
-    }
-
-    private fun showAchievements() {
-        lifecycleScope.launch {
-             try {
-                 val intent = androidCloudSaveService.getAchievementsIntent()
-                 achievementsLauncher.launch(intent)
-             } catch (e: Exception) {
-                 Toast.makeText(requireContext(), getString(R.string.about_coming_soon) + ": " + e.message, Toast.LENGTH_SHORT).show()
-             }
-        }
-    }
-
-    private fun showSavedGamesUI() {
-        lifecycleScope.launch {
-            try {
-                val intent = androidCloudSaveService.getSavedGamesIntent(
-                    "Sauvegardes", 
-                    allowAdd = true, 
-                    allowDelete = true, 
-                    maxSnapshots = 5
-                )
-                savedGamesLauncher.launch(intent)
-            } catch (e: Exception) {
-                 Toast.makeText(requireContext(), getString(R.string.about_coming_soon) + ": " + e.message, Toast.LENGTH_SHORT).show()
-            }
         }
     }
 }

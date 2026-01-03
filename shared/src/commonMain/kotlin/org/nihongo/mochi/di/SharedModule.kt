@@ -11,6 +11,7 @@ import org.nihongo.mochi.domain.kanji.KanjiRepository
 import org.nihongo.mochi.domain.levels.LevelsRepository
 import org.nihongo.mochi.domain.meaning.MeaningRepository
 import org.nihongo.mochi.domain.settings.SettingsRepository
+import org.nihongo.mochi.domain.statistics.ResultsViewModel
 import org.nihongo.mochi.domain.statistics.StatisticsEngine
 import org.nihongo.mochi.domain.util.LevelContentProvider
 import org.nihongo.mochi.domain.words.WordRepository
@@ -65,6 +66,13 @@ val sharedModule = module {
             levelContentProvider = get(),
             kanjiRepository = get(),
             baseColorInt = params.get()
+        )
+    }
+
+    factory { params ->
+        ResultsViewModel(
+            cloudSaveService = params.get(),
+            statisticsEngine = get()
         )
     }
     

@@ -1,16 +1,21 @@
 package org.nihongo.mochi.domain.statistics
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import org.nihongo.mochi.data.ScoreManager
+import org.nihongo.mochi.domain.services.CloudSaveService
+import org.nihongo.mochi.presentation.SagaAction
+import org.nihongo.mochi.presentation.ViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import org.nihongo.mochi.data.ScoreManager
-import org.nihongo.mochi.domain.services.CloudSaveService
+
+sealed class OneTimeEvent {
+    data object ShowAchievements : OneTimeEvent()
+    data object ShowSavedGames : OneTimeEvent()
+}
 
 class ResultsViewModel(
     private val cloudSaveService: CloudSaveService,
@@ -18,17 +23,19 @@ class ResultsViewModel(
 ) : ViewModel() {
 
     private val _isAuthenticated = MutableStateFlow(false)
-    val isAuthenticated: StateFlow<Boolean> = _isAuthenticated.asStateFlow()
+    val isAuthenticated: MutableStateFlow<Boolean> = _isAuthenticated
 
     private val _message = MutableStateFlow<String?>(null)
-    val message: StateFlow<String?> = _message.asStateFlow()
+    val message: MutableStateFlow<String?> = _message
     
-    // Saga Map State now uses Steps instead of just Nodes
+    private val _oneTimeEvent = MutableSharedFlow<OneTimeEvent>()
+    val oneTimeEvent = _oneTimeEvent.asSharedFlow()
+
     private val _sagaSteps = MutableStateFlow<List<SagaStep>>(emptyList())
-    val sagaSteps: StateFlow<List<SagaStep>> = _sagaSteps.asStateFlow()
+    val sagaSteps: MutableStateFlow<List<SagaStep>> = _sagaSteps
     
     private val _currentTab = MutableStateFlow(SagaTab.JLPT)
-    val currentTab: StateFlow<SagaTab> = _currentTab.asStateFlow()
+    val currentTab: MutableStateFlow<SagaTab> = _currentTab
 
     private var currentSaveName = "NihongoMochiSnapshot"
 
@@ -37,6 +44,33 @@ class ResultsViewModel(
         viewModelScope.launch {
             statisticsEngine.loadLevelDefinitions()
             refreshSagaMap()
+        }
+    }
+    
+    fun handleSagaAction(action: SagaAction) {
+        viewModelScope.launch {
+            when (action) {
+                SagaAction.SIGN_IN -> signIn()
+                SagaAction.ACHIEVEMENTS -> _oneTimeEvent.emit(OneTimeEvent.ShowAchievements)
+                SagaAction.BACKUP -> _oneTimeEvent.emit(OneTimeEvent.ShowSavedGames)
+                SagaAction.RESTORE -> _oneTimeEvent.emit(OneTimeEvent.ShowSavedGames)
+            }
+        }
+    }
+
+    fun handleSnapshotResult(snapshotName: String?, isNew: Boolean) {
+        if (isNew) {
+            val unique = Clock.System.now().toEpochMilliseconds().toString()
+            setCurrentSaveName("NihongoMochiSnapshot-$unique")
+            saveGame()
+        } else if (snapshotName != null) {
+            setCurrentSaveName(snapshotName)
+            viewModelScope.launch {
+                val data = cloudSaveService.loadGame(snapshotName)
+                if (data != null) {
+                    loadGame(data)
+                }
+            }
         }
     }
     
@@ -59,7 +93,7 @@ class ResultsViewModel(
         }
     }
 
-    fun signIn() {
+    private fun signIn() {
         viewModelScope.launch {
             val success = cloudSaveService.signIn()
             _isAuthenticated.value = success
