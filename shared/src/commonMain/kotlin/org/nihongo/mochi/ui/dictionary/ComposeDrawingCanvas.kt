@@ -2,6 +2,7 @@ package org.nihongo.mochi.ui.dictionary
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -38,13 +39,14 @@ fun ComposeDrawingCanvas(
     }
 
     Canvas(
-        modifier = modifier.pointerInput(Unit) {
+        modifier = modifier.fillMaxSize().pointerInput(Unit) {
             detectDragGestures(
                 onDragStart = { offset ->
                     // Start a new stroke by adding the first point
                     currentPoints = listOf(offset)
                 },
                 onDrag = { change, _ ->
+                    change.consume()
                     // Add the new point to the current stroke
                     currentPoints = currentPoints + change.position
                 },
