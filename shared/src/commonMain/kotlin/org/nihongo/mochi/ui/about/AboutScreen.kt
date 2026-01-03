@@ -38,16 +38,10 @@ import org.nihongo.mochi.presentation.MochiBackground
 import org.nihongo.mochi.shared.generated.resources.Res
 import org.nihongo.mochi.shared.generated.resources.*
 
-// Expect/Actual or Platform specific utility for date and version info
-// Since this is UI code in shared, we cannot access BuildConfig or Java Date directly if we want to be pure KMP.
-// For now, we will use placeholders or expect/actual interfaces.
-// But to fix compilation quickly, I'll remove the Android dependencies (BuildConfig, java.util.Date)
-// and replace them with KMP equivalents (Kotlinx-datetime) or simple strings for now.
-
 @Composable
 fun AboutScreen(
-    versionName: String, // Pass version from platform
-    currentDate: String, // Pass date from platform
+    versionName: String,
+    currentDate: String,
     onIssueTrackerClick: () -> Unit,
     onRateAppClick: () -> Unit,
     onPatreonClick: () -> Unit,
@@ -63,7 +57,6 @@ fun AboutScreen(
                 .verticalScroll(scrollState)
                 .padding(16.dp)
         ) {
-            // Header
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -78,29 +71,24 @@ fun AboutScreen(
                     color = MaterialTheme.colorScheme.primary
                 )
                 
-                // Image logo (if migrated)
-                /*
                 Image(
-                    painter = painterResource(R.mipmap.nihongomochi),
+                    painter = painterResource(Res.drawable.nihongomochi),
                     contentDescription = stringResource(Res.string.app_name),
                     modifier = Modifier.size(96.dp)
                 )
-                */
             }
 
             Text(
                 text = stringResource(Res.string.about_version_info),
                 fontSize = 16.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant, // textColorSecondary equivalent
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(bottom = 24.dp)
             )
 
-            // Informations Section
             AboutSectionCard(
                 title = stringResource(Res.string.about_category_informations),
                 icon = Icons.Default.Info
             ) {
-                // Table equivalent
                 Row(modifier = Modifier.padding(bottom = 8.dp)) {
                     Text(
                         text = stringResource(Res.string.about_version_label),
@@ -134,20 +122,17 @@ fun AboutScreen(
                 
                 FullWidthButton(
                     text = stringResource(Res.string.about_rate_app),
-                    icon = Icons.Default.Star, // star_off
+                    icon = Icons.Default.Star, 
                     onClick = onRateAppClick
                 )
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Credits Section
             AboutSectionCard(
                 title = stringResource(Res.string.about_category_credits),
-                // Using info icon as placeholder for ic_menu_info_details if not vector
                 icon = Icons.Default.Info 
             ) {
-                // Design / Dev
                 Text(
                     text = stringResource(Res.string.about_design_dev),
                     fontWeight = FontWeight.Bold,
@@ -172,7 +157,6 @@ fun AboutScreen(
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
 
-                // Pedagogical Content
                 Text(
                     text = stringResource(Res.string.about_pedagogical),
                     fontWeight = FontWeight.Bold,
@@ -189,10 +173,8 @@ fun AboutScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Resources Section
             AboutSectionCard(
                 title = stringResource(Res.string.about_category_resources),
-                // Using default icon as placeholder for ic_menu_gallery
                 icon = Icons.Default.Info 
             ) {
                  FullWidthButton(
@@ -201,8 +183,6 @@ fun AboutScreen(
                 )
             }
             
-            // Extra padding at bottom for navigation bar if needed, though Scaffold usually handles it.
-            // XML had paddingBottom="16dp" on ScrollView + padding inside.
             Spacer(modifier = Modifier.height(16.dp))
         }
     }
@@ -218,11 +198,9 @@ fun AboutSectionCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(2.dp),
-        // Use a semi-transparent surface color to blend with background like other screens
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f))
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            // Header
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -263,9 +241,8 @@ fun FullWidthButton(
             contentColor = MaterialTheme.colorScheme.onPrimary
         ),
         elevation = ButtonDefaults.buttonElevation(defaultElevation = 6.dp),
-        shape = RoundedCornerShape(4.dp) // Material 2 default or keep Material 3 rounded
+        shape = RoundedCornerShape(4.dp)
     ) {
-        // Material 3 Button content is RowScope
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Center,
@@ -277,7 +254,7 @@ fun FullWidthButton(
                 Icon(
                     imageVector = icon, 
                     contentDescription = null,
-                    modifier = Modifier.size(18.dp) // Default icon size in button
+                    modifier = Modifier.size(18.dp)
                 )
             }
         }
