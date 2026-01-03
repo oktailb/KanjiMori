@@ -5,6 +5,7 @@ import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -23,71 +24,75 @@ fun ComposeDrawingCanvas(
     onStrokeComplete: (List<InkStroke>) -> Unit,
     clearTrigger: Int
 ) {
+    // State for the strokes that are completed and stored as our KMP abstraction
+    val completedStrokes = remember { mutableStateListOf<InkStroke>() }
+    // State for the points of the stroke currently being drawn
     var currentPoints by remember { mutableStateOf<List<Offset>>(emptyList()) }
-    val completedStrokes = remember { mutableStateOf<List<InkStroke>>(emptyList()) }
-    val completedPaths = remember { mutableStateOf<List<Path>>(emptyList()) }
 
+    // When the clear trigger changes, reset everything
     LaunchedEffect(clearTrigger) {
+        completedStrokes.clear()
         currentPoints = emptyList()
-        completedStrokes.value = emptyList()
-        completedPaths.value = emptyList()
+        // Also notify listener that canvas is cleared
+        onStrokeComplete(emptyList())
     }
 
     Canvas(
         modifier = modifier.pointerInput(Unit) {
             detectDragGestures(
                 onDragStart = { offset ->
+                    // Start a new stroke by adding the first point
                     currentPoints = listOf(offset)
                 },
                 onDrag = { change, _ ->
+                    // Add the new point to the current stroke
                     currentPoints = currentPoints + change.position
                 },
                 onDragEnd = {
+                    // Finalize the current stroke
                     val strokeBuilder = newStrokeBuilder()
-                    currentPoints.forEach { offset ->
-                        strokeBuilder.addPoint(createInkPoint(offset.x, offset.y, 0L))
+                    currentPoints.forEach { point ->
+                        // Using 0L for time is a simplification that works for now.
+                        strokeBuilder.addPoint(createInkPoint(point.x, point.y, 0L))
                     }
-                    val newStroke = strokeBuilder.build()
-                    completedStrokes.value = completedStrokes.value + newStroke
-                    onStrokeComplete(completedStrokes.value)
+                    completedStrokes.add(strokeBuilder.build())
 
-                    val newPath = Path()
-                    if (currentPoints.isNotEmpty()) {
-                        newPath.moveTo(currentPoints.first().x, currentPoints.first().y)
-                        currentPoints.forEach { newPath.lineTo(it.x, it.y) }
-                    }
-                    completedPaths.value = completedPaths.value + newPath
+                    // Notify the listener with the complete list of strokes
+                    onStrokeComplete(completedStrokes.toList())
+
+                    // Clear the current points to end the drawing of the current line
                     currentPoints = emptyList()
                 },
                 onDragCancel = {
+                    // Clear the current stroke if the gesture is cancelled
                     currentPoints = emptyList()
                 }
             )
         }
     ) {
-        val strokeStyle = Stroke(
-            width = 12f,
-            cap = StrokeCap.Round,
-            join = StrokeJoin.Round
-        )
+        val strokeStyle = Stroke(width = 12f, cap = StrokeCap.Round, join = StrokeJoin.Round)
 
-        completedPaths.value.forEach { path ->
-            drawPath(
-                path = path,
-                color = Color.Black,
-                style = strokeStyle
-            )
+        // Draw completed strokes from their points
+        completedStrokes.forEach { inkStroke ->
+            val path = Path()
+            val points = inkStroke.getPoints()
+            if (points.isNotEmpty()) {
+                path.moveTo(points.first().x, points.first().y)
+                points.forEach { point ->
+                    path.lineTo(point.x, point.y)
+                }
+                drawPath(path = path, color = Color.Black, style = strokeStyle)
+            }
         }
 
-        if (currentPoints.isNotEmpty()) {
+        // Draw the current stroke in progress from its points
+        if (currentPoints.size > 1) {
             val currentPath = Path()
             currentPath.moveTo(currentPoints.first().x, currentPoints.first().y)
-            currentPoints.forEach { currentPath.lineTo(it.x, it.y) }
-            drawPath(
-                path = currentPath,
-                color = Color.Black,
-                style = strokeStyle
-            )
+            for (i in 1 until currentPoints.size) {
+                currentPath.lineTo(currentPoints[i].x, currentPoints[i].y)
+            }
+            drawPath(path = currentPath, color = Color.Black, style = strokeStyle)
         }
     }
 }
