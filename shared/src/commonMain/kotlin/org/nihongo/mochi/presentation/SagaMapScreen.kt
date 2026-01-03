@@ -26,16 +26,16 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowLeft
+import androidx.compose.material.icons.automirrored.filled.ArrowRight
+import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.ArrowLeft
-import androidx.compose.material.icons.filled.ArrowRight
 import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Login
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.CircularProgressIndicator
@@ -169,7 +169,7 @@ fun CloudActionsBar(
     FloatingCardBar {
         if (!isAuthenticated) {
             ActionButton(
-                icon = Icons.Default.Login,
+                icon = Icons.AutoMirrored.Filled.Login,
                 label = "Sign In",
                 onClick = { onAction(SagaAction.SIGN_IN) }
             )
@@ -598,14 +598,14 @@ fun BillboardItem(
         if (isLeftSide) {
             BillboardContent(drawable, description, progress, color)
             Icon(
-                imageVector = Icons.Default.ArrowRight,
+                imageVector = Icons.AutoMirrored.Filled.ArrowRight,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.outline,
                 modifier = Modifier.size(24.dp).offset(x = (-4).dp)
             )
         } else {
             Icon(
-                imageVector = Icons.Default.ArrowLeft,
+                imageVector = Icons.AutoMirrored.Filled.ArrowLeft,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.outline,
                 modifier = Modifier.size(24.dp).offset(x = 4.dp)
