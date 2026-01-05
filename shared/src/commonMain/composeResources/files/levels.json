@@ -14,6 +14,10 @@
             "RECOGNITION": {
               "dataFile": "Hiragana",
               "enabled": true
+            },
+            "GAMES": {
+              "dataFile": "Hiragana",
+              "enabled": true
             }
           }
         },
@@ -23,6 +27,10 @@
           "description": "level_katakana_desc",
           "activities": {
             "RECOGNITION": {
+              "dataFile": "Katakana",
+              "enabled": true
+            },
+            "GAMES": {
               "dataFile": "Katakana",
               "enabled": true
             }
@@ -55,6 +63,10 @@
             },
             "GRAMMAR": {
               "dataFile": "jlpt_grammar_n5",
+              "enabled": false
+            },
+            "GAMES": {
+              "dataFile": "jlpt_wordlist_n5",
               "enabled": false
             }
           }
