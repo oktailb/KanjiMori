@@ -137,11 +137,10 @@ fun DictionaryScreen(
                     }
 
                     // Level Filter Dropdown & Search Mode
-                    Row(
+                    Column (
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(top = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                            .padding(top = 8.dp)
                     ) {
                         // Dropdown for Category/Level
                         Box {
