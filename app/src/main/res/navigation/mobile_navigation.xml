@@ -38,6 +38,9 @@
         <action
             android:id="@+id/action_nav_home_to_nav_katakana"
             app:destination="@id/nav_katakana" />
+        <action
+            android:id="@+id/action_nav_home_to_grammar"
+            app:destination="@id/nav_grammar" />
     </fragment>
 
     <!-- Fragments intermédiaires supprimés (Recognition, Reading, Writing) -->
@@ -214,6 +217,16 @@
             app:argType="string[]"
             app:nullable="true"
             android:defaultValue="@null"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_grammar"
+        android:name="org.nihongo.mochi.ui.grammar.GrammarFragment"
+        android:label="Grammar"
+        tools:layout="@layout/fragment_grammar">
+        <argument
+            android:name="levelId"
+            app:argType="string" />
     </fragment>
 
 </navigation>

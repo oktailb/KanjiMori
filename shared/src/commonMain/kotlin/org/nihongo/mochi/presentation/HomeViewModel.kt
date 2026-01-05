@@ -22,9 +22,11 @@ class HomeViewModel(
         val isRecognitionEnabled: Boolean = true,
         val isReadingEnabled: Boolean = true,
         val isWritingEnabled: Boolean = true,
+        val isGrammarEnabled: Boolean = true,
         val recognitionDataFile: String? = null,
         val readingDataFile: String? = null,
-        val writingDataFile: String? = null
+        val writingDataFile: String? = null,
+        val grammarDataFile: String? = null
     )
 
     private val _uiState = MutableStateFlow(HomeUiState())
@@ -84,6 +86,7 @@ class HomeViewModel(
                 val recognitionConfig = selectedLevel?.activities?.get(StatisticsType.RECOGNITION)
                 val readingConfig = selectedLevel?.activities?.get(StatisticsType.READING)
                 val writingConfig = selectedLevel?.activities?.get(StatisticsType.WRITING)
+                val grammarConfig = selectedLevel?.activities?.get(StatisticsType.GRAMMAR)
 
                 currentState.copy(
                     availableLevels = levels,
@@ -91,9 +94,11 @@ class HomeViewModel(
                     isRecognitionEnabled = recognitionConfig?.enabled == true,
                     isReadingEnabled = readingConfig?.enabled == true,
                     isWritingEnabled = writingConfig?.enabled == true,
+                    isGrammarEnabled = grammarConfig?.enabled == true,
                     recognitionDataFile = recognitionConfig?.dataFile,
                     readingDataFile = readingConfig?.dataFile,
-                    writingDataFile = writingConfig?.dataFile
+                    writingDataFile = writingConfig?.dataFile,
+                    grammarDataFile = grammarConfig?.dataFile
                 )
             }
         }
@@ -107,6 +112,7 @@ class HomeViewModel(
         val recognitionConfig = selectedLevel?.activities?.get(StatisticsType.RECOGNITION)
         val readingConfig = selectedLevel?.activities?.get(StatisticsType.READING)
         val writingConfig = selectedLevel?.activities?.get(StatisticsType.WRITING)
+        val grammarConfig = selectedLevel?.activities?.get(StatisticsType.GRAMMAR)
 
         _uiState.update { 
             it.copy(
@@ -114,9 +120,11 @@ class HomeViewModel(
                 isRecognitionEnabled = recognitionConfig?.enabled == true,
                 isReadingEnabled = readingConfig?.enabled == true,
                 isWritingEnabled = writingConfig?.enabled == true,
+                isGrammarEnabled = grammarConfig?.enabled == true,
                 recognitionDataFile = recognitionConfig?.dataFile,
                 readingDataFile = readingConfig?.dataFile,
-                writingDataFile = writingConfig?.dataFile
+                writingDataFile = writingConfig?.dataFile,
+                grammarDataFile = grammarConfig?.dataFile
             ) 
         }
     }

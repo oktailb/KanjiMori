@@ -43,12 +43,6 @@
       "dependencies": ["verb_dict_form"]
     },
     {
-      "id": "forme_conjecturale",
-      "description":  "forme_conjecturale_desc",
-      "level": "jlpt_n4",
-      "dependencies": ["base_verbale"]
-    },
-    {
       "id": "adjectifs_i",
       "description":  "adjectifs_i_desc",
       "level": "jlpt_n5",
@@ -198,14 +192,6 @@
       "level": "jlpt_n5",
       "dependencies": ["base_verbale"],
       "tags": ["desir"]
-    },
-    {
-      "id": "forme_te",
-      "description":  "forme_te_desc",
-      "category": "conjugaison",
-      "level": "jlpt_n5",
-      "dependencies": ["verb_dict_form"],
-      "tags": ["conjonction", "conjugaison"]
     },
     {
       "id": "particule_ga",

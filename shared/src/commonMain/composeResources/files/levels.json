@@ -63,7 +63,7 @@
             },
             "GRAMMAR": {
               "dataFile": "jlpt_grammar_n5",
-              "enabled": false
+              "enabled": true
             },
             "GAMES": {
               "dataFile": "jlpt_wordlist_n5",
@@ -91,7 +91,7 @@
             },
             "GRAMMAR": {
               "dataFile": "jlpt_grammar_n4",
-              "enabled": false
+              "enabled": true
             }
           }
         },
@@ -115,7 +115,7 @@
             },
             "GRAMMAR": {
               "dataFile": "jlpt_grammar_n3",
-              "enabled": false
+              "enabled": true
             }
           }
         },
@@ -139,7 +139,7 @@
             },
             "GRAMMAR": {
               "dataFile": "jlpt_grammar_n2",
-              "enabled": false
+              "enabled": true
             }
           }
         },

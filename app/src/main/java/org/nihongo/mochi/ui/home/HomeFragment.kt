@@ -39,6 +39,7 @@ class HomeFragment : Fragment() {
                         isRecognitionEnabled = uiState.isRecognitionEnabled,
                         isReadingEnabled = uiState.isReadingEnabled,
                         isWritingEnabled = uiState.isWritingEnabled,
+                        isGrammarEnabled = uiState.isGrammarEnabled,
                         onLevelSelected = homeViewModel::onLevelSelected,
                         onRecognitionClick = {
                             if (uiState.isRecognitionEnabled) {
@@ -69,6 +70,14 @@ class HomeFragment : Fragment() {
                                     putString("level", uiState.selectedLevelId)
                                 }
                                 findNavController().navigate(R.id.action_nav_home_to_writing_recap, args)
+                            }
+                        },
+                        onGrammarClick = {
+                            if (uiState.isGrammarEnabled) {
+                                val args = Bundle().apply {
+                                    putString("levelId", uiState.selectedLevelId)
+                                }
+                                findNavController().navigate(R.id.action_nav_home_to_grammar, args)
                             }
                         },
                         onDictionaryClick = {

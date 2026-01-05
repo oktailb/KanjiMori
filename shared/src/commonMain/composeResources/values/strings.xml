@@ -291,7 +291,6 @@
     <string name="forme_ta_desc">Forme passée des verbes</string>
     <string name="forme_te_desc">Forme -te des verbes</string>
     <string name="conjugaison_conditionnel_desc">Conjugaison des conditionnels</string>
-    <string name="forme_conjecturale_desc">Forme conjecturale (-ō/-yō)</string>
     <string name="adjectifs_i_desc">Adjectifs en -i</string>
     <string name="adjectifs_na_desc">Adjectifs en -na</string>
     <string name="noms_desc">Noms et substantifs</string>
@@ -312,7 +311,6 @@
     <string name="forme_naide_kudasai_desc">Forme en -ないでください - Impératif poli</string>
     <string name="forme_dict_desc">Forme en -る, -う - Forme neutre ou du dictionnaire</string>
     <string name="forme_tai_desc">Forme en -たい - Forme volitive</string>
-    <string name="forme_te_desc">Forme en -て - Forme verbale</string>
     <string name="particule_ga_desc">が - Particule du sujet</string>
     <string name="particule_ha_desc">は - Particule de thème</string>
     <string name="ha_ikemasen_desc">は いけません - Exprimer l'interdiction ou l'impossibilité</string>

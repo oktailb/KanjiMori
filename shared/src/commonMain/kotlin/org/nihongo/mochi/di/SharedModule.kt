@@ -4,6 +4,7 @@ import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 import org.nihongo.mochi.domain.dictionary.DictionaryViewModel
+import org.nihongo.mochi.domain.grammar.GrammarRepository
 import org.nihongo.mochi.domain.kana.ComposeResourceLoader
 import org.nihongo.mochi.domain.kana.KanaRepository
 import org.nihongo.mochi.domain.kana.ResourceLoader
@@ -20,6 +21,7 @@ import org.nihongo.mochi.presentation.dictionary.KanjiDetailViewModel
 import org.nihongo.mochi.presentation.settings.SettingsViewModel
 import org.nihongo.mochi.ui.gamerecap.GameRecapViewModel
 import org.nihongo.mochi.ui.gojuon.KanaRecapViewModel
+import org.nihongo.mochi.ui.grammar.GrammarViewModel
 import org.nihongo.mochi.ui.wordlist.WordListViewModel
 import org.nihongo.mochi.ui.writingrecap.WritingRecapViewModel
 
@@ -34,6 +36,7 @@ val sharedModule = module {
     singleOf(::SettingsRepository)
     singleOf(::LevelContentProvider)
     singleOf(::StatisticsEngine)
+    singleOf(::GrammarRepository)
 
     // --- ViewModels ---
     factoryOf(::KanjiDetailViewModel)
@@ -41,6 +44,7 @@ val sharedModule = module {
     // RecognitionViewModel, ReadingViewModel, WritingViewModel removed
     factoryOf(::WordListViewModel)
     factoryOf(::HomeViewModel) // Added HomeViewModel
+    factoryOf(::GrammarViewModel)
     
     // ViewModels with parameters
     factory { params ->

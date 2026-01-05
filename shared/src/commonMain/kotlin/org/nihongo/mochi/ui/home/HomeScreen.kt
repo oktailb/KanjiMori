@@ -51,10 +51,12 @@ fun HomeScreen(
     isRecognitionEnabled: Boolean,
     isReadingEnabled: Boolean,
     isWritingEnabled: Boolean,
+    isGrammarEnabled: Boolean,
     onLevelSelected: (String) -> Unit,
     onRecognitionClick: () -> Unit,
     onReadingClick: () -> Unit,
     onWritingClick: () -> Unit,
+    onGrammarClick: () -> Unit,
     onDictionaryClick: () -> Unit,
     onResultsClick: () -> Unit,
     onOptionsClick: () -> Unit,
@@ -120,6 +122,16 @@ fun HomeScreen(
                 kanjiTitle = stringResource(Res.string.writing_title),
                 enabled = isWritingEnabled,
                 onClick = onWritingClick
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            BigModeCard(
+                title = stringResource(Res.string.activity_type_grammar),
+                subtitle = stringResource(Res.string.section_fundamentals_desc), // TODO: Create specific grammar subtitle
+                kanjiTitle = "文法", // Bunpou (Grammar)
+                enabled = isGrammarEnabled,
+                onClick = onGrammarClick
             )
 
             Spacer(modifier = Modifier.height(24.dp))
