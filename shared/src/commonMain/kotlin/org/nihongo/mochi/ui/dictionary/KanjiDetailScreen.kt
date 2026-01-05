@@ -168,7 +168,8 @@ fun KanjiDetailScreen(
                         
                         KanjiGraphComponent(
                             rootNode = uiState.componentTree!!,
-                            modifier = Modifier.fillMaxSize()
+                            modifier = Modifier.fillMaxSize(),
+                            onNodeClick = onKanjiClick
                         )
                     }
                 } else if (uiState.components.isNotEmpty()) {

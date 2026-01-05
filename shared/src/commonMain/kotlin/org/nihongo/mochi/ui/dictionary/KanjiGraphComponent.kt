@@ -1,7 +1,8 @@
 package org.nihongo.mochi.ui.dictionary
 
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
@@ -11,6 +12,8 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
@@ -25,6 +28,8 @@ import org.nihongo.mochi.shared.generated.resources.*
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.atan2
+import kotlin.math.pow
+import kotlin.math.sqrt
 
 // Visual Node structure for drawing
 private data class VisualNode(
@@ -39,15 +44,17 @@ private data class VisualNode(
 @Composable
 fun KanjiGraphComponent(
     rootNode: ComponentNode,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onNodeClick: (String) -> Unit
 ) {
     // Dynamic Theme colors
     val nodeColorMain = MaterialTheme.colorScheme.tertiary
     val nodeColorSub = MaterialTheme.colorScheme.primary
-    val textColor = Color.White // Text inside circles (usually keep white if bubbles are colored)
+    val textColor = Color.White
     val edgeColor = MaterialTheme.colorScheme.onSurface
     val labelBackgroundColor = MaterialTheme.colorScheme.surfaceVariant
     val labelTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+    val linkIndicatorColor = MaterialTheme.colorScheme.secondary
 
     val kanjiFont = FontFamily(Font(Res.font.KanjiStrokeOrders))
     val textMeasurer = rememberTextMeasurer()
@@ -58,8 +65,29 @@ fun KanjiGraphComponent(
         val edges = mutableListOf<Pair<VisualNode, VisualNode>>()
         
         val levelHeight = 300f
-        val siblingSpacing = 200f
+        val nodeUnitWidth = 250f 
         
+        val subtreeWidths = mutableMapOf<ComponentNode, Float>()
+        
+        // 1. Calculate widths (Post-order traversal)
+        fun calculateWidths(node: ComponentNode): Float {
+            if (node.children.isEmpty()) {
+                val w = nodeUnitWidth
+                subtreeWidths[node] = w
+                return w
+            }
+            var totalWidth = 0f
+            node.children.forEach { child ->
+                totalWidth += calculateWidths(child)
+            }
+            val w = maxOf(nodeUnitWidth, totalWidth)
+            subtreeWidths[node] = w
+            return w
+        }
+        
+        calculateWidths(rootNode)
+        
+        // 2. Layout nodes (Pre-order traversal)
         fun layoutNode(node: ComponentNode, x: Float, y: Float, level: Int): VisualNode {
             val vNode = VisualNode(
                 character = node.character, 
@@ -72,13 +100,17 @@ fun KanjiGraphComponent(
             nodes.add(vNode)
             
             if (node.children.isNotEmpty()) {
-                val totalWidth = node.children.size * siblingSpacing
-                var startX = x - totalWidth / 2f + siblingSpacing / 2f
+                val childrenSumWidth = node.children.sumOf { (subtreeWidths[it] ?: 0f).toDouble() }.toFloat()
+                var currentX = x - childrenSumWidth / 2f
                 
                 node.children.forEach { child ->
-                    val childVNode = layoutNode(child, startX, y + levelHeight, level + 1)
+                    val childWidth = subtreeWidths[child] ?: 0f
+                    val childCenterX = currentX + childWidth / 2f
+                    
+                    val childVNode = layoutNode(child, childCenterX, y + levelHeight, level + 1)
                     edges.add(vNode to childVNode)
-                    startX += siblingSpacing
+                    
+                    currentX += childWidth
                 }
             }
             return vNode
@@ -93,29 +125,71 @@ fun KanjiGraphComponent(
         rootNode.onReadings.toSet()
     }
 
-    Box(modifier = modifier) {
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            // Calculate bounds to auto-fit
+    val density = LocalDensity.current
+
+    BoxWithConstraints(modifier = modifier) {
+        val width = with(density) { maxWidth.toPx() }
+        val height = with(density) { maxHeight.toPx() }
+
+        // Determine scale and offset to fit graph
+        val layoutInfo = remember(visualNodes, width, height) {
             val minX = visualNodes.minOfOrNull { it.x } ?: 0f
             val maxX = visualNodes.maxOfOrNull { it.x } ?: 0f
             val maxY = visualNodes.maxOfOrNull { it.y } ?: 0f
+            val minY = visualNodes.minOfOrNull { it.y } ?: 0f
             
-            val graphWidth = maxX - minX + 150.dp.toPx() // + padding
-            val graphHeight = maxY + 150.dp.toPx()
+            val padding = with(density) { 100.dp.toPx() }
+            val graphWidth = (maxX - minX) + padding * 2
+            val graphHeight = (maxY - minY) + padding * 2
             
-            val scaleX = size.width / graphWidth
-            val scaleY = size.height / graphHeight
-            val autoScale = minOf(scaleX, scaleY, 0.8f) // Cap scale at 0.8
+            val safeGraphWidth = if (graphWidth <= 0) 1f else graphWidth
+            val safeGraphHeight = if (graphHeight <= 0) 1f else graphHeight
+
+            val scaleX = width / safeGraphWidth
+            val scaleY = height / safeGraphHeight
+            val autoScale = minOf(scaleX, scaleY, 0.8f)
             
-            val initialCenter = Offset(size.width / 2, 60.dp.toPx())
-            
+            val graphCenterX = (minX + maxX) / 2f
+            // We want the root (0,0 typically, or miny) at some top margin
+            val rootScreenPos = Offset(width / 2f, with(density) { 60.dp.toPx() })
+
+            Triple(autoScale, graphCenterX, rootScreenPos)
+        }
+        
+        val (autoScale, graphCenterX, rootScreenPos) = layoutInfo
+
+        fun toScreenFixedTop(x: Float, y: Float): Offset {
+            val dx = x - graphCenterX
+            return rootScreenPos + Offset(dx * autoScale, y * autoScale)
+        }
+
+        Canvas(modifier = Modifier
+            .fillMaxSize()
+            .pointerInput(visualNodes, layoutInfo) {
+                detectTapGestures { tapOffset ->
+                    visualNodes.forEach { node ->
+                        val pos = toScreenFixedTop(node.x, node.y)
+                        val radius = (if (node.level == 0) 40.dp.toPx() else 30.dp.toPx()) * autoScale
+                        
+                        // Check distance
+                        // Increase hit target slightly
+                        val hitRadius = radius * 1.5f
+                        val distance = sqrt((tapOffset.x - pos.x).pow(2) + (tapOffset.y - pos.y).pow(2))
+                        if (distance <= hitRadius) {
+                             if (!node.id.isNullOrEmpty()) {
+                                 // Pass character instead of ID to match previous behavior
+                                 onNodeClick(node.character)
+                             }
+                        }
+                    }
+                }
+            }
+        ) {
             // Draw Edges
             visualEdges.forEach { (parent, child) ->
-                // Reverse edge direction visually: Draw from child (to) to parent (from)
-                val start = initialCenter + Offset(child.x, child.y) * autoScale
-                val end = initialCenter + Offset(parent.x, parent.y) * autoScale
+                val start = toScreenFixedTop(child.x, child.y)
+                val end = toScreenFixedTop(parent.x, parent.y)
                 
-                // Check for shared ON reading
                 val sharedOnReading = child.onReadings.find { it in rootOnReadings }
                 val isImportantPath = sharedOnReading != null
                 
@@ -130,7 +204,6 @@ fun KanjiGraphComponent(
                     alpha = 0.8f 
                 )
                 
-                // Draw arrow head
                 val arrowPath = Path().apply {
                     val dx = (end.x - start.x).toDouble()
                     val dy = (end.y - start.y).toDouble()
@@ -156,7 +229,6 @@ fun KanjiGraphComponent(
                 }
                 drawPath(path = arrowPath, color = edgeColor)
 
-                // Draw shared reading text next to the arrow if exists
                 if (isImportantPath && sharedOnReading != null) {
                     val midX = (start.x + end.x) / 2
                     val midY = (start.y + end.y) / 2
@@ -170,15 +242,14 @@ fun KanjiGraphComponent(
                         )
                     )
                     
-                    // Draw background rectangle for text readability
                     val textPos = Offset(midX + 10f * autoScale, midY)
-                    val padding = 4.dp.toPx() * autoScale
+                    val textPadding = 4.dp.toPx() * autoScale
                     drawRect(
                         color = labelBackgroundColor,
-                        topLeft = textPos - Offset(padding, padding),
+                        topLeft = textPos - Offset(textPadding, textPadding),
                         size = Size(
-                            textLayoutResult.size.width + padding * 2,
-                            textLayoutResult.size.height + padding * 2
+                            textLayoutResult.size.width + textPadding * 2,
+                            textLayoutResult.size.height + textPadding * 2
                         )
                     )
                     
@@ -191,7 +262,7 @@ fun KanjiGraphComponent(
             
             // Draw Nodes
             visualNodes.forEach { node ->
-                val pos = initialCenter + Offset(node.x, node.y) * autoScale
+                val pos = toScreenFixedTop(node.x, node.y)
                 val radius = (if (node.level == 0) 40.dp else 30.dp).toPx() * autoScale
                 
                 val color = if (node.level == 0) nodeColorMain else nodeColorSub
@@ -225,6 +296,31 @@ fun KanjiGraphComponent(
                     textLayoutResult = textLayoutResult,
                     topLeft = pos - Offset(textLayoutResult.size.width / 2f, textLayoutResult.size.height / 2f)
                 )
+
+                // Visual Indicator for Clickable Nodes (Link)
+                if (!node.id.isNullOrEmpty()) {
+                    val indicatorRadius = 8.dp.toPx() * autoScale
+                    // Place at top-right edge
+                    val angle = -45.0 * (Math.PI / 180.0) 
+                    val indicatorCenter = pos + Offset(
+                        (radius * cos(angle)).toFloat(),
+                        (radius * sin(angle)).toFloat()
+                    )
+                    
+                    // Small circle background
+                    drawCircle(
+                        color = Color.White,
+                        radius = indicatorRadius,
+                        center = indicatorCenter
+                    )
+                    
+                    // Inner colored dot
+                    drawCircle(
+                        color = linkIndicatorColor,
+                        radius = indicatorRadius * 0.7f,
+                        center = indicatorCenter
+                    )
+                }
             }
         }
     }

@@ -118,10 +118,18 @@ class KanjiDetailViewModel(
         
         // If we have an ID, we can look up its components
         // If not, we try to find the ID by character
-        val entry = if (kanjiId != null) {
+        var entry = if (kanjiId != null) {
             kanjiRepository.getKanjiById(kanjiId)
         } else {
             kanjiRepository.getKanjiByCharacter(character)
+        }
+
+        // --- FIX: Attempt to resolve ID if missing ---
+        val resolvedId = entry?.id ?: kanjiRepository.getKanjiByCharacter(character)?.id
+        
+        // If we still don't have an entry but have an ID (rare), or if we found an entry via char
+        if (entry == null && resolvedId != null) {
+             entry = kanjiRepository.getKanjiById(resolvedId)
         }
         
         val onReadings = entry?.readings?.reading
@@ -132,12 +140,10 @@ class KanjiDetailViewModel(
         if (entry != null) {
              entry.components?.component?.forEach { comp ->
                  val char = comp.text ?: comp.kanjiRef ?: ""
+                 // Logic change: Try harder to find the ref ID
                  val refId = comp.kanjiRef?.let { ref -> 
-                     // Optimization: If ref is the character itself, it's just the char. 
-                     // Usually ref is the character string.
-                     // We need the ID to look deeper.
                      kanjiRepository.getKanjiByCharacter(ref)?.id
-                 }
+                 } ?: kanjiRepository.getKanjiByCharacter(char)?.id // Fallback to char lookup
                  
                  // Avoid self-reference loop immediately
                  if (char != character) {
@@ -147,7 +153,7 @@ class KanjiDetailViewModel(
         }
         
         return ComponentNode(
-            id = entry?.id,
+            id = resolvedId, // Use resolved ID
             character = character,
             onReadings = onReadings,
             children = children
