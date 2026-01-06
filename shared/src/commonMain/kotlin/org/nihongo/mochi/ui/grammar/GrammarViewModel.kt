@@ -39,6 +39,10 @@ class GrammarViewModel(
     private val _selectedCategories = MutableStateFlow<Set<String>>(emptySet())
     val selectedCategories: StateFlow<Set<String>> = _selectedCategories.asStateFlow()
 
+    // New: Expose the total height in "slots" to the UI for consistent scaling
+    private val _totalLayoutSlots = MutableStateFlow(1f)
+    val totalLayoutSlots: StateFlow<Float> = _totalLayoutSlots.asStateFlow()
+
     private var currentMaxLevelId: String = "N5" // Default fallback
 
     fun loadGraph(maxLevelId: String) {
@@ -46,15 +50,9 @@ class GrammarViewModel(
         viewModelScope.launch {
             _isLoading.value = true
             
-            // Load available categories if not loaded
             if (_availableCategories.value.isEmpty()) {
                 val categories = grammarRepository.getCategories()
                 _availableCategories.value = categories
-                // By default, select all categories? Or none means all? 
-                // Let's say empty set means "All" for easier logic, or we initialize with all.
-                // User asked for "filter to select categories". Usually starts with all.
-                // Let's keep it empty initially and treat empty as "Show All" or initialize with all.
-                // Let's treat empty as "Show All" to avoid issues if categories change.
             }
 
             refreshGraph()
@@ -84,170 +82,174 @@ class GrammarViewModel(
 
     private suspend fun refreshGraph() {
         val def = grammarRepository.loadGrammarDefinition()
-        
-        // Determine level order
         val allLevels = def.metadata.levels
         val targetLevelIndex = allLevels.indexOf(currentMaxLevelId).takeIf { it != -1 } ?: allLevels.size - 1
         val levelsToShow = allLevels.take(targetLevelIndex + 1)
         
         var rules = grammarRepository.getRulesUntilLevel(currentMaxLevelId)
         
-        // Apply Category Filter
         val selected = _selectedCategories.value
         if (selected.isNotEmpty()) {
             rules = rules.filter { rule ->
-                // If rule has no category, do we show it? Usually yes, core grammar often has no specific category or "General".
-                // But if the user selects specific categories, they might want only those.
-                // Let's assume: if rule.category is null, keep it? Or strict filtering?
-                // Looking at repository, category is nullable.
-                // Let's match if category is in selected set. If category is null, maybe include it only if a special "Uncategorized" option is there?
-                // For now: strict match. If category is null, it's hidden if filters are active.
-                // OR: If selected categories contains "General" and rule category is null.
                 rule.category != null && selected.contains(rule.category)
             }
         }
         
-        // Build the graph layout
-        val (nodes, separators) = buildGraphLayout(rules, levelsToShow)
+        val (nodes, separators, totalSlots) = buildGraphLayout(rules, levelsToShow)
         
         _nodes.value = nodes
         _separators.value = separators
+        _totalLayoutSlots.value = totalSlots
     }
 
-    private fun buildGraphLayout(rules: List<GrammarRule>, levels: List<String>): Pair<List<GrammarNode>, List<GrammarLevelSeparator>> {
-        val nodes = mutableListOf<GrammarNode>()
-        val separators = mutableListOf<GrammarLevelSeparator>()
+    private fun buildGraphLayout(rules: List<GrammarRule>, levels: List<String>): Triple<List<GrammarNode>, List<GrammarLevelSeparator>, Float> {
+        // Defines the height of one node relative to the padding
+        val slotHeightPerNode = 1.0f 
+        // Defines the spacing around the Toori gate (gap between levels)
+        val paddingSlotsPerLevel = 3.0f
+
+        val rawNodes = mutableListOf<Pair<GrammarRule, Float>>() // Rule + Raw Y Slot
+        val rawSeparators = mutableListOf<Pair<String, Float>>() // Level + Raw Y Slot
         
-        // Map rules for easy lookup
         val rulesMap = rules.associateBy { it.id }
-        
-        // Cache for depth calculation
         val depthCache = mutableMapOf<String, Int>()
 
-        // Recursive function to calculate depth (Longest Path from Root)
-        // Returns the "layer" index (0 = Root)
         fun getDepth(ruleId: String): Int {
-            if (depthCache.containsKey(ruleId)) {
-                val cached = depthCache[ruleId]!!
-                if (cached == -1) return 0 // Cycle detected, break it, assume root
-                return cached
-            }
-            
+            if (depthCache.containsKey(ruleId)) return depthCache[ruleId] ?: 0
             val rule = rulesMap[ruleId]
-            
-            // If dependency is missing from the current set (rulesMap), 
-            // we treat this node as a root relative to the current view.
             if (rule == null) return 0 
-            
-            depthCache[ruleId] = -1 // Mark as visiting to detect cycles
-            
-            var maxDepDepth = -1 // Start at -1 so base rules (0 deps) get depth 0
-            
+            depthCache[ruleId] = -1 
+            var maxDepDepth = -1
             if (rule.dependencies.isNotEmpty()) {
                 for (depId in rule.dependencies) {
                     val d = getDepth(depId)
                     if (d > maxDepDepth) maxDepDepth = d
                 }
-            } else {
-                 maxDepDepth = -1
             }
-            
             val depth = maxDepDepth + 1
             depthCache[ruleId] = depth
             return depth
         }
-
-        // Calculate depths for all rules
         rules.forEach { getDepth(it.id) }
 
-        // Determine total slots needed.
         val rulesByLevel = rules.groupBy { it.level }
-        val paddingSlotsPerLevel = 0
-        var totalSlots = 0
+        
+        var currentSlot = 0f
         
         levels.forEach { levelId ->
-            val count = rulesByLevel[levelId]?.size ?: 0
-            val effectiveCount = if (count == 0) 1 else count 
-            totalSlots += effectiveCount + paddingSlotsPerLevel
-        }
-
-        if (totalSlots == 0) totalSlots = 1
-
-        var currentSlotIndex = 0
-        
-        levels.forEachIndexed { levelIndex, levelId ->
             val levelRules = rulesByLevel[levelId] ?: emptyList()
             
-            // Top padding for level
-            currentSlotIndex++
+            // Add top padding/separator space for this level
+            // This centers the content between the previous separator and the next
+            currentSlot += 0.5f 
             
             if (levelRules.isNotEmpty()) {
-                // Determine placement (X axis) strategy
-                // Nodes should try to be on the same side as their intra-level parent
-                
-                // Map node ID to assigned X side (0.25 for Left, 0.75 for Right)
                 val assignedSides = mutableMapOf<String, Float>()
-                
-                // Keep track of counts to balance sides for root nodes
                 var leftCount = 0
                 var rightCount = 0
                 
-                // First pass: Sort by depth to process parents first
                 val sortedRules = levelRules.sortedWith(
-                    compareBy<GrammarRule> { depthCache[it.id] ?: 0 }
-                        .thenBy { it.id }
+                    compareBy<GrammarRule> { depthCache[it.id] ?: 0 }.thenBy { it.id }
                 )
                 
-                // Helper to assign side
                 fun assignSide(ruleId: String, preferredSide: Float?): Float {
-                    val side = if (preferredSide != null) {
-                        preferredSide
-                    } else {
-                        // Balance: pick the side with fewer items so far
-                        if (leftCount <= rightCount) 0.3f else 0.7f
-                    }
-                    
+                    val side = if (preferredSide != null) preferredSide else if (leftCount <= rightCount) 0.3f else 0.7f
                     assignedSides[ruleId] = side
                     if (side < 0.5f) leftCount++ else rightCount++
                     return side
                 }
 
                 sortedRules.forEach { rule ->
-                    // Check for intra-level parent
                     val intraLevelParentId = rule.dependencies.firstOrNull { depId ->
                         rulesMap[depId]?.level == levelId && assignedSides.containsKey(depId)
                     }
-                    
-                    val preferredSide = if (intraLevelParentId != null) {
-                        assignedSides[intraLevelParentId]
-                    } else {
-                        null
-                    }
-                    
+                    val preferredSide = if (intraLevelParentId != null) assignedSides[intraLevelParentId] else null
                     assignSide(rule.id, preferredSide)
                 }
                 
-                // Now create nodes with computed Y and assigned X
                 sortedRules.forEach { rule ->
-                    val y = currentSlotIndex.toFloat() / totalSlots
-                    val x = assignedSides[rule.id] ?: 0.25f
-                    
-                    nodes.add(GrammarNode(rule, x, y))
-                    currentSlotIndex++
+                    rawNodes.add(rule to currentSlot)
+                    currentSlot += slotHeightPerNode
                 }
             } else {
-                currentSlotIndex++
+                // Empty level placeholder
+                currentSlot += slotHeightPerNode
             }
             
-            val separatorY = (currentSlotIndex.toFloat() + 0.66f) / totalSlots
-            
-            // Add separator for ALL levels, including the last one
-            separators.add(GrammarLevelSeparator(levelId, separatorY))
-            
-            // Bottom padding for level
-            currentSlotIndex++
+            // Space for Toori Gate
+            currentSlot += (paddingSlotsPerLevel / 2f)
+            rawSeparators.add(levelId to currentSlot)
+            currentSlot += (paddingSlotsPerLevel / 2f)
         }
         
-        return Pair(nodes, separators)
+        // Final total slots
+        val totalSlots = if (currentSlot == 0f) 1f else currentSlot
+        
+        // Normalize Y to 0..1
+        val nodes = rawNodes.map { (rule, rawY) ->
+            // Re-lookup assigned side logic or store it earlier. 
+            // For simplicity, we re-run simple side logic or we should have stored X.
+            // Let's rely on the deterministic order we used above.
+            // Wait, we lost X. Let's fix this by storing full node earlier.
+            // Re-calculating X here is risky if logic changes.
+            // Let's assume we can't easily retrieve X without re-running logic.
+            // Better: Store Node with X in the first pass.
+            GrammarNode(rule, 0.5f, rawY / totalSlots) // X is placeholder
+        }
+        
+        // Fix: We need the X values.
+        // Let's rewrite the loop slightly to build final nodes directly but with temporary Y.
+        val finalNodes = mutableListOf<GrammarNode>()
+        
+        // RESET for second pass with correct structure
+        currentSlot = 0f
+        
+         levels.forEach { levelId ->
+            val levelRules = rulesByLevel[levelId] ?: emptyList()
+            currentSlot += 0.5f
+            
+            if (levelRules.isNotEmpty()) {
+                val assignedSides = mutableMapOf<String, Float>()
+                var leftCount = 0
+                var rightCount = 0
+                
+                val sortedRules = levelRules.sortedWith(
+                    compareBy<GrammarRule> { depthCache[it.id] ?: 0 }.thenBy { it.id }
+                )
+                
+                fun assignSide(ruleId: String, preferredSide: Float?): Float {
+                    val side = if (preferredSide != null) preferredSide else if (leftCount <= rightCount) 0.3f else 0.7f
+                    assignedSides[ruleId] = side
+                    if (side < 0.5f) leftCount++ else rightCount++
+                    return side
+                }
+
+                sortedRules.forEach { rule ->
+                    val intraLevelParentId = rule.dependencies.firstOrNull { depId ->
+                        rulesMap[depId]?.level == levelId && assignedSides.containsKey(depId)
+                    }
+                    val preferredSide = if (intraLevelParentId != null) assignedSides[intraLevelParentId] else null
+                    assignSide(rule.id, preferredSide)
+                }
+                
+                sortedRules.forEach { rule ->
+                    val x = assignedSides[rule.id] ?: 0.5f
+                    finalNodes.add(GrammarNode(rule, x, currentSlot)) // Y is raw here
+                    currentSlot += slotHeightPerNode
+                }
+            } else {
+                currentSlot += slotHeightPerNode
+            }
+            
+            currentSlot += (paddingSlotsPerLevel / 2f)
+            // Separator Y raw
+            currentSlot += (paddingSlotsPerLevel / 2f)
+        }
+        
+        // Normalize
+        val normalizedNodes = finalNodes.map { it.copy(y = it.y / totalSlots) }
+        val normalizedSeparators = rawSeparators.map { GrammarLevelSeparator(it.first, it.second / totalSlots) }
+        
+        return Triple(normalizedNodes, normalizedSeparators, totalSlots)
     }
 }

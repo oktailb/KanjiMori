@@ -77,6 +77,7 @@ fun GrammarScreen(
     val nodes by viewModel.nodes.collectAsState()
     val separators by viewModel.separators.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+    val totalSlots by viewModel.totalLayoutSlots.collectAsState()
     
     val availableCategories by viewModel.availableCategories.collectAsState()
     val selectedCategories by viewModel.selectedCategories.collectAsState()
@@ -92,38 +93,7 @@ fun GrammarScreen(
     val currentLevelTitle by remember {
         derivedStateOf {
             if (separators.isEmpty()) return@derivedStateOf ""
-            
-            // Calculate relative scroll position (0.0 to 1.0)
-            // Note: scrollState.maxValue is (contentHeight - viewportHeight)
-            // But our separator.y is relative to the FULL contentHeight.
-            // So we need to estimate the viewport height relative to full height to get accurate center.
-            // A simple approximation is checking if we passed the separator.
-            
-            // If scroll is at 0, we are at top.
-            // We want to know which 'gap' between separators we are in.
-            
-            val totalScrollRange = scrollState.maxValue
-            if (totalScrollRange == 0) return@derivedStateOf separators.firstOrNull()?.levelId ?: ""
-            
-            // Current pixel offset
-            val currentScroll = scrollState.value
-            
-            // We need the total height in pixels to convert separator.y (0..1) to pixels.
-            // The canvas height calculation is dynamic inside BoxWithConstraints, so we don't strictly know it here easily without moving logic up.
-            // However, we can inverse logic: 
-            // The scroll percentage roughly tracks the progress.
-            
-            // Let's assume the user is looking at the top-middle of the screen.
-            // But wait, we can't easily access the pixel height here.
-            
-            // Let's pass the height out or recalculate it? 
-            // Simpler: The separators are sorted by Y.
-            // The first separator with y * height > (scroll + viewport/2) is likely the one we are "in" or approaching.
-            // But we don't have height.
-            
-            // Fallback: Just show the first level if list empty, else try to update from inside BoxWithConstraints if possible?
-            // Actually, we can move the level detection inside BoxWithConstraints and lift the state up.
-            ""
+            "" // Placeholder, logic is handled inside BoxWithConstraints
         }
     }
     
@@ -146,22 +116,24 @@ fun GrammarScreen(
                             .padding(paddingValues)
                             .verticalScroll(scrollState)
                     ) {
-                        val estimatedHeight = (nodes.size * 60).dp + (separators.size * 1550).dp + 2300.dp
-                        val minCanvasHeight = 2000.dp
-                        val canvasHeight = max(minCanvasHeight, estimatedHeight)
+                        // HEIGHT CALCULATION FIX:
+                        // Use totalSlots from ViewModel to determine exact height.
+                        // Each slot is, for example, 100.dp (height of one node + minimal padding).
+                        // Adjust 'heightPerSlot' to control vertical density globally.
+                        val heightPerSlot = 80.dp
+                        val calculatedHeight = (totalSlots * heightPerSlot.value).dp + 200.dp // Add buffer for bottom
+                        
+                        val minCanvasHeight = 1000.dp
+                        val canvasHeight = max(minCanvasHeight, calculatedHeight)
                         val canvasHeightPx = with(density) { canvasHeight.toPx() }
                         
                         val canvasWidth = maxWidth
                         
                         // Update detected level
-                        // We do this as a side effect of composition/layout
                         val scrollY = scrollState.value
                         val viewportHeight = with(density) { maxHeight.toPx() }
-                        val centerViewY = scrollY + (viewportHeight / 3) // Look at top third
+                        val centerViewY = scrollY + (viewportHeight / 3) 
                         
-                        // Find the separator that defines the current section.
-                        // Separators are at the BOTTOM of a level section.
-                        // So the first separator whose Y is > centerViewY defines the current level.
                         val currentSep = separators.firstOrNull { (it.y * canvasHeightPx) > centerViewY } 
                                          ?: separators.lastOrNull()
                         
@@ -466,12 +438,16 @@ fun GrammarScreen(
                                 modifier = Modifier.fillMaxSize(),
                                 contentAlignment = Alignment.TopCenter
                             ) {
-                                 val stoneWidth = 48.dp
+                                 val stoneWidth = 24.dp
+                                 // Repeat stone path based on actual height
                                  Column(
                                      modifier = Modifier.width(stoneWidth)
                                  ) {
-                                     val repeatCount = estimatedHeight.value.toFloat() / 700.0
-                                     repeat(repeatCount.toInt()) {
+                                     // Estimate count based on fixed pixel height if possible, or just arbitrary large number
+                                     // Since we know calculatedHeight, we can be more precise if we knew image height.
+                                     // Assuming ~50dp per stone for example
+                                     val repeatCount = (calculatedHeight.value / 40).toInt() + 10
+                                     repeat(repeatCount) {
                                          Image(
                                              painter = stonePathPainter,
                                              contentDescription = null,
@@ -499,7 +475,7 @@ fun GrammarScreen(
                                     // The Gate and Text
                                     Column(
                                         horizontalAlignment = Alignment.CenterHorizontally,
-                                        modifier = Modifier.offset(y = (-150).dp)
+                                        modifier = Modifier.offset(y = (-180).dp)
                                     ) {
                                         Image(
                                             painter = painterResource(Res.drawable.toori),
