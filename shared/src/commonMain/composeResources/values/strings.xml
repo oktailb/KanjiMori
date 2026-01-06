@@ -69,8 +69,8 @@
     <string name="activity_type_recognition">Reconnaissance de caractères</string>
     <string name="activity_type_reading">Lecture et prononciation</string>
     <string name="activity_type_writing">Écriture et tracé</string>
-    <string name="activity_type_grammar">Grammaire et structure</string>
-    <string name="activity_type_games">Jeux et défis interactifs</string>
+    <string name="activity_type_grammar">Grammaire</string>
+    <string name="activity_type_games">Jeux et défis</string>
 
     <!-- Game Recap Screen -->
     <string name="game_recap_title">Jeu de reconnaissance</string>

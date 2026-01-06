@@ -9,18 +9,21 @@
     {
       "id": "verb_dict_form",
       "description":  "verb_dict_form_desc",
+      "category": "conjugaison",
       "level": "n5",
       "dependencies": []
     },
     {
       "id": "base_verbale",
       "description":  "base_verbale_desc",
+      "category": "conjugaison",
       "level": "n5",
       "dependencies": ["verb_dict_form"]
     },
     {
       "id": "forme_nai",
       "description":  "forme_nai_desc",
+      "category": "conjugaison",
       "level": "n5",
       "dependencies": ["verb_dict_form"]
     },

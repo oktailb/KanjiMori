@@ -64,19 +64,24 @@ class GrammarViewModel(
         // Cache for depth calculation
         val depthCache = mutableMapOf<String, Int>()
 
-        // Recursive function to calculate depth
+        // Recursive function to calculate depth (Longest Path from Root)
+        // Returns the "layer" index (0 = Root)
         fun getDepth(ruleId: String): Int {
             if (depthCache.containsKey(ruleId)) {
                 val cached = depthCache[ruleId]!!
-                if (cached == -1) return 0 // Cycle detected, break it
+                if (cached == -1) return 0 // Cycle detected, break it, assume root
                 return cached
             }
             
-            val rule = rulesMap[ruleId] ?: return 0 // Dependency not found in current set, assume base
+            val rule = rulesMap[ruleId]
             
-            depthCache[ruleId] = -1 // Mark as visiting
+            // If dependency is missing from the current set (rulesMap), 
+            // we treat this node as a root relative to the current view.
+            if (rule == null) return 0 
             
-            var maxDepDepth = -1 // Start at -1 so base rules (0 deps) get depth 0 (max(-1) + 1 = 0)
+            depthCache[ruleId] = -1 // Mark as visiting to detect cycles
+            
+            var maxDepDepth = -1 // Start at -1 so base rules (0 deps) get depth 0
             
             if (rule.dependencies.isNotEmpty()) {
                 for (depId in rule.dependencies) {
@@ -84,7 +89,6 @@ class GrammarViewModel(
                     if (d > maxDepDepth) maxDepDepth = d
                 }
             } else {
-                 // Base rule within this set
                  maxDepDepth = -1
             }
             
@@ -93,22 +97,16 @@ class GrammarViewModel(
             return depth
         }
 
-        // Pre-calculate depths to ensure correct ordering (parents before children)
+        // Calculate depths for all rules
         rules.forEach { getDepth(it.id) }
 
-        // --- ZIGZAG VERTICAL LAYOUT STRATEGY ---
-        
-        // 1. Determine total slots needed.
-        // Each rule takes 1 slot.
-        // Each level adds some padding/separator space (e.g. equivalent to 2 slots).
-        
+        // Determine total slots needed.
         val rulesByLevel = rules.groupBy { it.level }
         val paddingSlotsPerLevel = 2
         var totalSlots = 0
         
         levels.forEach { levelId ->
             val count = rulesByLevel[levelId]?.size ?: 0
-            // Ensure at least some space for empty levels
             val effectiveCount = if (count == 0) 1 else count 
             totalSlots += effectiveCount + paddingSlotsPerLevel
         }
@@ -120,46 +118,73 @@ class GrammarViewModel(
         levels.forEachIndexed { levelIndex, levelId ->
             val levelRules = rulesByLevel[levelId] ?: emptyList()
             
-            // Add top padding for the level (1 slot)
+            // Top padding for level
             currentSlotIndex++
             
             if (levelRules.isNotEmpty()) {
-                // Sort rules:
-                // Primary: Depth (so dependencies appear above)
-                // Secondary: Alphabetical (for consistency)
+                // Determine placement (X axis) strategy
+                // Nodes should try to be on the same side as their intra-level parent
+                
+                // Map node ID to assigned X side (0.25 for Left, 0.75 for Right)
+                val assignedSides = mutableMapOf<String, Float>()
+                
+                // Keep track of counts to balance sides for root nodes
+                var leftCount = 0
+                var rightCount = 0
+                
+                // First pass: Sort by depth to process parents first
                 val sortedRules = levelRules.sortedWith(
                     compareBy<GrammarRule> { depthCache[it.id] ?: 0 }
                         .thenBy { it.id }
                 )
                 
-                sortedRules.forEachIndexed { ruleIndex, rule ->
-                    val y = currentSlotIndex.toFloat() / totalSlots
+                // Helper to assign side
+                fun assignSide(ruleId: String, preferredSide: Float?): Float {
+                    val side = if (preferredSide != null) {
+                        preferredSide
+                    } else {
+                        // Balance: pick the side with fewer items so far
+                        if (leftCount <= rightCount) 0.25f else 0.75f
+                    }
                     
-                    // X Alternation: 0.25 (Left) vs 0.75 (Right)
-                    // We reset the pattern per level or keep it continuous? 
-                    // Keeping it continuous within the level looks nice.
-                    val x = if (ruleIndex % 2 == 0) 0.25f else 0.75f
+                    assignedSides[ruleId] = side
+                    if (side < 0.5f) leftCount++ else rightCount++
+                    return side
+                }
+
+                sortedRules.forEach { rule ->
+                    // Check for intra-level parent
+                    val intraLevelParentId = rule.dependencies.firstOrNull { depId ->
+                        rulesMap[depId]?.level == levelId && assignedSides.containsKey(depId)
+                    }
+                    
+                    val preferredSide = if (intraLevelParentId != null) {
+                        assignedSides[intraLevelParentId]
+                    } else {
+                        null
+                    }
+                    
+                    assignSide(rule.id, preferredSide)
+                }
+                
+                // Now create nodes with computed Y and assigned X
+                sortedRules.forEach { rule ->
+                    val y = currentSlotIndex.toFloat() / totalSlots
+                    val x = assignedSides[rule.id] ?: 0.25f
                     
                     nodes.add(GrammarNode(rule, x, y))
-                    
-                    // Move to next slot
                     currentSlotIndex++
                 }
             } else {
-                // Empty level placeholder space
                 currentSlotIndex++
             }
             
-            // Separator takes a slot (or is placed at the current gap)
             val separatorY = (currentSlotIndex.toFloat() + 0.5f) / totalSlots
             
-            // Add separator (except maybe the very last one if strictly at bottom, 
-            // but for "levels passed" visualization, having one after each completed level is good)
-            if (levelIndex < levels.size - 1) {
-                separators.add(GrammarLevelSeparator(levelId, separatorY))
-            }
+            // Add separator for ALL levels, including the last one
+            separators.add(GrammarLevelSeparator(levelId, separatorY))
             
-            // Add bottom padding for the level (consume the slot we used for calculation)
+            // Bottom padding for level
             currentSlotIndex++
         }
         
