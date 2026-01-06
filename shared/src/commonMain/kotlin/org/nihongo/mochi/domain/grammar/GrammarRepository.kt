@@ -42,6 +42,10 @@ class GrammarRepository(
         return grammarDefinition!!
     }
 
+    suspend fun getCategories(): List<String> {
+        return loadGrammarDefinition().metadata.categories
+    }
+
     suspend fun getRulesUntilLevel(maxLevelId: String): List<GrammarRule> {
         val def = loadGrammarDefinition()
         val allRules = def.dependencies_basics + def.rules

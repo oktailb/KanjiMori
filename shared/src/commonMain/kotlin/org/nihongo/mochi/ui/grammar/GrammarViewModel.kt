@@ -33,25 +33,85 @@ class GrammarViewModel(
     private val _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
+    private val _availableCategories = MutableStateFlow<List<String>>(emptyList())
+    val availableCategories: StateFlow<List<String>> = _availableCategories.asStateFlow()
+
+    private val _selectedCategories = MutableStateFlow<Set<String>>(emptySet())
+    val selectedCategories: StateFlow<Set<String>> = _selectedCategories.asStateFlow()
+
+    private var currentMaxLevelId: String = "N5" // Default fallback
+
     fun loadGraph(maxLevelId: String) {
+        currentMaxLevelId = maxLevelId
         viewModelScope.launch {
             _isLoading.value = true
-            val def = grammarRepository.loadGrammarDefinition()
             
-            // Determine level order
-            val allLevels = def.metadata.levels
-            val targetLevelIndex = allLevels.indexOf(maxLevelId).takeIf { it != -1 } ?: allLevels.size - 1
-            val levelsToShow = allLevels.take(targetLevelIndex + 1)
-            
-            val rules = grammarRepository.getRulesUntilLevel(maxLevelId)
-            
-            // Build the graph layout
-            val (nodes, separators) = buildGraphLayout(rules, levelsToShow)
-            
-            _nodes.value = nodes
-            _separators.value = separators
+            // Load available categories if not loaded
+            if (_availableCategories.value.isEmpty()) {
+                val categories = grammarRepository.getCategories()
+                _availableCategories.value = categories
+                // By default, select all categories? Or none means all? 
+                // Let's say empty set means "All" for easier logic, or we initialize with all.
+                // User asked for "filter to select categories". Usually starts with all.
+                // Let's keep it empty initially and treat empty as "Show All" or initialize with all.
+                // Let's treat empty as "Show All" to avoid issues if categories change.
+            }
+
+            refreshGraph()
             _isLoading.value = false
         }
+    }
+
+    fun toggleCategory(category: String) {
+        val current = _selectedCategories.value.toMutableSet()
+        if (current.contains(category)) {
+            current.remove(category)
+        } else {
+            current.add(category)
+        }
+        _selectedCategories.value = current
+        viewModelScope.launch {
+            refreshGraph()
+        }
+    }
+    
+    fun setCategories(categories: Set<String>) {
+        _selectedCategories.value = categories
+        viewModelScope.launch {
+            refreshGraph()
+        }
+    }
+
+    private suspend fun refreshGraph() {
+        val def = grammarRepository.loadGrammarDefinition()
+        
+        // Determine level order
+        val allLevels = def.metadata.levels
+        val targetLevelIndex = allLevels.indexOf(currentMaxLevelId).takeIf { it != -1 } ?: allLevels.size - 1
+        val levelsToShow = allLevels.take(targetLevelIndex + 1)
+        
+        var rules = grammarRepository.getRulesUntilLevel(currentMaxLevelId)
+        
+        // Apply Category Filter
+        val selected = _selectedCategories.value
+        if (selected.isNotEmpty()) {
+            rules = rules.filter { rule ->
+                // If rule has no category, do we show it? Usually yes, core grammar often has no specific category or "General".
+                // But if the user selects specific categories, they might want only those.
+                // Let's assume: if rule.category is null, keep it? Or strict filtering?
+                // Looking at repository, category is nullable.
+                // Let's match if category is in selected set. If category is null, maybe include it only if a special "Uncategorized" option is there?
+                // For now: strict match. If category is null, it's hidden if filters are active.
+                // OR: If selected categories contains "General" and rule category is null.
+                rule.category != null && selected.contains(rule.category)
+            }
+        }
+        
+        // Build the graph layout
+        val (nodes, separators) = buildGraphLayout(rules, levelsToShow)
+        
+        _nodes.value = nodes
+        _separators.value = separators
     }
 
     private fun buildGraphLayout(rules: List<GrammarRule>, levels: List<String>): Pair<List<GrammarNode>, List<GrammarLevelSeparator>> {
