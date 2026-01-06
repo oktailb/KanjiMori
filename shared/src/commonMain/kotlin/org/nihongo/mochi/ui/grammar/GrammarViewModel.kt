@@ -162,7 +162,7 @@ class GrammarViewModel(
 
         // Determine total slots needed.
         val rulesByLevel = rules.groupBy { it.level }
-        val paddingSlotsPerLevel = 32
+        val paddingSlotsPerLevel = 0
         var totalSlots = 0
         
         levels.forEach { levelId ->

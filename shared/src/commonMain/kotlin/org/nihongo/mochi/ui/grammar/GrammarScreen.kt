@@ -146,7 +146,7 @@ fun GrammarScreen(
                             .padding(paddingValues)
                             .verticalScroll(scrollState)
                     ) {
-                        val estimatedHeight = (nodes.size * 100).dp + (separators.size * 350).dp + 2300.dp
+                        val estimatedHeight = (nodes.size * 60).dp + (separators.size * 1550).dp + 2300.dp
                         val minCanvasHeight = 2000.dp
                         val canvasHeight = max(minCanvasHeight, estimatedHeight)
                         val canvasHeightPx = with(density) { canvasHeight.toPx() }
@@ -466,7 +466,7 @@ fun GrammarScreen(
                                 modifier = Modifier.fillMaxSize(),
                                 contentAlignment = Alignment.TopCenter
                             ) {
-                                 val stoneWidth = 24.dp
+                                 val stoneWidth = 48.dp
                                  Column(
                                      modifier = Modifier.width(stoneWidth)
                                  ) {
@@ -499,7 +499,7 @@ fun GrammarScreen(
                                     // The Gate and Text
                                     Column(
                                         horizontalAlignment = Alignment.CenterHorizontally,
-                                        modifier = Modifier.offset(y = (-180).dp)
+                                        modifier = Modifier.offset(y = (-150).dp)
                                     ) {
                                         Image(
                                             painter = painterResource(Res.drawable.toori),
