@@ -1,8 +1,22 @@
 {
   "version": "1.0",
   "metadata": {
-    "levels": ["n5", "n4", "n3", "n2", "n1", "unclassified"],
-    "categories": ["verbes", "particules", "conjugaison", "expressions", "conjonctions", "adjectifs", "adverbes", "suffixes", "conditionnel", "comparaison", "keigo", "imperatif", "verbes_composes"]
+    "levels": ["n5", "n4", "n3", "n2", "unclassified"],
+    "categories": [
+      "verbes",
+      "particules",
+      "conjugaison",
+      "expressions",
+      "conjonctions",
+      "adjectifs",
+      "adverbes",
+      "suffixes",
+      "conditionnel",
+      "comparaison",
+      "keigo",
+      "imperatif",
+      "verbes_composes"
+    ]
   },
 
   "dependencies_basics": [
