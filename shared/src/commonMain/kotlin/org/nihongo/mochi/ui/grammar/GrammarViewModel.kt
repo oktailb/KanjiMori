@@ -102,7 +102,7 @@ class GrammarViewModel(
 
         // Determine total slots needed.
         val rulesByLevel = rules.groupBy { it.level }
-        val paddingSlotsPerLevel = 2
+        val paddingSlotsPerLevel = 32
         var totalSlots = 0
         
         levels.forEach { levelId ->
@@ -110,7 +110,7 @@ class GrammarViewModel(
             val effectiveCount = if (count == 0) 1 else count 
             totalSlots += effectiveCount + paddingSlotsPerLevel
         }
-        
+
         if (totalSlots == 0) totalSlots = 1
 
         var currentSlotIndex = 0
@@ -144,7 +144,7 @@ class GrammarViewModel(
                         preferredSide
                     } else {
                         // Balance: pick the side with fewer items so far
-                        if (leftCount <= rightCount) 0.25f else 0.75f
+                        if (leftCount <= rightCount) 0.3f else 0.7f
                     }
                     
                     assignedSides[ruleId] = side
@@ -179,7 +179,7 @@ class GrammarViewModel(
                 currentSlotIndex++
             }
             
-            val separatorY = (currentSlotIndex.toFloat() + 0.5f) / totalSlots
+            val separatorY = (currentSlotIndex.toFloat() + 0.66f) / totalSlots
             
             // Add separator for ALL levels, including the last one
             separators.add(GrammarLevelSeparator(levelId, separatorY))

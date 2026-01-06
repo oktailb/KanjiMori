@@ -28,6 +28,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -35,17 +36,24 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.sp
+import org.jetbrains.compose.resources.imageResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.nihongo.mochi.presentation.MochiBackground
 import org.nihongo.mochi.shared.generated.resources.Res
+import org.nihongo.mochi.shared.generated.resources.stonepath
 import org.nihongo.mochi.shared.generated.resources.toori
 import org.nihongo.mochi.ui.ResourceUtils
 import kotlin.math.abs
+import kotlin.math.ceil
 import kotlin.math.min
+import kotlin.math.max
+import kotlin.math.roundToInt
 import kotlin.math.sign
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -60,6 +68,20 @@ fun GrammarScreen(
     
     val scrollState = rememberScrollState()
     val density = LocalDensity.current
+
+    val stonePathBitmap = remember { 
+        // We can't synchronously load resources inside composable easily without a loader
+        // But for KMP/Compose Multiplatform 'painterResource' returns a Painter. 
+        // For drawing on Canvas we prefer ImageBitmap.
+        // Let's use a simpler approach: Draw the path using a loop of Image composables in a Box BEHIND the canvas content?
+        // Or better: Use 'painterResource' inside a draw scope if possible? No.
+        // We will use 'imageResource' which is a suspend function, usually loaded via LaunchedEffect or produceState.
+        // For simplicity and stability, let's just use a Box with repeated Images in the background layer (Z-order).
+        null
+    }
+    
+    // We'll use a separate Composable for the background path to handle resource loading cleanly
+    val stonePathPainter = painterResource(Res.drawable.stonepath)
 
     Scaffold(
         // No TopBar
@@ -76,7 +98,7 @@ fun GrammarScreen(
                         .padding(paddingValues)
                         .verticalScroll(scrollState)
                 ) {
-                    val estimatedHeight = (nodes.size * 120).dp + (separators.size * 250).dp + 300.dp
+                    val estimatedHeight = (nodes.size * 100).dp + (separators.size * 350).dp + 2300.dp
                     val minCanvasHeight = 2000.dp
                     val canvasHeight = max(minCanvasHeight, estimatedHeight)
                     
@@ -84,6 +106,65 @@ fun GrammarScreen(
                     
                     val nodesById = remember(nodes) { nodes.associateBy { it.rule.id } }
                     val nodesByLevel = remember(nodes) { nodes.groupBy { it.rule.level } }
+                    
+                    // Pre-calculate Outer Tracks (X-Offsets) to prevent overlapping vertical lines
+                    // Key: Pair(ParentId, ChildId) -> TrackIndex
+                    val outerConnectionTracks = remember(nodes) {
+                        data class ConnInfo(
+                            val key: Pair<String, String>, 
+                            val minY: Float, 
+                            val maxY: Float,
+                            val length: Float
+                        )
+                        
+                        val tracksLeft = mutableListOf<Float>() // Stores the maxY of the last connection on this track
+                        val tracksRight = mutableListOf<Float>()
+                        val mapping = mutableMapOf<Pair<String, String>, Int>()
+                        val bufferY = 0.02f // Small vertical buffer so lines don't touch end-to-end perfectly
+
+                        // 1. Gather all intra-level same-side connections
+                        val connections = nodes.flatMap { child ->
+                            child.rule.dependencies.mapNotNull { parentId ->
+                                val parent = nodesById[parentId] ?: return@mapNotNull null
+                                if (parent.rule.level == child.rule.level) {
+                                    val isLeft = child.x < 0.5f
+                                    val isParentLeft = parent.x < 0.5f
+                                    if (isLeft == isParentLeft) {
+                                        val minY = min(parent.y, child.y)
+                                        val maxY = max(parent.y, child.y)
+                                        Triple(ConnInfo(parentId to child.rule.id, minY, maxY, maxY - minY), isLeft, minY)
+                                    } else null
+                                } else null
+                            }
+                        }
+                        // 2. Sort by Length ASCENDING (Shortest wires inside), then by Position
+                        .sortedWith(compareBy({ it.first.length }, { it.first.minY }))
+
+                        // 3. Allocate Tracks
+                        connections.forEach { (info, isLeft, _) ->
+                            val tracks = if (isLeft) tracksLeft else tracksRight
+                            
+                            // Find the first track that is free at info.minY
+                            // A track is free if trackEnd < info.minY
+                            var allocatedTrack = -1
+                            for (i in tracks.indices) {
+                                if (tracks[i] + bufferY < info.minY) {
+                                    tracks[i] = info.maxY // Extend track
+                                    allocatedTrack = i
+                                    break
+                                }
+                            }
+                            
+                            if (allocatedTrack == -1) {
+                                // Create new track
+                                tracks.add(info.maxY)
+                                allocatedTrack = tracks.lastIndex
+                            }
+                            
+                            mapping[info.key] = allocatedTrack
+                        }
+                        mapping
+                    }
                     
                     val lineColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)
                     val separatorLineColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
@@ -93,14 +174,16 @@ fun GrammarScreen(
                     val nodeHalfWidthPx = with(density) { (nodeWidthDp / 2).toPx() }
                     // Used implicitly for visual vertical centering calculations
                     val nodeHeightPx = with(density) { nodeHeightDp.toPx() } 
-                    val centerChannelPadding = with(density) { 12.dp.toPx() }
-                    val cornerRadius = with(density) { 32.dp.toPx() }
+                    val centerChannelPadding = with(density) { 0.dp.toPx() }
+                    val cornerRadius = with(density) { 16.dp.toPx() }
+                    val trackSpacingPx = with(density) { 4.dp.toPx() }
 
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(canvasHeight)
                     ) {
+                        // LAYER 1: Links (Bottom)
                         Canvas(modifier = Modifier.fillMaxSize()) {
                             val canvasW = size.width
                             val canvasH = size.height
@@ -144,9 +227,9 @@ fun GrammarScreen(
                                     
                                     drawPath(
                                         path = path,
-                                        color = lineColor.copy(alpha = 0.2f), // Very faint
+                                        color = lineColor,
                                         style = Stroke(
-                                            width = 1.dp.toPx(),
+                                            width = 2.dp.toPx(),
                                             pathEffect = null // Solid line, no dashes
                                         )
                                     )
@@ -262,8 +345,14 @@ fun GrammarScreen(
                                                 val parentAnchorX = if (parentNode.x < 0.5f) (parentNode.x * canvasW) - nodeHalfWidthPx else (parentNode.x * canvasW) + nodeHalfWidthPx
                                                 val childAnchorX = if (node.x < 0.5f) (node.x * canvasW) - nodeHalfWidthPx else (node.x * canvasW) + nodeHalfWidthPx
                                                 
+                                                // Retrieve allocated track index
+                                                val trackIndex = outerConnectionTracks[dependencyId to node.rule.id] ?: 0
+                                                val dynamicExtra = trackIndex * trackSpacingPx
+                                                
                                                 val baseOffset = 40f
-                                                val controlOffset = if (parentNode.x < 0.5f) -baseOffset else baseOffset
+                                                val totalOffset = baseOffset + dynamicExtra
+                                                
+                                                val controlOffset = if (parentNode.x < 0.5f) -totalOffset else totalOffset
                                                 val outerChannelX = parentAnchorX + controlOffset
                                                 
                                                 path.moveTo(parentAnchorX, parentCenterY)
@@ -307,7 +396,44 @@ fun GrammarScreen(
                             }
                         }
 
-                        // Draw Separators (Toori Gates + Text)
+                        // LAYER 2: Stone Path (Above Links, Below Content)
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.TopCenter
+                        ) {
+                             // We want to tile the image vertically from top to bottom
+                             // Since we don't know the exact height of the drawable in DP easily without loading it,
+                             // we can use a Column with repeating Images. 
+                             // Assuming the drawable has a reasonable aspect ratio.
+                             // Let's fix the width to 24.dp as requested.
+                             val stoneWidth = 24.dp
+                             
+                             // We need to cover 'canvasHeight'
+                             // We can use a Column or a lazy column or a custom layout.
+                             // Simple Column is fine since canvasHeight is finite.
+                             
+                             // NOTE: Ideally we should measure the image to know how many times to repeat.
+                             // Here we will just repeat enough times to cover a large height, 
+                             // or use a Box with repeat background pattern if Modifier supported it easily in Compose.
+                             // Let's use a Column with weight/fill? No, height is explicit.
+                             
+                             Column(
+                                 modifier = Modifier.width(stoneWidth)
+                             ) {
+                                 val repeatCount = 250 // Enough to cover 2000+ dp if each stone is e.g. 50dp
+                                 repeat(repeatCount) {
+                                     Image(
+                                         painter = stonePathPainter,
+                                         contentDescription = null,
+                                         contentScale = ContentScale.FillWidth,
+                                         modifier = Modifier.fillMaxWidth(),
+                                         alpha = 0.9f
+                                     )
+                                 }
+                             }
+                        }
+
+                        // LAYER 3: Separators (Toori Gates + Text)
                         separators.forEach { separator ->
                             val yPosPx = separator.y * canvasHeight.value
                             val levelName = ResourceUtils.resolveStringResource("level_${separator.levelId}")?.let { 
@@ -320,17 +446,6 @@ fun GrammarScreen(
                                     .offset(y = (yPosPx).dp),
                                 contentAlignment = Alignment.Center
                             ) {
-                                // The Line
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(2.dp)
-                                        .background(
-                                            color = separatorLineColor,
-                                            shape = RoundedCornerShape(1.dp)
-                                        )
-                                )
-                                
                                 // The Gate and Text
                                 Column(
                                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -360,7 +475,7 @@ fun GrammarScreen(
                             }
                         }
 
-                        // Draw Nodes
+                        // LAYER 4: Nodes
                         nodes.forEach { node ->
                             val xPosPx = node.x * canvasWidth.value
                             val yPosPx = node.y * canvasHeight.value
