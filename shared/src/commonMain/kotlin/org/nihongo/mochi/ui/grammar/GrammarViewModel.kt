@@ -43,10 +43,11 @@ class GrammarViewModel(
     private val _totalLayoutSlots = MutableStateFlow(1f)
     val totalLayoutSlots: StateFlow<Float> = _totalLayoutSlots.asStateFlow()
 
-    private var currentMaxLevelId: String = "N5" // Default fallback
+    private val _currentLevelId = MutableStateFlow("N5")
+    val currentLevelId: StateFlow<String> = _currentLevelId.asStateFlow()
 
     fun loadGraph(maxLevelId: String) {
-        currentMaxLevelId = maxLevelId
+        _currentLevelId.value = maxLevelId
         viewModelScope.launch {
             _isLoading.value = true
             
@@ -81,6 +82,7 @@ class GrammarViewModel(
     }
 
     private suspend fun refreshGraph() {
+        val currentMaxLevelId = _currentLevelId.value
         val def = grammarRepository.loadGrammarDefinition()
         val allLevels = def.metadata.levels
         val targetLevelIndex = allLevels.indexOf(currentMaxLevelId).takeIf { it != -1 } ?: allLevels.size - 1
@@ -185,20 +187,7 @@ class GrammarViewModel(
         // Final total slots
         val totalSlots = if (currentSlot == 0f) 1f else currentSlot
         
-        // Normalize Y to 0..1
-        val nodes = rawNodes.map { (rule, rawY) ->
-            // Re-lookup assigned side logic or store it earlier. 
-            // For simplicity, we re-run simple side logic or we should have stored X.
-            // Let's rely on the deterministic order we used above.
-            // Wait, we lost X. Let's fix this by storing full node earlier.
-            // Re-calculating X here is risky if logic changes.
-            // Let's assume we can't easily retrieve X without re-running logic.
-            // Better: Store Node with X in the first pass.
-            GrammarNode(rule, 0.5f, rawY / totalSlots) // X is placeholder
-        }
-        
         // Fix: We need the X values.
-        // Let's rewrite the loop slightly to build final nodes directly but with temporary Y.
         val finalNodes = mutableListOf<GrammarNode>()
         
         // RESET for second pass with correct structure

@@ -3,10 +3,9 @@ La meilleure appli d apprentissage du japonais qui soit
 
 Features:
  - Grammar section with typical JLTP exercises
-  - consider grammar rues applied for each exercise
-  - propose reminders/lessons and progression depending JLPT level only
+   - consider grammar rules applied for each exercise
+   - propose reminders/lessons and progression depending JLPT level only
  - Grammar lessons and specific exercises
- - Dictionary : graph/tree view to the kanji components roots, with enlight when onyumi reading is the same (very common and usefull to remember prononciation)
  - Prévoir l'intégration "Social" (comparaison de progression) pour plus tard.
 Games:
   - Tetris : achieve words from selected level in Kana to make blocks disappear
