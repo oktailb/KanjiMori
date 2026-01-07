@@ -13,7 +13,7 @@ object ResourceUtils {
     fun resolveStringResource(key: String): StringResource? {
         // Grammar descriptions special mapping
         if (key.endsWith("_desc")) {
-            return when(key) {
+            val res = when(key) {
                 // Grammar Rules Descriptions
                 "verb_dict_form_desc" -> Res.string.verb_dict_form_desc
                 "base_verbale_desc" -> Res.string.base_verbale_desc
@@ -320,6 +320,7 @@ object ResourceUtils {
                 "zutsu_desc" -> Res.string.zutsu_desc
                 else -> null
             }
+            if (res != null) return res
         }
 
         return when(key) {
