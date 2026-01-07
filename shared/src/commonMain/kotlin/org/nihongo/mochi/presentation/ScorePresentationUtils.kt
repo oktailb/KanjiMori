@@ -1,6 +1,6 @@
 package org.nihongo.mochi.presentation
 
-import org.nihongo.mochi.data.KanjiScore
+import org.nihongo.mochi.data.LearningScore
 
 object ScorePresentationUtils {
     // ARGB constants compatible with generic Int colors
@@ -14,7 +14,7 @@ object ScorePresentationUtils {
      * @param baseColor The base color (ARGB Int) to interpolate from (usually neutral).
      * @return The calculated ARGB color.
      */
-    fun getScoreColor(score: KanjiScore, baseColor: Int): Int {
+    fun getScoreColor(score: LearningScore, baseColor: Int): Int {
         val balance = score.successes - score.failures
         val percentage = (balance.toFloat() / 10.0f).coerceIn(-1.0f, 1.0f)
 

@@ -26,6 +26,7 @@ composeBom = "2024.06.00"
 jetbrainsCompose = "1.6.11" # Compatible with Kotlin 2.0.20
 playServicesGames = "21.0.0"
 mlkitDigitalInk = "18.1.0"
+richEditor = "1.0.0-rc10" # Ajouté pour le support HTML
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -64,6 +65,9 @@ androidx-compose-material-icons-extended = { group = "androidx.compose.material"
 # Google Services
 play-services-games = { group = "com.google.android.gms", name = "play-services-games-v2", version.ref = "playServicesGames" }
 mlkit-digital-ink = { group = "com.google.mlkit", name = "digital-ink-recognition", version.ref = "mlkitDigitalInk" }
+
+# Third Party
+rich-editor = { group = "com.mohamedrejeb.richeditor", name = "richeditor-compose", version.ref = "richEditor" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

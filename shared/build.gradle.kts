@@ -43,6 +43,9 @@ kotlin {
             implementation(compose.material3)
             api(compose.components.resources)
             implementation(compose.materialIconsExtended)
+            
+            // Rich Text Editor
+            implementation(libs.rich.editor)
         }
 
         androidMain.dependencies {

@@ -27,7 +27,8 @@ object ScoreManager : ScoreRepository {
     enum class ScoreType {
         RECOGNITION, // Default, raw key
         READING,     // Prefixed with "reading_"
-        WRITING      // Prefixed with "writing_"
+        WRITING,      // Prefixed with "writing_"
+        GRAMMAR      // Prefixed with "grammar_"
     }
 
     override fun saveScore(key: String, wasCorrect: Boolean, type: ScoreType) {
@@ -83,8 +84,10 @@ object ScoreManager : ScoreRepository {
         }
     }
 
-    override fun getScore(key: String, type: ScoreType): KanjiScore {
+    override fun getScore(key: String, type: ScoreType): LearningScore {
         val actualKey = getActualKey(key, type)
+        // Ensure we return the correct type. Although getScoreInternal returns LearningScore (as KanjiScore or potentially GrammarRuleScore logic),
+        // we might want to be explicit. For now, reusing the internal logic is fine.
         return getScoreInternal(actualKey)
     }
 
@@ -107,21 +110,24 @@ object ScoreManager : ScoreRepository {
             ScoreType.RECOGNITION -> key
             ScoreType.READING -> "reading_$key"
             ScoreType.WRITING -> "writing_$key"
+            ScoreType.GRAMMAR -> "grammar_$key"
         }
     }
 
-    override fun getAllScores(type: ScoreType): Map<String, KanjiScore> {
+    override fun getAllScores(type: ScoreType): Map<String, LearningScore> {
         val prefix = when(type) {
             ScoreType.READING -> "reading_"
             ScoreType.WRITING -> "writing_"
+            ScoreType.GRAMMAR -> "grammar_"
             ScoreType.RECOGNITION -> "" 
         }
         
         return scoresSettings.keys.mapNotNull { storedKey ->
             val keyMatchesType = when (type) {
-                ScoreType.RECOGNITION -> !storedKey.startsWith("reading_") && !storedKey.startsWith("writing_")
+                ScoreType.RECOGNITION -> !storedKey.startsWith("reading_") && !storedKey.startsWith("writing_") && !storedKey.startsWith("grammar_")
                 ScoreType.READING -> storedKey.startsWith(prefix)
                 ScoreType.WRITING -> storedKey.startsWith(prefix)
+                ScoreType.GRAMMAR -> storedKey.startsWith(prefix)
             }
 
             if (keyMatchesType) {

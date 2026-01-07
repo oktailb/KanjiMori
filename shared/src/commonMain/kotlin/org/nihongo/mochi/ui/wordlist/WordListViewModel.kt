@@ -4,7 +4,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import org.nihongo.mochi.data.KanjiScore
+import org.nihongo.mochi.data.LearningScore
 import org.nihongo.mochi.data.ScoreManager
 import org.nihongo.mochi.domain.kanji.KanjiRepository
 import org.nihongo.mochi.domain.levels.LevelsRepository
@@ -27,8 +27,8 @@ class WordListViewModel(
 
     private val engine = WordListEngine(wordRepository)
 
-    private val _displayedWords = MutableStateFlow<List<Triple<WordEntry, KanjiScore, Boolean>>>(emptyList())
-    val displayedWords: StateFlow<List<Triple<WordEntry, KanjiScore, Boolean>>> = _displayedWords.asStateFlow()
+    private val _displayedWords = MutableStateFlow<List<Triple<WordEntry, LearningScore, Boolean>>>(emptyList())
+    val displayedWords: StateFlow<List<Triple<WordEntry, LearningScore, Boolean>>> = _displayedWords.asStateFlow()
 
     private val _currentPage = MutableStateFlow(0)
     val currentPage: StateFlow<Int> = _currentPage.asStateFlow()

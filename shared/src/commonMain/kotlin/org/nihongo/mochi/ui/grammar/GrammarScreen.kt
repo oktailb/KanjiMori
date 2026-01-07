@@ -24,6 +24,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -52,6 +53,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
@@ -61,10 +63,13 @@ import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.min
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
+import com.mohamedrejeb.richeditor.model.rememberRichTextState
+import com.mohamedrejeb.richeditor.ui.material3.RichText
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.nihongo.mochi.presentation.MochiBackground
+import org.nihongo.mochi.presentation.ScorePresentationUtils
 import org.nihongo.mochi.shared.generated.resources.Res
 import org.nihongo.mochi.shared.generated.resources.stonepath
 import org.nihongo.mochi.shared.generated.resources.toori
@@ -88,6 +93,7 @@ fun GrammarScreen(
     
     val availableCategories by viewModel.availableCategories.collectAsState()
     val selectedCategories by viewModel.selectedCategories.collectAsState()
+    val selectedLessonHtml by viewModel.selectedLessonHtml.collectAsState()
     
     var showFilterDialog by remember { mutableStateOf(false) }
     
@@ -368,7 +374,7 @@ fun GrammarScreen(
 
                             // LAYER 2: Stone Path
                             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
-                                 val stoneWidth = 24.dp
+                                 val stoneWidth = 48.dp
                                  Column(modifier = Modifier.width(stoneWidth)) {
                                      val repeatCount = (calculatedHeight.value / 40).toInt() + 10
                                      repeat(repeatCount) {
@@ -415,6 +421,7 @@ fun GrammarScreen(
                                 val yPos = canvasHeight * node.y
                                 GrammarNodeItem(
                                     node = node,
+                                    onLessonClick = { viewModel.onNodeClick(node) },
                                     modifier = Modifier.offset(x = xPos - 50.dp, y = yPos - 30.dp)
                                 )
                             }
@@ -457,6 +464,46 @@ fun GrammarScreen(
                              }
                         }
                     }
+                    
+                    // Lesson Dialog Overlay
+                    if (selectedLessonHtml != null) {
+                        Box(
+                            modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.5f)).clickable(enabled = false) {},
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth(0.9f)
+                                    .fillMaxSize(0.8f)
+                                    .clip(RoundedCornerShape(16.dp))
+                                    .background(MaterialTheme.colorScheme.surface)
+                                    .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(16.dp))
+                            ) {
+                                Column(modifier = Modifier.fillMaxSize()) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth().padding(8.dp),
+                                        horizontalArrangement = Arrangement.End
+                                    ) {
+                                        IconButton(onClick = { viewModel.closeLesson() }) {
+                                            Icon(Icons.Filled.Close, contentDescription = "Close")
+                                        }
+                                    }
+                                    val state = rememberRichTextState()
+                                    LaunchedEffect(selectedLessonHtml) {
+                                        state.setHtml(selectedLessonHtml ?: "")
+                                    }
+                                    
+                                    Box(modifier = Modifier.weight(1f).padding(horizontal = 16.dp).verticalScroll(rememberScrollState())) {
+                                        RichText(
+                                            state = state,
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -492,12 +539,44 @@ fun GrammarScreen(
 }
 
 @Composable
-fun GrammarNodeItem(node: GrammarNode, modifier: Modifier = Modifier) {
+fun GrammarNodeItem(node: GrammarNode, onLessonClick: () -> Unit, modifier: Modifier = Modifier) {
     val description = ResourceUtils.resolveStringResource(node.rule.description)?.let { stringResource(it) } ?: node.rule.id
+    val baseColor = MaterialTheme.colorScheme.surfaceVariant
+    val colorInt = ScorePresentationUtils.getScoreColor(node.score, baseColor.toArgb())
+    val backgroundColor = Color(colorInt)
+
+    // Note: The main box is NOT clickable to reserve it for future usage.
+    // The lesson icon is a separate clickable element overlaid on top.
+    
     Box(
-        modifier = modifier.width(100.dp).height(60.dp).background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp)).border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(8.dp)).padding(4.dp),
-        contentAlignment = Alignment.Center
+        modifier = modifier
+            .width(100.dp)
+            .height(60.dp)
+            .background(backgroundColor, RoundedCornerShape(8.dp))
+            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(8.dp))
+            .padding(4.dp)
     ) {
-        Text(text = description, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center, maxLines = 3, lineHeight = 12.sp)
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text(text = description, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center, maxLines = 3, lineHeight = 12.sp)
+        }
+        
+        if (node.hasLesson) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .offset(x = -12.dp, y = (-12.dp))
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primaryContainer)
+                    .clickable(onClick = onLessonClick)
+                    .padding(4.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Description,
+                    contentDescription = "Open Lesson",
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                    modifier = Modifier.size(16.dp)
+                )
+            }
+        }
     }
 }

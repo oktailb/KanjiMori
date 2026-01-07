@@ -44,6 +44,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -245,7 +246,7 @@ fun ActionButton(
         modifier = Modifier
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
-                indication = androidx.compose.material.ripple.rememberRipple(bounded = false),
+                indication = ripple(bounded = false),
                 onClick = onClick
             )
             .padding(8.dp)
@@ -754,4 +755,4 @@ fun androidx.compose.ui.graphics.drawscope.DrawScope.drawCurvedPath(
      )
 }
 
-fun Modifier.zIndex(zIndex: Float): Modifier = this
+fun Modifier.zIndex(zIndex: Float): Modifier = this // zIndex modifier not available in commonMain Compose yet, using no-op

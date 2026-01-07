@@ -1,5 +1,8 @@
 package org.nihongo.mochi.ui.grammar
 
+import org.nihongo.mochi.data.GrammarRuleScore
+import org.nihongo.mochi.data.LearningScore
+import org.nihongo.mochi.data.ScoreManager
 import org.nihongo.mochi.domain.grammar.GrammarRepository
 import org.nihongo.mochi.domain.grammar.GrammarRule
 import org.nihongo.mochi.presentation.ViewModel
@@ -12,6 +15,8 @@ data class GrammarNode(
     val rule: GrammarRule,
     val x: Float, // Relative X position (0.0 - 1.0)
     val y: Float, // Relative Y position (0.0 - 1.0)
+    val score: LearningScore,
+    val hasLesson: Boolean = false,
     val children: List<GrammarNode> = emptyList()
 )
 
@@ -46,6 +51,9 @@ class GrammarViewModel(
     private val _currentLevelId = MutableStateFlow("N5")
     val currentLevelId: StateFlow<String> = _currentLevelId.asStateFlow()
 
+    private val _selectedLessonHtml = MutableStateFlow<String?>(null)
+    val selectedLessonHtml: StateFlow<String?> = _selectedLessonHtml.asStateFlow()
+
     fun loadGraph(maxLevelId: String) {
         _currentLevelId.value = maxLevelId
         viewModelScope.launch {
@@ -79,6 +87,19 @@ class GrammarViewModel(
         viewModelScope.launch {
             refreshGraph()
         }
+    }
+    
+    fun onNodeClick(node: GrammarNode) {
+         if (node.hasLesson) {
+             viewModelScope.launch {
+                 val html = grammarRepository.loadLessonHtml(node.rule.id)
+                 _selectedLessonHtml.value = html
+             }
+         }
+    }
+    
+    fun closeLesson() {
+        _selectedLessonHtml.value = null
     }
 
     private suspend fun refreshGraph() {
@@ -223,7 +244,13 @@ class GrammarViewModel(
                 
                 sortedRules.forEach { rule ->
                     val x = assignedSides[rule.id] ?: 0.5f
-                    finalNodes.add(GrammarNode(rule, x, currentSlot)) // Y is raw here
+                    val rawScore = ScoreManager.getScore(rule.id, ScoreManager.ScoreType.GRAMMAR)
+                    val score = GrammarRuleScore(rawScore.successes, rawScore.failures, rawScore.lastReviewDate)
+                    // TODO: Check if lesson exists using repository/resource checker if possible, or assume all have it, or check filename list.
+                    // For now, assume true if we can implement a check. The user provided a list of files.
+                    // Let's implement a check in the Repository.
+                    val hasLesson = grammarRepository.hasLesson(rule.id)
+                    finalNodes.add(GrammarNode(rule, x, currentSlot, score, hasLesson)) 
                     currentSlot += slotHeightPerNode
                 }
             } else {
