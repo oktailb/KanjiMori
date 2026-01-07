@@ -162,13 +162,18 @@ object ScoreManager : ScoreRepository {
             if (value.isNotEmpty()) {
                 try {
                     val parts = value.split("-")
-                    var successes = parts[0].toInt()
+                    val successes = parts[0].toInt()
                     val failures = parts[1].toInt()
                     val lastDate = if (parts.size > 2) parts[2].toLong() else 0L
 
-                    if (currentTime - lastDate > ONE_WEEK_MS && successes > 0) {
-                        successes /= 2
-                        scoresSettings.putString(key, "$successes-$failures-$currentTime")
+                    val weeksPassed = (currentTime - lastDate) / ONE_WEEK_MS
+
+                    if (weeksPassed >= 1 && successes > 0) {
+                        // Benevolent Decay: 10% per week, max 50% total
+                        val decayPercent = (weeksPassed * 0.10).coerceAtMost(0.50)
+                        val newSuccesses = (successes * (1.0 - decayPercent)).toInt()
+                        
+                        scoresSettings.putString(key, "$newSuccesses-$failures-$currentTime")
                         anyScoreDecayed = true
                     }
                 } catch (_: Exception) {
