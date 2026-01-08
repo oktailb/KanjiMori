@@ -1,5 +1,6 @@
 package org.nihongo.mochi.ui.settings
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -46,6 +47,11 @@ class SettingsFragment : Fragment() {
     }
 
     private fun changeLocale(localeCode: String) {
+        // Force synchronous commit to SharedPreferences for Android < 13 compatibility
+        // This ensures attachBaseContext reads the correct new value immediately after restart
+        val prefs = requireContext().getSharedPreferences("AppSettings", Context.MODE_PRIVATE)
+        prefs.edit().putString("AppLocale", localeCode).commit()
+
         val localeTag = localeCode.replace('_', '-')
         val appLocale = LocaleListCompat.forLanguageTags(localeTag)
         AppCompatDelegate.setApplicationLocales(appLocale)

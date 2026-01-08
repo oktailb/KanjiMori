@@ -1,5 +1,6 @@
 package org.nihongo.mochi
 
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
@@ -12,16 +13,34 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.google.android.gms.games.GamesSignInClient
 import com.google.android.gms.games.PlayGames
+import com.russhwolf.settings.SharedPreferencesSettings
 import org.koin.android.ext.android.inject
 import org.nihongo.mochi.domain.settings.SettingsRepository
 import org.nihongo.mochi.workers.DecayWorker
+import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var gamesSignInClient: GamesSignInClient
     
+    // Injecting here works for onCreate, but for attachBaseContext we need manual retrieval
     private val settingsRepository: SettingsRepository by inject()
+
+    override fun attachBaseContext(newBase: Context) {
+        // Manual locale application for older Android versions (API < 33)
+        // We can't use Koin injection here yet as the context isn't fully ready or Koin might rely on it.
+        // We manually read SharedPreferences to be safe and fast.
+        val prefs = newBase.getSharedPreferences("AppSettings", Context.MODE_PRIVATE)
+        val savedLocaleCode = prefs.getString("AppLocale", "en_GB") ?: "en_GB"
+        val localeTag = savedLocaleCode.replace('_', '-')
+        
+        val localeList = LocaleListCompat.forLanguageTags(localeTag)
+        // This helps AppCompatDelegate know what we want before it restores state
+        AppCompatDelegate.setApplicationLocales(localeList)
+        
+        super.attachBaseContext(newBase)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,7 +58,7 @@ class MainActivity : AppCompatActivity() {
             AppCompatDelegate.setDefaultNightMode(nightMode)
         }
         
-        // Apply stored locale from SettingsRepository
+        // Redundant check but good for runtime changes while app is open
         val savedLocale = settingsRepository.getAppLocale()
         val localeTag = savedLocale.replace('_', '-')
         
