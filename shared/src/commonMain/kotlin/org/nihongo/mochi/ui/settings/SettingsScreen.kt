@@ -155,12 +155,12 @@ fun SettingsScreen(
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
                 )
-                Row {
+                Column {
                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clickable { viewModel.onPronunciationChanged("Roman") }) {
                         RadioButton(selected = uiState.pronunciation == "Roman", onClick = { viewModel.onPronunciationChanged("Roman") })
                         Text(stringResource(Res.string.settings_pronunciation_roman), color = MaterialTheme.colorScheme.onSurface)
                     }
-                    Spacer(Modifier.width(16.dp))
+                    Spacer(Modifier.height(8.dp))
                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clickable { viewModel.onPronunciationChanged("Hiragana") }) {
                         RadioButton(selected = uiState.pronunciation == "Hiragana", onClick = { viewModel.onPronunciationChanged("Hiragana") })
                         Text(stringResource(Res.string.settings_pronunciation_hiragana), color = MaterialTheme.colorScheme.onSurface)
