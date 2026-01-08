@@ -94,6 +94,7 @@ fun GrammarScreen(
     val availableCategories by viewModel.availableCategories.collectAsState()
     val selectedCategories by viewModel.selectedCategories.collectAsState()
     val selectedLessonHtml by viewModel.selectedLessonHtml.collectAsState()
+    val selectedLessonTitle by viewModel.selectedLessonTitle.collectAsState()
     
     var showFilterDialog by remember { mutableStateOf(false) }
     
@@ -480,14 +481,29 @@ fun GrammarScreen(
                                     .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(16.dp))
                             ) {
                                 Column(modifier = Modifier.fillMaxSize()) {
+                                    // Header with Title and Close button
                                     Row(
-                                        modifier = Modifier.fillMaxWidth().padding(8.dp),
-                                        horizontalArrangement = Arrangement.End
+                                        modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.primaryContainer).padding(16.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
                                     ) {
+                                        val title = selectedLessonTitle?.let { key -> 
+                                            ResourceUtils.resolveStringResource(key)?.let { stringResource(it) } ?: key 
+                                        } ?: "Lesson"
+                                        
+                                        Text(
+                                            text = title,
+                                            style = MaterialTheme.typography.titleLarge,
+                                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                            fontWeight = FontWeight.Bold,
+                                            modifier = Modifier.weight(1f)
+                                        )
+                                        
                                         IconButton(onClick = { viewModel.closeLesson() }) {
-                                            Icon(Icons.Filled.Close, contentDescription = "Close")
+                                            Icon(Icons.Filled.Close, contentDescription = "Close", tint = MaterialTheme.colorScheme.onPrimaryContainer)
                                         }
                                     }
+                                    
                                     val state = rememberRichTextState()
                                     LaunchedEffect(selectedLessonHtml) {
                                         state.setHtml(selectedLessonHtml ?: "")
@@ -497,7 +513,8 @@ fun GrammarScreen(
                                         RichText(
                                             state = state,
                                             style = MaterialTheme.typography.bodyMedium,
-                                            color = MaterialTheme.colorScheme.onSurface
+                                            color = MaterialTheme.colorScheme.onSurface,
+                                            modifier = Modifier.padding(vertical = 16.dp)
                                         )
                                     }
                                 }

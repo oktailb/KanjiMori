@@ -33,23 +33,9 @@ class GrammarRepository(
 ) {
     private val json = Json { ignoreUnknownKeys = true }
     private var grammarDefinition: GrammarDefinition? = null
-    // Cache for known lessons to avoid async check on every node render if possible, 
-    // or just use resourceLoader check if it's fast. 
-    // Since resourceLoader.loadJson is suspend, we might need a way to check existence synchronously or pre-load the list.
-    // For now, let's just attempt to load or rely on a known list if available.
-    // The user mentioned "files/grammar/lessons/". We can't easily list files in common code without a specific API.
-    // However, usually one might have a manifest or we just try to load.
-    // Given the UI needs to know 'hasLesson' upfront, we might need to know which IDs have files.
     
-    // HACK: Since we can't list files easily in KMP resource loader (usually), 
-    // let's assume if we can load it, it exists. But we need 'hasLesson' for the UI graph building which is synchronous-ish or built in ViewModel.
-    // Ideally, we'd have a list of available lessons. 
-    // Since I saw "files/grammar/lessons/" has many files, I can't hardcode them all efficiently.
-    // But wait, the previous `list_files` call showed me the file list! 
-    // I can generate a hardcoded set or index if I want, OR I can just try to load it on click.
-    // But the user asked for a BADGE. So we need to know beforehand.
-    // I will add a set of available lessons.
-    
+    // HACK: List of IDs that we know have lessons. 
+    // In a real localized setup, we should check if the file exists for the locale or fallback.
     private val availableLessons = setOf(
         "ge", "kke", "mai", "shi", "beki", "garu", "hazu", "hodo", "kiri", "koso", "muke", "muki", "nado", "naru", "noms", "noni", "ppoi", "toka",
         "ichio", "seide", "te_mo", "to_iu", "ue_de", "ue_ha", "ue_ni", "zutsu", "ato_de", "chu_ju", "darake", "hanmen", "hoshii", "ijo_ha", "kagiri",
@@ -116,15 +102,36 @@ class GrammarRepository(
     }
     
     fun hasLesson(ruleId: String): Boolean {
-        // Simple check against our hardcoded (or potentially dynamically loaded in future) list
         return availableLessons.contains(ruleId)
     }
     
-    suspend fun loadLessonHtml(ruleId: String): String {
+    suspend fun loadCss(isDark: Boolean): String {
+        val fileName = if (isDark) "styles_dark.css" else "styles_light.css"
         return try {
-            resourceLoader.loadJson("grammar/lessons/$ruleId.html")
+            resourceLoader.loadJson("grammar/lessons/$fileName")
         } catch (e: Exception) {
-            "<h1>Error loading lesson</h1><p>${e.message}</p>"
+             // Fallback CSS in case file load fails
+             if (isDark) {
+                 "body { font-family: sans-serif; padding: 16px; color: #E0E0E0; }"
+             } else {
+                 "body { font-family: sans-serif; padding: 16px; color: #333; }"
+             }
+        }
+    }
+    
+    suspend fun loadLessonHtml(ruleId: String, languageCode: String = "en"): String {
+        val localizedPath = "grammar/lessons/$languageCode/$ruleId.html"
+        val defaultPath = "grammar/lessons/$ruleId.html"
+        
+        return try {
+            resourceLoader.loadJson(localizedPath)
+        } catch (e: Exception) {
+            // Fallback to default
+            try {
+                resourceLoader.loadJson(defaultPath)
+            } catch (e2: Exception) {
+                "<h1>Error loading lesson</h1><p>Lesson not found for ID: $ruleId</p>"
+            }
         }
     }
 }

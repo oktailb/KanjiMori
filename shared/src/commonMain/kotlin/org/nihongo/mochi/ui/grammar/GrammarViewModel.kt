@@ -5,6 +5,7 @@ import org.nihongo.mochi.data.LearningScore
 import org.nihongo.mochi.data.ScoreManager
 import org.nihongo.mochi.domain.grammar.GrammarRepository
 import org.nihongo.mochi.domain.grammar.GrammarRule
+import org.nihongo.mochi.domain.settings.SettingsRepository
 import org.nihongo.mochi.presentation.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -26,7 +27,8 @@ data class GrammarLevelSeparator(
 )
 
 class GrammarViewModel(
-    private val grammarRepository: GrammarRepository
+    private val grammarRepository: GrammarRepository,
+    private val settingsRepository: SettingsRepository // Injected to get locale
 ) : ViewModel() {
 
     private val _nodes = MutableStateFlow<List<GrammarNode>>(emptyList())
@@ -44,7 +46,6 @@ class GrammarViewModel(
     private val _selectedCategories = MutableStateFlow<Set<String>>(emptySet())
     val selectedCategories: StateFlow<Set<String>> = _selectedCategories.asStateFlow()
 
-    // New: Expose the total height in "slots" to the UI for consistent scaling
     private val _totalLayoutSlots = MutableStateFlow(1f)
     val totalLayoutSlots: StateFlow<Float> = _totalLayoutSlots.asStateFlow()
 
@@ -53,6 +54,9 @@ class GrammarViewModel(
 
     private val _selectedLessonHtml = MutableStateFlow<String?>(null)
     val selectedLessonHtml: StateFlow<String?> = _selectedLessonHtml.asStateFlow()
+    
+    private val _selectedLessonTitle = MutableStateFlow<String?>(null)
+    val selectedLessonTitle: StateFlow<String?> = _selectedLessonTitle.asStateFlow()
 
     fun loadGraph(maxLevelId: String) {
         _currentLevelId.value = maxLevelId
@@ -91,15 +95,41 @@ class GrammarViewModel(
     
     fun onNodeClick(node: GrammarNode) {
          if (node.hasLesson) {
+             _selectedLessonTitle.value = node.rule.description // Use description as title
              viewModelScope.launch {
-                 val html = grammarRepository.loadLessonHtml(node.rule.id)
-                 _selectedLessonHtml.value = html
+                 // Get current locale from settings (e.g., "en_GB", "fr_FR")
+                 val locale = settingsRepository.getAppLocale()
+                 val languageCode = locale.take(2).lowercase() // "en", "fr"
+                 
+                 // Check if dark mode is active (assuming settingsRepository stores "dark" or "light")
+                 // The actual theme might be system default, but we can check the stored preference.
+                 // Ideally we should pass the actual UI state, but here we'll rely on settings.
+                 val theme = settingsRepository.getTheme()
+                 val isDark = theme == "dark" // Simple check, might need system check if "system" is an option
+                 
+                 val css = grammarRepository.loadCss(isDark)
+                 val rawHtml = grammarRepository.loadLessonHtml(node.rule.id, languageCode)
+                 _selectedLessonHtml.value = applyCommonStyle(rawHtml, css)
              }
          }
     }
     
     fun closeLesson() {
         _selectedLessonHtml.value = null
+        _selectedLessonTitle.value = null
+    }
+
+    private fun applyCommonStyle(htmlContent: String, cssContent: String): String {
+        val styleTag = "<style>\n$cssContent\n</style>"
+        
+        // Inject style into head or body
+        return if (htmlContent.contains("</head>")) {
+            htmlContent.replace("</head>", "$styleTag</head>")
+        } else if (htmlContent.contains("<body>")) {
+            htmlContent.replace("<body>", "<body>$styleTag")
+        } else {
+            "$styleTag$htmlContent"
+        }
     }
 
     private suspend fun refreshGraph() {
@@ -126,14 +156,10 @@ class GrammarViewModel(
     }
 
     private fun buildGraphLayout(rules: List<GrammarRule>, levels: List<String>): Triple<List<GrammarNode>, List<GrammarLevelSeparator>, Float> {
-        // Defines the height of one node relative to the padding
         val slotHeightPerNode = 1.0f 
-        // Defines the spacing around the Toori gate (gap between levels)
         val paddingSlotsPerLevel = 3.0f
 
-        val rawNodes = mutableListOf<Pair<GrammarRule, Float>>() // Rule + Raw Y Slot
-        val rawSeparators = mutableListOf<Pair<String, Float>>() // Level + Raw Y Slot
-        
+        val rawSeparators = mutableListOf<Pair<String, Float>>() 
         val rulesMap = rules.associateBy { it.id }
         val depthCache = mutableMapOf<String, Int>()
 
@@ -156,62 +182,24 @@ class GrammarViewModel(
         rules.forEach { getDepth(it.id) }
 
         val rulesByLevel = rules.groupBy { it.level }
-        
         var currentSlot = 0f
         
         levels.forEach { levelId ->
-            val levelRules = rulesByLevel[levelId] ?: emptyList()
-            
-            // Add top padding/separator space for this level
-            // This centers the content between the previous separator and the next
             currentSlot += 0.5f 
-            
+            val levelRules = rulesByLevel[levelId] ?: emptyList()
             if (levelRules.isNotEmpty()) {
-                val assignedSides = mutableMapOf<String, Float>()
-                var leftCount = 0
-                var rightCount = 0
-                
-                val sortedRules = levelRules.sortedWith(
-                    compareBy<GrammarRule> { depthCache[it.id] ?: 0 }.thenBy { it.id }
-                )
-                
-                fun assignSide(ruleId: String, preferredSide: Float?): Float {
-                    val side = if (preferredSide != null) preferredSide else if (leftCount <= rightCount) 0.3f else 0.7f
-                    assignedSides[ruleId] = side
-                    if (side < 0.5f) leftCount++ else rightCount++
-                    return side
-                }
-
-                sortedRules.forEach { rule ->
-                    val intraLevelParentId = rule.dependencies.firstOrNull { depId ->
-                        rulesMap[depId]?.level == levelId && assignedSides.containsKey(depId)
-                    }
-                    val preferredSide = if (intraLevelParentId != null) assignedSides[intraLevelParentId] else null
-                    assignSide(rule.id, preferredSide)
-                }
-                
-                sortedRules.forEach { rule ->
-                    rawNodes.add(rule to currentSlot)
-                    currentSlot += slotHeightPerNode
-                }
+                currentSlot += levelRules.size * slotHeightPerNode
             } else {
-                // Empty level placeholder
                 currentSlot += slotHeightPerNode
             }
-            
-            // Space for Toori Gate
             currentSlot += (paddingSlotsPerLevel / 2f)
             rawSeparators.add(levelId to currentSlot)
             currentSlot += (paddingSlotsPerLevel / 2f)
         }
         
-        // Final total slots
         val totalSlots = if (currentSlot == 0f) 1f else currentSlot
-        
-        // Fix: We need the X values.
         val finalNodes = mutableListOf<GrammarNode>()
         
-        // RESET for second pass with correct structure
         currentSlot = 0f
         
          levels.forEach { levelId ->
@@ -246,9 +234,6 @@ class GrammarViewModel(
                     val x = assignedSides[rule.id] ?: 0.5f
                     val rawScore = ScoreManager.getScore(rule.id, ScoreManager.ScoreType.GRAMMAR)
                     val score = GrammarRuleScore(rawScore.successes, rawScore.failures, rawScore.lastReviewDate)
-                    // TODO: Check if lesson exists using repository/resource checker if possible, or assume all have it, or check filename list.
-                    // For now, assume true if we can implement a check. The user provided a list of files.
-                    // Let's implement a check in the Repository.
                     val hasLesson = grammarRepository.hasLesson(rule.id)
                     finalNodes.add(GrammarNode(rule, x, currentSlot, score, hasLesson)) 
                     currentSlot += slotHeightPerNode
@@ -257,12 +242,9 @@ class GrammarViewModel(
                 currentSlot += slotHeightPerNode
             }
             
-            currentSlot += (paddingSlotsPerLevel / 2f)
-            // Separator Y raw
-            currentSlot += (paddingSlotsPerLevel / 2f)
+            currentSlot += paddingSlotsPerLevel
         }
         
-        // Normalize
         val normalizedNodes = finalNodes.map { it.copy(y = it.y / totalSlots) }
         val normalizedSeparators = rawSeparators.map { GrammarLevelSeparator(it.first, it.second / totalSlots) }
         
