@@ -23,7 +23,8 @@ data class GrammarNode(
 
 data class GrammarLevelSeparator(
     val levelId: String,
-    val y: Float
+    val y: Float,
+    val completionPercentage: Int = 0
 )
 
 class GrammarViewModel(
@@ -167,7 +168,7 @@ class GrammarViewModel(
         val slotHeightPerNode = 1.0f 
         val paddingSlotsPerLevel = 3.0f
 
-        val rawSeparators = mutableListOf<Pair<String, Float>>() 
+        val rawSeparators = mutableListOf<Triple<String, Float, Int>>() 
         val rulesMap = rules.associateBy { it.id }
         val depthCache = mutableMapOf<String, Int>()
 
@@ -195,13 +196,23 @@ class GrammarViewModel(
         levels.forEach { levelId ->
             currentSlot += 0.5f 
             val levelRules = rulesByLevel[levelId] ?: emptyList()
+            
+            // Calculate completion for this level
+            val completion = if (levelRules.isNotEmpty()) {
+                val successfulNodes = levelRules.count { rule ->
+                    val score = ScoreManager.getScore(rule.id, ScoreManager.ScoreType.GRAMMAR)
+                    (score.successes - score.failures) >= 1 // Consider "learned" if balance is positive
+                }
+                (successfulNodes * 100) / levelRules.size
+            } else 0
+
             if (levelRules.isNotEmpty()) {
                 currentSlot += levelRules.size * slotHeightPerNode
             } else {
                 currentSlot += slotHeightPerNode
             }
             currentSlot += (paddingSlotsPerLevel / 2f)
-            rawSeparators.add(levelId to currentSlot)
+            rawSeparators.add(Triple(levelId, currentSlot, completion))
             currentSlot += (paddingSlotsPerLevel / 2f)
         }
         
@@ -254,7 +265,7 @@ class GrammarViewModel(
         }
         
         val normalizedNodes = finalNodes.map { it.copy(y = it.y / totalSlots) }
-        val normalizedSeparators = rawSeparators.map { GrammarLevelSeparator(it.first, it.second / totalSlots) }
+        val normalizedSeparators = rawSeparators.map { GrammarLevelSeparator(it.first, it.second / totalSlots, it.third) }
         
         return Triple(normalizedNodes, normalizedSeparators, totalSlots)
     }

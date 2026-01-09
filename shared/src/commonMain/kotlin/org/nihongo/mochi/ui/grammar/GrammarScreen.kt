@@ -381,8 +381,11 @@ fun GrammarScreen(
                                             modifier = Modifier.size(280.dp),
                                             contentScale = ContentScale.Fit
                                         )
+                                        
+                                        val labelText = "$levelName (${separator.completionPercentage}%)"
+                                        
                                         Text(
-                                            text = levelName,
+                                            text = labelText,
                                             style = MaterialTheme.typography.titleMedium,
                                             color = MaterialTheme.colorScheme.primary,
                                             fontWeight = FontWeight.Bold,
