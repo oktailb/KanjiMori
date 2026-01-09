@@ -16,6 +16,7 @@ class ExerciseRepository(
     private val json = Json { 
         ignoreUnknownKeys = true 
         isLenient = true
+        encodeDefaults = true
     }
     
     private var cachedExercises: List<Exercise>? = null
@@ -44,40 +45,11 @@ class ExerciseRepository(
     fun parsePayload(exercise: Exercise): ExercisePayload? {
         return try {
             when (exercise.type) {
-                ExerciseType.FILL_BLANK -> {
-                    ExercisePayload.FillBlank(
-                        sentence = exercise.payload["sentence"]?.let { json.decodeFromJsonElement<String>(it) } ?: "",
-                        correct = exercise.payload["correct"]?.let { json.decodeFromJsonElement<String>(it) } ?: "",
-                        distractors = exercise.payload["distractors"]?.let { json.decodeFromJsonElement<List<String>>(it) } ?: emptyList()
-                    )
-                }
-                ExerciseType.SENTENCE_ORDER -> {
-                    ExercisePayload.SentenceOrder(
-                        prefix = exercise.payload["prefix"]?.let { json.decodeFromJsonElement<String>(it) } ?: "",
-                        suffix = exercise.payload["suffix"]?.let { json.decodeFromJsonElement<String>(it) } ?: "",
-                        blocks = exercise.payload["blocks"]?.let { json.decodeFromJsonElement<List<String>>(it) } ?: emptyList()
-                    )
-                }
-                ExerciseType.UNDERLINE_READING, ExerciseType.UNDERLINE_WRITING -> {
-                    ExercisePayload.Underline(
-                        sentence = exercise.payload["sentence"]?.let { json.decodeFromJsonElement<String>(it) } ?: "",
-                        correct = exercise.payload["correct"]?.let { json.decodeFromJsonElement<String>(it) } ?: "",
-                        distractors = exercise.payload["distractors"]?.let { json.decodeFromJsonElement<List<String>>(it) } ?: emptyList()
-                    )
-                }
-                ExerciseType.PARAPHRASE -> {
-                    ExercisePayload.Paraphrase(
-                        baseSentence = exercise.payload["base_sentence"]?.let { json.decodeFromJsonElement<String>(it) } ?: "",
-                        correct = exercise.payload["correct"]?.let { json.decodeFromJsonElement<String>(it) } ?: "",
-                        distractors = exercise.payload["distractors"]?.let { json.decodeFromJsonElement<List<String>>(it) } ?: emptyList()
-                    )
-                }
-                ExerciseType.WORD_USAGE -> {
-                    ExercisePayload.WordUsage(
-                        word = exercise.payload["word"]?.let { json.decodeFromJsonElement<String>(it) } ?: "",
-                        options = exercise.payload["options"]?.let { json.decodeFromJsonElement<List<UsageOption>>(it) } ?: emptyList()
-                    )
-                }
+                ExerciseType.FILL_BLANK -> json.decodeFromJsonElement<ExercisePayload.FillBlank>(exercise.payload)
+                ExerciseType.SENTENCE_ORDER -> json.decodeFromJsonElement<ExercisePayload.SentenceOrder>(exercise.payload)
+                ExerciseType.UNDERLINE_READING, ExerciseType.UNDERLINE_WRITING -> json.decodeFromJsonElement<ExercisePayload.Underline>(exercise.payload)
+                ExerciseType.PARAPHRASE -> json.decodeFromJsonElement<ExercisePayload.Paraphrase>(exercise.payload)
+                ExerciseType.WORD_USAGE -> json.decodeFromJsonElement<ExercisePayload.WordUsage>(exercise.payload)
             }
         } catch (e: Exception) {
             e.printStackTrace()

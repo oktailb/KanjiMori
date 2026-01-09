@@ -1,5 +1,6 @@
 package org.nihongo.mochi.domain.grammar
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonObject
 
@@ -21,31 +22,41 @@ enum class ExerciseType {
     WORD_USAGE
 }
 
+@Serializable
 sealed class ExercisePayload {
+    @Serializable
+    @SerialName("FILL_BLANK")
     data class FillBlank(
         val sentence: String,
         val correct: String,
         val distractors: List<String>
     ) : ExercisePayload()
 
+    @Serializable
+    @SerialName("SENTENCE_ORDER")
     data class SentenceOrder(
-        val prefix: String,
-        val suffix: String,
+        val prefix: String = "",
+        val suffix: String = "",
         val blocks: List<String> // In correct order
     ) : ExercisePayload()
 
+    @Serializable
     data class Underline(
         val sentence: String,
         val correct: String,
         val distractors: List<String>
     ) : ExercisePayload()
 
+    @Serializable
+    @SerialName("PARAPHRASE")
     data class Paraphrase(
-        val baseSentence: String,
+        @SerialName("base_sentence") val baseSentence: String,
         val correct: String,
         val distractors: List<String>
     ) : ExercisePayload()
 
+    @Serializable
+    @SerialName("WORD_USAGE")
     data class WordUsage(
         val word: String,
         val options: List<UsageOption>
