@@ -9,7 +9,10 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import org.koin.androidx.compose.koinViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
+import org.koin.core.qualifier.named
 import org.nihongo.mochi.ui.theme.AppTheme
 
 class GrammarFragment : Fragment() {
@@ -31,7 +34,11 @@ class GrammarFragment : Fragment() {
                 AppTheme {
                     GrammarScreen(
                         viewModel = viewModel,
-                        onBackClick = { findNavController().popBackStack() }
+                        onBackClick = { findNavController().popBackStack() },
+                        quizViewModelFactory = { tag, sessionKey ->
+                            // Use the sessionKey as a Koin qualifier to ensure a new instance is created
+                            koinViewModel<GrammarQuizViewModel>(key = sessionKey) { parametersOf(tag) }
+                        }
                     )
                 }
             }

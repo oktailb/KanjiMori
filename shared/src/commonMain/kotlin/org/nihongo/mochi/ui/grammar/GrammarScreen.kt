@@ -27,8 +27,6 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -37,14 +35,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.Checkbox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -59,13 +56,10 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.max
-import androidx.compose.ui.unit.min
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.unit.times
 import com.mohamedrejeb.richeditor.model.rememberRichTextState
 import com.mohamedrejeb.richeditor.ui.material3.RichText
-import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.nihongo.mochi.presentation.MochiBackground
@@ -79,11 +73,21 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.sign
 
+private data class InternalConnInfo(
+    val key: Pair<String, String>,
+    val minY: Float,
+    val maxY: Float,
+    val length: Float,
+    val isLeft: Boolean
+)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GrammarScreen(
     viewModel: GrammarViewModel,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    // The factory now takes a tag and a unique session key
+    quizViewModelFactory: @Composable (tag: String, sessionKey: String) -> GrammarQuizViewModel? = { _, _ -> null }
 ) {
     val nodes by viewModel.nodes.collectAsState()
     val separators by viewModel.separators.collectAsState()
@@ -95,19 +99,16 @@ fun GrammarScreen(
     val selectedCategories by viewModel.selectedCategories.collectAsState()
     val selectedLessonHtml by viewModel.selectedLessonHtml.collectAsState()
     val selectedLessonTitle by viewModel.selectedLessonTitle.collectAsState()
+    val selectedQuizTag by viewModel.selectedQuizTag.collectAsState()
     
     var showFilterDialog by remember { mutableStateOf(false) }
     
     val scrollState = rememberScrollState()
     val density = LocalDensity.current
-    val coroutineScope = rememberCoroutineScope()
 
     val stonePathPainter = painterResource(Res.drawable.stonepath)
 
-    // State to hoist the level name out of BoxWithConstraints
     var detectedLevelName by remember { mutableStateOf("") }
-    
-    // Flag to handle initial scroll only once
     var initialScrollDone by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -119,7 +120,6 @@ fun GrammarScreen(
                     CircularProgressIndicator()
                 }
             } else {
-                // Outer BoxWithConstraints to get Viewport dimensions BEFORE scrolling
                 BoxWithConstraints(
                     modifier = Modifier
                         .fillMaxSize()
@@ -129,57 +129,42 @@ fun GrammarScreen(
                     val viewportHeightPx = with(density) { viewportHeight.toPx() }
                     val viewportWidth = maxWidth
                     
-                    // The Scrollable Container
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
                             .verticalScroll(scrollState)
                     ) {
-                        // HEIGHT CALCULATION
                         val heightPerSlot = 70.dp
-                        val calculatedHeight = (totalSlots * heightPerSlot.value).dp + 200.dp
+                        val totalSlotsVal = totalSlots
+                        val calculatedHeight = (totalSlotsVal * 70f).dp + 200.dp
                         
-                        // Ensure canvas is at least viewport height so it fills screen if content is small
                         val minCanvasHeight = viewportHeight
-                        val canvasHeight = max(minCanvasHeight, calculatedHeight)
+                        val canvasHeight = if (calculatedHeight > minCanvasHeight) calculatedHeight else minCanvasHeight
                         val canvasHeightPx = with(density) { canvasHeight.toPx() }
                         
-                        // INITIAL SCROLL LOGIC
                         LaunchedEffect(canvasHeightPx, separators, currentLevelId) {
                             if (!initialScrollDone && separators.isNotEmpty() && canvasHeightPx > 0) {
-
-                                // Let's look at the separators list order. It follows layout order.
                                 val targetIndex = separators.indexOfFirst { it.levelId == currentLevelId }
-                                
                                 if (targetIndex != -1) {
                                     val targetY = if (targetIndex > 0) {
-                                        // Scroll to the previous separator (Start of this level)
                                         separators[targetIndex - 1].y * canvasHeightPx
                                     } else {
-                                        0f // First level, start at top
+                                        0f
                                     }
-                                    
-                                    // Add a small offset to not cut the header perfectly
-                                    val finalScroll = max(0f, targetY - 100f) // -100px buffer
-                                    
+                                    val finalScroll = max(0f, targetY - 100f)
                                     scrollState.scrollTo(finalScroll.toInt())
                                     initialScrollDone = true
                                 }
                             }
                         }
                         
-                        // Logic to detect level based on scroll
                         LaunchedEffect(separators, canvasHeightPx, viewportHeightPx) {
                             snapshotFlow { scrollState.value }
                                 .collect { scrollY ->
                                     if (separators.isNotEmpty()) {
-                                        // Trigger point: Top third of the screen
-                                        val centerViewY = scrollY + (viewportHeightPx / 3)
-                                        
-                                        // Find first separator below the trigger point
+                                        val centerViewY = scrollY.toFloat() + (viewportHeightPx / 3f)
                                         val currentSep = separators.firstOrNull { (it.y * canvasHeightPx) > centerViewY } 
                                                          ?: separators.lastOrNull()
-                                        
                                         if (currentSep != null) {
                                             detectedLevelName = currentSep.levelId
                                         }
@@ -190,32 +175,32 @@ fun GrammarScreen(
                         val nodesById = remember(nodes) { nodes.associateBy { it.rule.id } }
                         val nodesByLevel = remember(nodes) { nodes.groupBy { it.rule.level } }
                         
-                        // Tracks calculation
-                        val outerConnectionTracks = remember(nodes) {
-                            data class ConnInfo(val key: Pair<String, String>, val minY: Float, val maxY: Float, val length: Float)
+                        val outerConnectionTracks = remember(nodes, nodesById) {
                             val tracksLeft = mutableListOf<Float>()
                             val tracksRight = mutableListOf<Float>()
                             val mapping = mutableMapOf<Pair<String, String>, Int>()
                             val bufferY = 0.02f 
 
-                            val connections = nodes.flatMap { child ->
-                                child.rule.dependencies.mapNotNull { parentId ->
-                                    val parent = nodesById[parentId] ?: return@mapNotNull null
-                                    if (parent.rule.level == child.rule.level) {
+                            val connections = mutableListOf<InternalConnInfo>()
+                            nodes.forEach { child ->
+                                child.rule.dependencies.forEach { parentId ->
+                                    val parent = nodesById[parentId]
+                                    if (parent != null && parent.rule.level == child.rule.level) {
                                         val isLeft = child.x < 0.5f
                                         val isParentLeft = parent.x < 0.5f
                                         if (isLeft == isParentLeft) {
                                             val minY = min(parent.y, child.y)
                                             val maxY = max(parent.y, child.y)
-                                            Triple(ConnInfo(parentId to child.rule.id, minY, maxY, maxY - minY), isLeft, minY)
-                                        } else null
-                                    } else null
+                                            connections.add(InternalConnInfo(parentId to child.rule.id, minY, maxY, maxY - minY, isLeft))
+                                        }
+                                    }
                                 }
                             }
-                            .sortedWith(compareBy({ it.first.length }, { it.first.minY }))
+                            
+                            connections.sortBy { it.length }
 
-                            connections.forEach { (info, isLeft, _) ->
-                                val tracks = if (isLeft) tracksLeft else tracksRight
+                            connections.forEach { info ->
+                                val tracks = if (info.isLeft) tracksLeft else tracksRight
                                 var allocatedTrack = -1
                                 for (i in tracks.indices) {
                                     if (tracks[i] + bufferY < info.minY) {
@@ -234,10 +219,7 @@ fun GrammarScreen(
                         }
                         
                         val lineColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)
-                        val separatorLineColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
-                        val nodeWidthDp = 100.dp
-                        val nodeHalfWidthPx = with(density) { (nodeWidthDp / 2).toPx() }
-                        val centerChannelPadding = with(density) { 0.dp.toPx() }
+                        val nodeHalfWidthPx = with(density) { 50.dp.toPx() } // 100.dp / 2
                         val cornerRadius = with(density) { 16.dp.toPx() }
                         val trackSpacingPx = with(density) { 4.dp.toPx() }
 
@@ -246,20 +228,18 @@ fun GrammarScreen(
                                 .fillMaxWidth()
                                 .height(canvasHeight)
                         ) {
-                            // LAYER 1: Links (Bottom)
                             Canvas(modifier = Modifier.fillMaxSize()) {
                                 val canvasW = size.width
                                 val canvasH = size.height
-                                val centerX = canvasW / 2
+                                val centerX = canvasW / 2f
 
-                                // Separator lines/curves
                                 separators.forEach { separator ->
                                     val gateY = separator.y * canvasH
                                     val levelNodes = nodesByLevel[separator.levelId] ?: emptyList()
                                     levelNodes.forEach { node ->
                                         val childAnchorX = if (node.x < 0.5f) (node.x * canvasW) + nodeHalfWidthPx else (node.x * canvasW) - nodeHalfWidthPx
                                         val childCenterY = node.y * canvasH
-                                        val childChannelX = if (node.x < 0.5f) centerX - centerChannelPadding else centerX + centerChannelPadding
+                                        val childChannelX = if (node.x < 0.5f) centerX else centerX
                                         
                                         val path = Path()
                                         path.moveTo(childAnchorX, childCenterY)
@@ -277,7 +257,6 @@ fun GrammarScreen(
                                     }
                                 }
 
-                                // Dependency Connections
                                 nodes.forEach { node ->
                                     node.rule.dependencies.forEach { dependencyId ->
                                         val parentNode = nodesById[dependencyId]
@@ -292,7 +271,7 @@ fun GrammarScreen(
                                                 if (gate != null) {
                                                     val gateY = gate.y * canvasH
                                                     val parentAnchorX = if (parentNode.x < 0.5f) (parentNode.x * canvasW) + nodeHalfWidthPx else (parentNode.x * canvasW) - nodeHalfWidthPx
-                                                    val parentChannelX = if(parentNode.x < 0.5f) centerX - centerChannelPadding else centerX + centerChannelPadding
+                                                    val parentChannelX = if(parentNode.x < 0.5f) centerX else centerX
                                                     
                                                     val pathParentToGate = Path()
                                                     pathParentToGate.moveTo(parentAnchorX, parentCenterY)
@@ -307,7 +286,7 @@ fun GrammarScreen(
                                                     drawPath(pathParentToGate, lineColor, style = Stroke(width = 2.dp.toPx()))
 
                                                     val childAnchorX = if (node.x < 0.5f) (node.x * canvasW) + nodeHalfWidthPx else (node.x * canvasW) - nodeHalfWidthPx
-                                                    val childChannelX = if(node.x < 0.5f) centerX - centerChannelPadding else centerX + centerChannelPadding
+                                                    val childChannelX = if(node.x < 0.5f) centerX else centerX
                                                     path.moveTo(childChannelX, gateY)
                                                     val distFromGate = childCenterY - gateY
                                                     if (abs(distFromGate) > cornerRadius * 1.5f) {
@@ -319,20 +298,19 @@ fun GrammarScreen(
                                                     }
                                                 }
                                             } else {
-                                                // Intra-level
                                                 val isCrossing = (parentNode.x < 0.5f) != (node.x < 0.5f)
                                                 val parentAnchorX = if (parentNode.x < 0.5f) (parentNode.x * canvasW) + nodeHalfWidthPx else (parentNode.x * canvasW) - nodeHalfWidthPx
                                                 
                                                 if (isCrossing) {
                                                     val childAnchorX = if (node.x < 0.5f) (node.x * canvasW) + nodeHalfWidthPx else (node.x * canvasW) - nodeHalfWidthPx
-                                                    val parentChannelX = if(parentNode.x < 0.5f) centerX - centerChannelPadding else centerX + centerChannelPadding
-                                                    val childChannelX = if(node.x < 0.5f) centerX - centerChannelPadding else centerX + centerChannelPadding
+                                                    val parentChannelX = if(parentNode.x < 0.5f) centerX else centerX
+                                                    val childChannelX = if(node.x < 0.5f) centerX else centerX
                                                     path.moveTo(parentAnchorX, parentCenterY)
                                                     val distY = childCenterY - parentCenterY
                                                     val dir = sign(distY)
                                                     if (abs(distY) > cornerRadius * 2.5f) {
                                                         val turn1Y = parentCenterY + (dir * cornerRadius)
-                                                        val midY = parentCenterY + (distY / 2)
+                                                        val midY = parentCenterY + (distY / 2f)
                                                         val turn2Y = childCenterY - (dir * cornerRadius)
                                                         path.quadraticBezierTo(parentChannelX, parentCenterY, parentChannelX, turn1Y)
                                                         path.lineTo(parentChannelX, midY - (dir * cornerRadius))
@@ -343,11 +321,10 @@ fun GrammarScreen(
                                                         path.cubicTo(parentChannelX, parentCenterY, childChannelX, childCenterY, childAnchorX, childCenterY)
                                                     }
                                                 } else {
-                                                    // Outer tracks
                                                     val parentAnchorXOuter = if (parentNode.x < 0.5f) (parentNode.x * canvasW) - nodeHalfWidthPx else (parentNode.x * canvasW) + nodeHalfWidthPx
                                                     val childAnchorXOuter = if (node.x < 0.5f) (node.x * canvasW) - nodeHalfWidthPx else (node.x * canvasW) + nodeHalfWidthPx
                                                     val trackIndex = outerConnectionTracks[dependencyId to node.rule.id] ?: 0
-                                                    val dynamicExtra = trackIndex * trackSpacingPx
+                                                    val dynamicExtra = trackIndex.toFloat() * trackSpacingPx
                                                     val baseOffset = 40f
                                                     val totalOffset = baseOffset + dynamicExtra
                                                     val controlOffset = if (parentNode.x < 0.5f) -totalOffset else totalOffset
@@ -373,18 +350,17 @@ fun GrammarScreen(
                                 }
                             }
 
-                            // LAYER 2: Stone Path
                             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
                                  val stoneWidth = 48.dp
                                  Column(modifier = Modifier.width(stoneWidth)) {
-                                     val repeatCount = (calculatedHeight.value / 40).toInt() + 10
+                                     val totalHeight = canvasHeight.value
+                                     val repeatCount = (totalHeight / 40f).toInt() + 10
                                      repeat(repeatCount) {
                                          Image(painter = stonePathPainter, contentDescription = null, contentScale = ContentScale.FillWidth, modifier = Modifier.fillMaxWidth(), alpha = 0.9f)
                                      }
                                  }
                             }
 
-                            // LAYER 3: Separators
                             separators.forEach { separator ->
                                 val yPosPx = separator.y * canvasHeight.value
                                 val levelName = ResourceUtils.resolveStringResource("level_${separator.levelId}")?.let { 
@@ -392,7 +368,7 @@ fun GrammarScreen(
                                 } ?: separator.levelId.uppercase()
 
                                 Box(
-                                    modifier = Modifier.fillMaxWidth().offset(y = (yPosPx).dp),
+                                    modifier = Modifier.fillMaxWidth().offset(y = yPosPx.dp),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Column(
@@ -416,20 +392,21 @@ fun GrammarScreen(
                                 }
                             }
 
-                            // LAYER 4: Nodes
                             nodes.forEach { node ->
-                                val xPos = viewportWidth * node.x
-                                val yPos = canvasHeight * node.y
+                                val viewportW = viewportWidth.value
+                                val canvasH = canvasHeight.value
+                                val xPos = viewportW * node.x
+                                val yPos = canvasH * node.y
                                 GrammarNodeItem(
                                     node = node,
-                                    onLessonClick = { viewModel.onNodeClick(node) },
-                                    modifier = Modifier.offset(x = xPos - 50.dp, y = yPos - 30.dp)
+                                    onLessonClick = { viewModel.openLesson(node) },
+                                    onNodeClick = { viewModel.startQuiz(node.rule.id) },
+                                    modifier = Modifier.offset(x = (xPos - 50f).dp, y = (yPos - 30f).dp)
                                 )
                             }
                         }
                     }
 
-                    // Floating Header (Overlay)
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -466,7 +443,6 @@ fun GrammarScreen(
                         }
                     }
                     
-                    // Lesson Dialog Overlay
                     if (selectedLessonHtml != null) {
                         Box(
                             modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.5f)).clickable(enabled = false) {},
@@ -481,7 +457,6 @@ fun GrammarScreen(
                                     .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(16.dp))
                             ) {
                                 Column(modifier = Modifier.fillMaxSize()) {
-                                    // Header with Title and Close button
                                     Row(
                                         modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.primaryContainer).padding(16.dp),
                                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -521,6 +496,21 @@ fun GrammarScreen(
                             }
                         }
                     }
+
+                    val tag = selectedQuizTag
+                    if (tag != null) {
+                        // Create a stable session key that changes only when a NEW quiz session is started
+                        val sessionKey = remember(tag) { "${tag}_${Clock.System.now().toEpochMilliseconds()}" }
+                        val quizViewModel = quizViewModelFactory(tag, sessionKey)
+                        if (quizViewModel != null) {
+                            Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+                                GrammarQuizScreen(
+                                    viewModel = quizViewModel,
+                                    onBackClick = { viewModel.closeQuiz() }
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -556,21 +546,19 @@ fun GrammarScreen(
 }
 
 @Composable
-fun GrammarNodeItem(node: GrammarNode, onLessonClick: () -> Unit, modifier: Modifier = Modifier) {
+fun GrammarNodeItem(node: GrammarNode, onLessonClick: () -> Unit, onNodeClick: () -> Unit, modifier: Modifier = Modifier) {
     val description = ResourceUtils.resolveStringResource(node.rule.description)?.let { stringResource(it) } ?: node.rule.id
     val baseColor = MaterialTheme.colorScheme.surfaceVariant
     val colorInt = ScorePresentationUtils.getScoreColor(node.score, baseColor.toArgb())
     val backgroundColor = Color(colorInt)
 
-    // Note: The main box is NOT clickable to reserve it for future usage.
-    // The lesson icon is a separate clickable element overlaid on top.
-    
     Box(
         modifier = modifier
             .width(100.dp)
             .height(60.dp)
             .background(backgroundColor, RoundedCornerShape(8.dp))
             .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(8.dp))
+            .clickable(onClick = onNodeClick)
             .padding(4.dp)
     ) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

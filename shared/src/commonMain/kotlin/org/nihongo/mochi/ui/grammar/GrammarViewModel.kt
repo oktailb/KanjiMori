@@ -28,7 +28,7 @@ data class GrammarLevelSeparator(
 
 class GrammarViewModel(
     private val grammarRepository: GrammarRepository,
-    private val settingsRepository: SettingsRepository // Injected to get locale
+    private val settingsRepository: SettingsRepository 
 ) : ViewModel() {
 
     private val _nodes = MutableStateFlow<List<GrammarNode>>(emptyList())
@@ -57,6 +57,9 @@ class GrammarViewModel(
     
     private val _selectedLessonTitle = MutableStateFlow<String?>(null)
     val selectedLessonTitle: StateFlow<String?> = _selectedLessonTitle.asStateFlow()
+
+    private val _selectedQuizTag = MutableStateFlow<String?>(null)
+    val selectedQuizTag: StateFlow<String?> = _selectedQuizTag.asStateFlow()
 
     fun loadGraph(maxLevelId: String) {
         _currentLevelId.value = maxLevelId
@@ -93,25 +96,32 @@ class GrammarViewModel(
         }
     }
     
-    fun onNodeClick(node: GrammarNode) {
+    fun openLesson(node: GrammarNode) {
          if (node.hasLesson) {
-             _selectedLessonTitle.value = node.rule.description // Use description as title
+             _selectedLessonTitle.value = node.rule.description 
              viewModelScope.launch {
-                 // Get current locale from settings (e.g., "en_GB", "fr_FR")
                  val locale = settingsRepository.getAppLocale()
-                 val languageCode = locale.take(2).lowercase() // "en", "fr"
+                 val languageCode = locale.take(2).lowercase() 
                  
-                 // Check if dark mode is active (assuming settingsRepository stores "dark" or "light")
-                 // The actual theme might be system default, but we can check the stored preference.
-                 // Ideally we should pass the actual UI state, but here we'll rely on settings.
                  val theme = settingsRepository.getTheme()
-                 val isDark = theme == "dark" // Simple check, might need system check if "system" is an option
+                 val isDark = theme == "dark" 
                  
                  val css = grammarRepository.loadCss(isDark)
                  val rawHtml = grammarRepository.loadLessonHtml(node.rule.id, languageCode)
                  _selectedLessonHtml.value = applyCommonStyle(rawHtml, css)
              }
          }
+    }
+
+    fun startQuiz(ruleId: String) {
+        _selectedQuizTag.value = ruleId
+    }
+
+    fun closeQuiz() {
+        _selectedQuizTag.value = null
+        viewModelScope.launch {
+            refreshGraph() // Refresh to update scores on the map
+        }
     }
     
     fun closeLesson() {
@@ -121,8 +131,6 @@ class GrammarViewModel(
 
     private fun applyCommonStyle(htmlContent: String, cssContent: String): String {
         val styleTag = "<style>\n$cssContent\n</style>"
-        
-        // Inject style into head or body
         return if (htmlContent.contains("</head>")) {
             htmlContent.replace("</head>", "$styleTag</head>")
         } else if (htmlContent.contains("<body>")) {

@@ -4,6 +4,7 @@ import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 import org.nihongo.mochi.domain.dictionary.DictionaryViewModel
+import org.nihongo.mochi.domain.grammar.ExerciseRepository
 import org.nihongo.mochi.domain.grammar.GrammarRepository
 import org.nihongo.mochi.domain.kana.ComposeResourceLoader
 import org.nihongo.mochi.domain.kana.KanaRepository
@@ -21,6 +22,7 @@ import org.nihongo.mochi.presentation.dictionary.KanjiDetailViewModel
 import org.nihongo.mochi.presentation.settings.SettingsViewModel
 import org.nihongo.mochi.ui.gamerecap.GameRecapViewModel
 import org.nihongo.mochi.ui.gojuon.KanaRecapViewModel
+import org.nihongo.mochi.ui.grammar.GrammarQuizViewModel
 import org.nihongo.mochi.ui.grammar.GrammarViewModel
 import org.nihongo.mochi.ui.wordlist.WordListViewModel
 import org.nihongo.mochi.ui.writingrecap.WritingRecapViewModel
@@ -30,20 +32,20 @@ val sharedModule = module {
     single<ResourceLoader> { ComposeResourceLoader() }
     singleOf(::KanaRepository)
     singleOf(::LevelsRepository)
-    single { KanjiRepository(get(), get(), get()) } // Explicit constructor needed if params don't match exactly or multiple constructors
+    single { KanjiRepository(get(), get(), get()) } 
     singleOf(::WordRepository)
     singleOf(::MeaningRepository)
     singleOf(::SettingsRepository)
     singleOf(::LevelContentProvider)
     singleOf(::StatisticsEngine)
     singleOf(::GrammarRepository)
+    singleOf(::ExerciseRepository)
 
     // --- ViewModels ---
     factoryOf(::KanjiDetailViewModel)
     factoryOf(::SettingsViewModel)
-    // RecognitionViewModel, ReadingViewModel, WritingViewModel removed
     factoryOf(::WordListViewModel)
-    factoryOf(::HomeViewModel) // Added HomeViewModel
+    factoryOf(::HomeViewModel) 
     factoryOf(::GrammarViewModel)
     
     // ViewModels with parameters
@@ -76,7 +78,14 @@ val sharedModule = module {
             statisticsEngine = get()
         )
     }
+
+    factory { params ->
+        GrammarQuizViewModel(
+            exerciseRepository = get(),
+            settingsRepository = get(),
+            grammarTag = params.get()
+        )
+    }
     
-    // DictionaryViewModel requires HandwritingRecognizer which is platform specific.
     factory { DictionaryViewModel(get(), get(), get(), get(), get(), get()) }
 }

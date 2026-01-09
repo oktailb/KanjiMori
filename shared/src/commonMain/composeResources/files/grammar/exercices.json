@@ -1,99 +1,115 @@
 {
   "meta": {
-    "version": 1,
-    "description": "Database of grammar exercises for Nihongo Mochi. Designed for unpredictability and variety."
+    "version": 3,
+    "description": "Base d'exercices JLPT - Nihongo Mochi (Format Simplifié)"
   },
   "exercises": [
     {
-      "id": "n5_part_ni_001",
-      "level": "N5",
-      "tags": ["particule_ni", "destination", "grammar_basics"],
-      "type": "choice",
-      "question": "明日、日本＿行きます。",
-      "explanation": "La particule 'ni' (に) ou 'he' (へ) indique la destination avec les verbes de mouvement comme 'ikimasu' (aller).",
+      "id": "n5_gram_001",
+      "type": "FILL_BLANK",
+      "tags": ["particule_ni"],
       "payload": {
+        "sentence": "明日、日本__行きます。",
         "correct": "に",
-        "distractors": ["を", "で", "が", "から", "より", "の"]
+        "distractors": ["を", "で", "が"]
       }
     },
     {
-      "id": "n5_part_de_002",
-      "level": "N5",
-      "tags": ["particule_de", "moyen", "transport"],
-      "type": "choice",
-      "question": "バス＿学校へ来ました。",
-      "explanation": "La particule 'de' (で) indique le moyen ou l'outil utilisé pour accomplir une action.",
+      "id": "n5_gram_002",
+      "type": "FILL_BLANK",
+      "tags": ["kara_made"],
       "payload": {
-        "correct": "で",
-        "distractors": ["に", "を", "へ", "が", "と", "や"]
+        "sentence": "８時__５時__働きます。",
+        "correct": "から / まで",
+        "distractors": ["に / まで", "から / に", "で / まで"]
       }
     },
     {
-      "id": "n5_adj_i_order_001",
-      "level": "N5",
-      "tags": ["adjectifs_i", "structure_phrase", "noms"],
-      "type": "order",
-      "question": "Reconstituez la phrase correcte.",
-      "explanation": "En japonais, l'adjectif-i se place directement avant le nom qu'il qualifie.",
+      "id": "n5_gram_003",
+      "type": "FILL_BLANK",
+      "tags": ["forme_te"],
       "payload": {
-        "sentence": "この 猫は 黒い です",
-        "noise": ["白い", "犬は"]
+        "sentence": "ここで写真を__ください。",
+        "correct": "撮らないで",
+        "distractors": ["撮らなくて", "撮りなくて", "撮らなないで"]
       }
     },
     {
-      "id": "n5_verb_masu_order_002",
-      "level": "N5",
-      "tags": ["forme_masu", "verbe_manger", "structure_phrase"],
-      "type": "order",
-      "question": "Ordonnez les éléments pour dire 'Je mange une pomme'.",
-      "explanation": "L'objet direct est marqué par 'wo' (を) et se place avant le verbe.",
+      "id": "n5_gram_004",
+      "type": "FILL_BLANK",
+      "tags": ["adjectifs_i"],
       "payload": {
-        "sentence": "私は りんごを 食べます",
-        "noise": ["飲みます", "パンを"]
+        "sentence": "昨日のパーティーはとても__です。",
+        "correct": "楽しかったです",
+        "distractors": ["楽しいでした", "楽しかったですかった", "楽しくなかったです"]
       }
     },
     {
-      "id": "n4_te_form_conj_001",
-      "level": "N4",
-      "tags": ["forme_te", "conjugaison"],
-      "type": "input",
-      "question": "Écrivez la forme en -te du verbe 'matsu' (待つ).",
-      "explanation": "Pour les verbes en 'tsu', la terminaison devient 'tte'.",
+      "id": "n5_vocab_001",
+      "type": "FILL_BLANK",
+      "tags": ["particule_ka"],
       "payload": {
-        "answers": ["待って", "まって"],
-        "hint": "Verbe du groupe 1 (Godan) se terminant par 'tsu'."
+        "sentence": "すみません、今__時ですか。",
+        "correct": "何",
+        "distractors": ["いつ", "どこ", "だれ"]
       }
     },
     {
-      "id": "n3_grammar_paraphrase_001",
-      "level": "N3",
-      "tags": ["paraphrase", "expression", "konkai"],
-      "type": "paraphrase",
-      "question": "Quelle phrase a le sens le plus proche de : '彼は来ないはずがない' ?",
-      "explanation": "'Hazu ga nai' exprime une forte impossibilité. La double négation signifie 'Il est impossible qu'il ne vienne pas' => 'Il va sûrement venir'.",
+      "id": "n5_order_001",
+      "type": "SENTENCE_ORDER",
+      "tags": ["adjectifs_i", "particule_wo", "forme_ta"],
       "payload": {
-        "correct": [
-          "彼は絶対に来ると思う。",
-          "彼が来ないわけがない。"
-        ],
+        "prefix": "昨日は、",
+        "suffix": "です。",
+        "blocks": ["とても", "美味しい", "料理を", "食べた"]
+      }
+    },
+    {
+      "id": "n5_kanji_001",
+      "type": "UNDERLINE_READING",
+      "tags": ["particule_wo", "forme_masu"],
+      "payload": {
+        "sentence": "毎日[電話]をします。",
+        "correct": "でんわ",
+        "distractors": ["てんわ", "denwan", "tenwan"]
+      }
+    },
+    {
+      "id": "n5_kanji_002",
+      "type": "UNDERLINE_WRITING",
+      "tags": ["n5_kanji_kuruma"],
+      "payload": {
+        "sentence": "新しい[くるま]を買いました。",
+        "correct": "車",
+        "distractors": ["東", "軍", "軌"]
+      }
+    },
+    {
+      "id": "n3_para_001",
+      "type": "PARAPHRASE",
+      "tags": ["n3_hazu_ga_nai"],
+      "payload": {
+        "base_sentence": "彼は来ないはずがない。",
+        "correct": "彼は絶対に来ると思う。",
         "distractors": [
           "彼はたぶん来ないだろう。",
           "彼は来るはずがない。",
-          "彼は来ないほうがいい。",
-          "彼が来るかどうか分からない。"
+          "彼は来ないほうがいい。"
         ]
       }
     },
-     {
-      "id": "n4_context_choice_001",
-      "level": "N4",
-      "tags": ["usage", "politesse", "keigo_basic"],
-      "type": "choice",
-      "question": "Sélectionnez la réponse la plus appropriée pour parler à votre professeur.",
-      "explanation": "Avec un supérieur, on utilise des formes de politesse. 'Kudasai' est plus poli que l'impératif direct.",
+    {
+      "id": "n4_usage_001",
+      "type": "WORD_USAGE",
+      "tags": ["n4_vocab_itsumo"],
       "payload": {
-        "correct": "教えてください",
-        "distractors": ["教えて", "教えろ", "教える", "教えてくれ"]
+        "word": "いつも",
+        "options": [
+          { "text": "私はいつも会社へ行きます。", "is_correct": true },
+          { "text": "いつもお菓子を食べたいです。", "is_correct": false },
+          { "text": "明日はいつも雨でしょう。", "is_correct": false },
+          { "text": "いつもありがとうございますを言いました。", "is_correct": false }
+        ]
       }
     }
   ]
