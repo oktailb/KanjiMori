@@ -83,7 +83,7 @@ val sharedModule = module {
         GrammarQuizViewModel(
             exerciseRepository = get(),
             settingsRepository = get(),
-            grammarTag = params.get()
+            grammarTags = params.get<List<String>>()
         )
     }
     

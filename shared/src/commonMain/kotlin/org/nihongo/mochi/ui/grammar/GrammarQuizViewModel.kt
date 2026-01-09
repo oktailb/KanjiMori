@@ -25,13 +25,13 @@ data class GrammarQuizState(
     val selectedOption: String? = null,
     val isAnswerCorrect: Boolean? = null,
     val progressHistory: List<GameStatus> = emptyList(),
-    val currentStarIndex: Int = 0 // Runtime star index for ORDER exercises
+    val currentStarIndex: Int = 0
 )
 
 class GrammarQuizViewModel(
     private val exerciseRepository: ExerciseRepository,
     private val settingsRepository: SettingsRepository,
-    private val grammarTag: String
+    private val grammarTags: List<String> // Changed to List
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(GrammarQuizState())
@@ -44,7 +44,16 @@ class GrammarQuizViewModel(
     private fun loadExercises() {
         viewModelScope.launch {
             _state.value = _state.value.copy(isLoading = true)
-            val exercises = exerciseRepository.getExercisesForTag(grammarTag, limit = 10)
+            
+            // Fetch exercises for ALL tags and limit total to 100
+            val allPossibleExercises = mutableListOf<Exercise>()
+            grammarTags.forEach { tag ->
+                // Fetch up to 10 exercises per tag to ensure variety, then we'll shuffle and take 100
+                allPossibleExercises.addAll(exerciseRepository.getExercisesForTag(tag, limit = 10))
+            }
+            
+            val exercises = allPossibleExercises.shuffled().take(100)
+            
             if (exercises.isNotEmpty()) {
                 setupQuestion(exercises, 0, emptyList())
             } else {
@@ -89,7 +98,6 @@ class GrammarQuizViewModel(
             is ExercisePayload.WordUsage -> {
                 val correctOnes = payload.options.filter { it.is_correct }.shuffled()
                 val incorrectOnes = payload.options.filter { !it.is_correct }.shuffled()
-                // Pick 1 correct and up to 3 incorrect to form 4 options
                 val selected = (correctOnes.take(1) + incorrectOnes.take(3)).map { it.text }
                 selected.shuffled()
             }
@@ -104,7 +112,11 @@ class GrammarQuizViewModel(
 
         val isCorrect = checkAnswer(option, currentState.currentExercisePayload, currentState.currentStarIndex)
         
-        ScoreManager.saveScore(grammarTag, isCorrect, ScoreManager.ScoreType.GRAMMAR)
+        // Save score for each tag associated with the rule
+        val currentExercise = currentState.exercises.getOrNull(currentState.currentIndex)
+        currentExercise?.tags?.forEach { tag ->
+            ScoreManager.saveScore(tag, isCorrect, ScoreManager.ScoreType.GRAMMAR)
+        }
 
         val newHistory = currentState.progressHistory.toMutableList()
         if (currentState.currentIndex < newHistory.size) {

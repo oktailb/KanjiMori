@@ -26,7 +26,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.Assignment
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -86,8 +89,7 @@ private data class InternalConnInfo(
 fun GrammarScreen(
     viewModel: GrammarViewModel,
     onBackClick: () -> Unit,
-    // The factory now takes a tag and a unique session key
-    quizViewModelFactory: @Composable (tag: String, sessionKey: String) -> GrammarQuizViewModel? = { _, _ -> null }
+    quizViewModelFactory: @Composable (tags: List<String>, sessionKey: String) -> GrammarQuizViewModel? = { _, _ -> null }
 ) {
     val nodes by viewModel.nodes.collectAsState()
     val separators by viewModel.separators.collectAsState()
@@ -99,7 +101,7 @@ fun GrammarScreen(
     val selectedCategories by viewModel.selectedCategories.collectAsState()
     val selectedLessonHtml by viewModel.selectedLessonHtml.collectAsState()
     val selectedLessonTitle by viewModel.selectedLessonTitle.collectAsState()
-    val selectedQuizTag by viewModel.selectedQuizTag.collectAsState()
+    val selectedQuizTags by viewModel.selectedQuizTags.collectAsState()
     
     var showFilterDialog by remember { mutableStateOf(false) }
     
@@ -375,6 +377,18 @@ fun GrammarScreen(
                                         horizontalAlignment = Alignment.CenterHorizontally,
                                         modifier = Modifier.offset(y = (-180).dp)
                                     ) {
+                                        // Exam Button above Toori
+                                        Button(
+                                            onClick = { viewModel.startQuiz(separator.ruleIds) },
+                                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary),
+                                            shape = RoundedCornerShape(12.dp),
+                                            modifier = Modifier.offset(y = (-20).dp).padding(bottom = 16.dp)
+                                        ) {
+                                            Icon(Icons.Default.Assignment, contentDescription = null, modifier = Modifier.size(18.dp))
+                                            Spacer(Modifier.width(8.dp))
+                                            Text("Passer l'examen", style = MaterialTheme.typography.labelLarge)
+                                        }
+
                                         Image(
                                             painter = painterResource(Res.drawable.toori),
                                             contentDescription = null,
@@ -403,7 +417,7 @@ fun GrammarScreen(
                                 GrammarNodeItem(
                                     node = node,
                                     onLessonClick = { viewModel.openLesson(node) },
-                                    onNodeClick = { viewModel.startQuiz(node.rule.id) },
+                                    onNodeClick = { viewModel.startQuiz(listOf(node.rule.id)) },
                                     modifier = Modifier.offset(x = (xPos - 50f).dp, y = (yPos - 30f).dp)
                                 )
                             }
@@ -500,11 +514,11 @@ fun GrammarScreen(
                         }
                     }
 
-                    val tag = selectedQuizTag
-                    if (tag != null) {
-                        // Create a stable session key that changes only when a NEW quiz session is started
-                        val sessionKey = remember(tag) { "${tag}_${Clock.System.now().toEpochMilliseconds()}" }
-                        val quizViewModel = quizViewModelFactory(tag, sessionKey)
+                    val tags = selectedQuizTags
+                    if (tags != null) {
+                        // Use string representation of list + timestamp for session key
+                        val sessionKey = remember(tags) { "${tags.joinToString(",")}_${Clock.System.now().toEpochMilliseconds()}" }
+                        val quizViewModel = quizViewModelFactory(tags, sessionKey)
                         if (quizViewModel != null) {
                             Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
                                 GrammarQuizScreen(

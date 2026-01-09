@@ -24,7 +24,8 @@ data class GrammarNode(
 data class GrammarLevelSeparator(
     val levelId: String,
     val y: Float,
-    val completionPercentage: Int = 0
+    val completionPercentage: Int = 0,
+    val ruleIds: List<String> = emptyList() // Added to store rules for exam
 )
 
 class GrammarViewModel(
@@ -59,8 +60,8 @@ class GrammarViewModel(
     private val _selectedLessonTitle = MutableStateFlow<String?>(null)
     val selectedLessonTitle: StateFlow<String?> = _selectedLessonTitle.asStateFlow()
 
-    private val _selectedQuizTag = MutableStateFlow<String?>(null)
-    val selectedQuizTag: StateFlow<String?> = _selectedQuizTag.asStateFlow()
+    private val _selectedQuizTags = MutableStateFlow<List<String>?>(null)
+    val selectedQuizTags: StateFlow<List<String>?> = _selectedQuizTags.asStateFlow()
 
     fun loadGraph(maxLevelId: String) {
         _currentLevelId.value = maxLevelId
@@ -114,12 +115,12 @@ class GrammarViewModel(
          }
     }
 
-    fun startQuiz(ruleId: String) {
-        _selectedQuizTag.value = ruleId
+    fun startQuiz(ruleIds: List<String>) {
+        _selectedQuizTags.value = ruleIds
     }
 
     fun closeQuiz() {
-        _selectedQuizTag.value = null
+        _selectedQuizTags.value = null
         viewModelScope.launch {
             refreshGraph() // Refresh to update scores on the map
         }
@@ -168,7 +169,7 @@ class GrammarViewModel(
         val slotHeightPerNode = 1.0f 
         val paddingSlotsPerLevel = 3.0f
 
-        val rawSeparators = mutableListOf<Triple<String, Float, Int>>() 
+        val rawSeparators = mutableListOf<Triple<String, Float, List<String>>>() 
         val rulesMap = rules.associateBy { it.id }
         val depthCache = mutableMapOf<String, Int>()
 
@@ -196,15 +197,7 @@ class GrammarViewModel(
         levels.forEach { levelId ->
             currentSlot += 0.5f 
             val levelRules = rulesByLevel[levelId] ?: emptyList()
-            
-            // Calculate completion for this level
-            val completion = if (levelRules.isNotEmpty()) {
-                val successfulNodes = levelRules.count { rule ->
-                    val score = ScoreManager.getScore(rule.id, ScoreManager.ScoreType.GRAMMAR)
-                    (score.successes - score.failures) >= 1 // Consider "learned" if balance is positive
-                }
-                (successfulNodes * 100) / levelRules.size
-            } else 0
+            val ruleIds = levelRules.map { it.id }
 
             if (levelRules.isNotEmpty()) {
                 currentSlot += levelRules.size * slotHeightPerNode
@@ -212,7 +205,7 @@ class GrammarViewModel(
                 currentSlot += slotHeightPerNode
             }
             currentSlot += (paddingSlotsPerLevel / 2f)
-            rawSeparators.add(Triple(levelId, currentSlot, completion))
+            rawSeparators.add(Triple(levelId, currentSlot, ruleIds))
             currentSlot += (paddingSlotsPerLevel / 2f)
         }
         
@@ -265,7 +258,19 @@ class GrammarViewModel(
         }
         
         val normalizedNodes = finalNodes.map { it.copy(y = it.y / totalSlots) }
-        val normalizedSeparators = rawSeparators.map { GrammarLevelSeparator(it.first, it.second / totalSlots, it.third) }
+        val normalizedSeparators = rawSeparators.map { triple ->
+            val levelId = triple.first
+            val levelRules = rulesByLevel[levelId] ?: emptyList()
+            val completion = if (levelRules.isNotEmpty()) {
+                val successfulNodes = levelRules.count { rule ->
+                    val score = ScoreManager.getScore(rule.id, ScoreManager.ScoreType.GRAMMAR)
+                    (score.successes - score.failures) >= 1
+                }
+                (successfulNodes * 100) / levelRules.size
+            } else 0
+            
+            GrammarLevelSeparator(levelId, triple.second / totalSlots, completion, triple.third) 
+        }
         
         return Triple(normalizedNodes, normalizedSeparators, totalSlots)
     }
