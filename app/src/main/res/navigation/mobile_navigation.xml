@@ -10,7 +10,6 @@
         android:name="org.nihongo.mochi.ui.home.HomeFragment"
         android:label="@string/title_home"
         tools:layout="@layout/fragment_home">
-        <!-- Anciennes actions vers les fragments intermédiaires supprimées -->
         <action
             android:id="@+id/action_nav_home_to_nav_dictionary"
             app:destination="@id/nav_dictionary" />
@@ -41,9 +40,16 @@
         <action
             android:id="@+id/action_nav_home_to_grammar"
             app:destination="@id/nav_grammar" />
+        <action
+            android:id="@+id/action_nav_home_to_games"
+            app:destination="@id/nav_games" />
     </fragment>
 
-    <!-- Fragments intermédiaires supprimés (Recognition, Reading, Writing) -->
+    <fragment
+        android:id="@+id/nav_games"
+        android:name="org.nihongo.mochi.ui.games.GamesFragment"
+        android:label="Games"
+        tools:layout="@layout/fragment_games" />
 
     <fragment
         android:id="@+id/nav_hiragana"
@@ -76,10 +82,6 @@
         android:name="org.nihongo.mochi.ui.gojuon.KatakanaQuizFragment"
         android:label="Katakana Quiz"
         tools:layout="@layout/fragment_kana_quiz" />
-
-    <!-- Le fragment Reading a été supprimé, mais ses destinations cibles (WordList) restent accessibles via Home -->
-
-    <!-- Le fragment Writing a été supprimé, mais ses destinations cibles (WritingRecap) restent accessibles via Home -->
 
     <fragment
         android:id="@+id/nav_dictionary"

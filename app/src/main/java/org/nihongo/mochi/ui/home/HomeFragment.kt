@@ -14,9 +14,6 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.nihongo.mochi.R
 import org.nihongo.mochi.presentation.HomeViewModel
 import org.nihongo.mochi.ui.theme.AppTheme
-import org.nihongo.mochi.ui.gamerecap.GameRecapFragmentArgs
-import org.nihongo.mochi.ui.writingrecap.WritingRecapFragmentArgs
-import org.nihongo.mochi.ui.wordlist.WordListFragmentArgs
 
 class HomeFragment : Fragment() {
 
@@ -58,7 +55,6 @@ class HomeFragment : Fragment() {
                         onReadingClick = {
                             if (uiState.isReadingEnabled) {
                                 val args = Bundle().apply {
-                                    // Reading expects the data file name (e.g. "jlpt_wordlist_n5"), not the level ID
                                     putString("wordList", uiState.readingDataFile ?: uiState.selectedLevelId)
                                 }
                                 findNavController().navigate(R.id.action_nav_home_to_word_list, args)
@@ -79,6 +75,9 @@ class HomeFragment : Fragment() {
                                 }
                                 findNavController().navigate(R.id.action_nav_home_to_grammar, args)
                             }
+                        },
+                        onGamesClick = {
+                            findNavController().navigate(R.id.action_nav_home_to_games)
                         },
                         onDictionaryClick = {
                             findNavController().navigate(R.id.action_nav_home_to_nav_dictionary)

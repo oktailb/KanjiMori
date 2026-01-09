@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -57,6 +58,7 @@ fun HomeScreen(
     onReadingClick: () -> Unit,
     onWritingClick: () -> Unit,
     onGrammarClick: () -> Unit,
+    onGamesClick: () -> Unit, // Added
     onDictionaryClick: () -> Unit,
     onResultsClick: () -> Unit,
     onOptionsClick: () -> Unit,
@@ -128,10 +130,20 @@ fun HomeScreen(
 
             BigModeCard(
                 title = stringResource(Res.string.activity_type_grammar),
-                subtitle = stringResource(Res.string.section_fundamentals_desc), // TODO: Create specific grammar subtitle
-                kanjiTitle = "文法", // Bunpou (Grammar)
+                subtitle = stringResource(Res.string.section_fundamentals_desc),
+                kanjiTitle = "文法", 
                 enabled = isGrammarEnabled,
                 onClick = onGrammarClick
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            BigModeCard(
+                title = "Games",
+                subtitle = "Défis ludiques pour s'entraîner (Taquin, Simon...)",
+                kanjiTitle = "遊び", 
+                enabled = true,
+                onClick = onGamesClick
             )
 
             Spacer(modifier = Modifier.height(24.dp))
