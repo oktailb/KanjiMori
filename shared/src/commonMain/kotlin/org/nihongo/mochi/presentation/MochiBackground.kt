@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -16,6 +17,8 @@ import org.nihongo.mochi.shared.generated.resources.background_night
 @OptIn(ExperimentalResourceApi::class)
 @Composable
 fun MochiBackground(
+    modifier: Modifier = Modifier,
+    applySafeInsets: Boolean = true,
     content: @Composable () -> Unit
 ) {
     val isDark = isSystemInDarkTheme()
@@ -29,6 +32,14 @@ fun MochiBackground(
             contentScale = ContentScale.Crop
         )
         
-        content()
+        val contentModifier = if (applySafeInsets) {
+            modifier.fillMaxSize().safeDrawingPadding()
+        } else {
+            modifier.fillMaxSize()
+        }
+        
+        Box(modifier = contentModifier) {
+            content()
+        }
     }
 }
