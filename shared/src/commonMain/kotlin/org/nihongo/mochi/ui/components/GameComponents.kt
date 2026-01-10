@@ -72,9 +72,9 @@ fun GameProgressBar(
                     }
 
                     val tint = when (status) {
-                        GameStatus.CORRECT -> Color(0xFF66BB6A) // Green 400 for consistency with buttons
+                        GameStatus.CORRECT -> Color(0xFF00E676) // Fluo Green A400
                         GameStatus.INCORRECT -> MaterialTheme.colorScheme.error
-                        GameStatus.PARTIAL -> Color(0xFFFFA500) // Orangeish for Partial
+                        GameStatus.PARTIAL -> Color(0xFF4FC3F7) // Light Blue 300 (Better for partial/progress)
                         else -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f) // Faded grey for unanswered
                     }
 
@@ -105,9 +105,9 @@ fun GameAnswerButton(
     onClick: () -> Unit
 ) {
     val backgroundColor = when (state) {
-        AnswerButtonState.CORRECT -> Color(0xFF66BB6A) // Green 400
+        AnswerButtonState.CORRECT -> Color(0xFF00E676) // Fluo Green A400
         AnswerButtonState.INCORRECT -> Color(0xFFEF5350) // Red 400
-        AnswerButtonState.NEUTRAL -> Color(0xFFFFCA28) // Amber 400
+        AnswerButtonState.NEUTRAL -> Color(0xFF4FC3F7) // Light Blue 300 (Used for partial steps)
         AnswerButtonState.DEFAULT -> MaterialTheme.colorScheme.primary // Use theme primary for default state
     }
 
