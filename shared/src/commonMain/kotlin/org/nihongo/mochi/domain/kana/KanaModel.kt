@@ -7,7 +7,8 @@ data class KanaEntry(
     val character: String,
     val romaji: String,
     val type: KanaType,
-    val line: Int = 0
+    val line: Int = 0,
+    val column: Int = 0
 ) {
     val category: String
         get() = when {

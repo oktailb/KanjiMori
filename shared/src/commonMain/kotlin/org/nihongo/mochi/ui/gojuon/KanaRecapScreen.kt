@@ -58,7 +58,7 @@ fun KanaRecapScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Custom Grid for Gojuon (5 columns, filling blanks)
+            // Custom Grid for Gojuon (5 columns)
             Column(modifier = Modifier.weight(1f)) {
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(5),
@@ -70,17 +70,21 @@ fun KanaRecapScreen(
                     for (lineKey in linesToShow) {
                         val charsInLine = charactersByLine[lineKey] ?: emptyList()
                         
-                        // Add actual characters
-                        items(charsInLine) { kana ->
-                            val color = kanaColors[kana.character] ?: Color.LightGray
-                            KanaGridItem(kana.character, color)
-                        }
+                        // We use a map to place characters in their specific columns (1-5)
+                        val columnMap = charsInLine.associateBy { it.column }
 
-                        // Add spacers to complete the row (Gojuon has 5 columns)
-                        val spacersNeeded = 5 - charsInLine.size
-                        if (spacersNeeded > 0) {
-                            items(spacersNeeded) {
-                                Spacer(modifier = Modifier.aspectRatio(1f))
+                        for (col in 1..5) {
+                            val kana = columnMap[col]
+                            if (kana != null) {
+                                item(key = "${kana.character}_${lineKey}_$col") {
+                                    val color = kanaColors[kana.character] ?: Color.LightGray
+                                    KanaGridItem(kana.character, color)
+                                }
+                            } else {
+                                // Add a spacer for empty columns (like in rows ya, wa, n)
+                                item(key = "empty_${lineKey}_$col") {
+                                    Spacer(modifier = Modifier.aspectRatio(1f))
+                                }
                             }
                         }
                     }
