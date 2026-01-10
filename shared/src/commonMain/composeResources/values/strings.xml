@@ -85,6 +85,23 @@
     <string name="game_memorize_title">Memorize</string>
     <string name="game_memorize_subtitle">Retrouvez les paires de cartes (Kanji, Sens, Lecture)</string>
 
+    <!-- Memorize Game -->
+    <string name="game_memorize_grid_size">Taille de la grille</string>
+    <string name="game_memorize_max_strokes">Complexité max (traits: %1$d)</string>
+    <string name="game_memorize_recent_scores">Derniers scores</string>
+    <string name="game_memorize_no_scores">Aucun score pour le moment</string>
+    <string name="game_memorize_score_format">%1$d coups</string>
+    <string name="game_memorize_time_format">%1$ds</string>
+    <string name="game_memorize_grid_label">%1$s</string>
+    <string name="game_memorize_quit">Quitter</string>
+    <string name="game_memorize_moves">Coups: %1$d</string>
+    <string name="game_memorize_time">Temps: %1$ds</string>
+    <string name="game_memorize_pairs_count">Paires: %1$d / %2$d</string>
+    <string name="game_memorize_finished">Terminé !</string>
+    <string name="game_memorize_congrats">Bravo ! Paires trouvées.</string>
+    <string name="game_memorize_replay">Rejouer</string>
+    <string name="game_memorize_back_menu">Retour au menu</string>
+
     <!-- Game Recap Screen -->
     <string name="game_recap_title">Jeu de reconnaissance</string>
     <string name="game_recap_meaning">Sens</string>

@@ -28,7 +28,10 @@ class GamesFragment : Fragment() {
                         onSimonClick = { Toast.makeText(context, "Coming soon: Simon", Toast.LENGTH_SHORT).show() },
                         onTetrisClick = { Toast.makeText(context, "Coming soon: Tetris", Toast.LENGTH_SHORT).show() },
                         onCrosswordsClick = { Toast.makeText(context, "Coming soon: Crosswords", Toast.LENGTH_SHORT).show() },
-                        onMemorizeClick = { Toast.makeText(context, "Coming soon: Memorize", Toast.LENGTH_SHORT).show() }
+                        onMemorizeClick = { 
+                            val action = GamesFragmentDirections.actionNavGamesToNavMemorize()
+                            findNavController().navigate(action)
+                        }
                     )
                 }
             }

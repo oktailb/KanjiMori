@@ -49,6 +49,16 @@
         android:id="@+id/nav_games"
         android:name="org.nihongo.mochi.ui.games.GamesFragment"
         android:label="Games"
+        tools:layout="@layout/fragment_games">
+        <action
+            android:id="@+id/action_nav_games_to_nav_memorize"
+            app:destination="@id/nav_memorize" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_memorize"
+        android:name="org.nihongo.mochi.ui.games.MemorizeFragment"
+        android:label="Memorize"
         tools:layout="@layout/fragment_games" />
 
     <fragment
