@@ -84,6 +84,14 @@
     <string name="game_crosswords_subtitle">Mots croisés thématiques par niveau JLPT</string>
     <string name="game_memorize_title">Memorize</string>
     <string name="game_memorize_subtitle">Retrouvez les paires de cartes (Kanji, Sens, Lecture)</string>
+    <string name="game_particles_title">Particle Defender</string>
+    <string name="game_particles_subtitle">Shooter grammatical : trouvez la bonne particule</string>
+    <string name="game_forge_title">Radical Forge</string>
+    <string name="game_forge_subtitle">Assemblez les radicaux pour forger des Kanjis</string>
+    <string name="game_shiritori_title">Shiritori Zen</string>
+    <string name="game_shiritori_subtitle">La chaîne de mots traditionnelle japonaise</string>
+    <string name="game_shadow_title">Shadow Kanji</string>
+    <string name="game_shadow_subtitle">Identifiez les Kanjis par leur silhouette</string>
 
     <!-- Taquin Game -->
     <string name="game_taquin_japanese_title">スライディングパズル</string>

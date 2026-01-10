@@ -1,16 +1,21 @@
 Objectif:
 La meilleure appli d apprentissage du japonais qui soit
 
+
 Features:
  - Grammar section with typical JLTP exercises
-   - define exercices JSON database format to ensure all classic JLPT grammar possibilities
-   - implement generic/adpatative displayer form to all exercice types
-   - consider grammar rules applied for each exercise
-   - propose reminders/lessons for each grammar rule
-   - propose a virtual JLPT grammar exam for each related levels
+   - fill exercices database
  - Prévoir l'intégration "Social" (comparaison de progression) pour plus tard.
+   - reussir la connexion au google play !
+ - Du son ! Du bruit ! des effets !
+
 Games:
-  - Tetris : achieve words from selected level in Kana to make blocks disappear
+  - memorize: hidden card pairs -> retrieve couples, different modes -> kanji/kanji kanji/meaning kanji/reading reading/meaning
   - Simon : enforce kanji remembering by sequence
-  - Taquin : redo the basic gojuon table hiragana/katakana
-  - cross words generator
+  - Taquin : redo the basic gojuon table hiragana/katakana [DONE]
+  - Tetris/Candycrush like (Kana Drop) : achieve words from selected level in Kana to make blocks disappear
+  - Crosswords (Mochi-Cross) : crossword generator using JLPT vocabulary
+  - Particle Defender : shooter grammatical pour automatiser le choix des particules (wa, ga, ni, o...)
+  - Radical Forge : puzzle de construction de Kanji à partir de leurs radicaux
+  - Shiritori Zen : jeu de chaîne de mots traditionnel japonais contre l'IA
+  - Shadow Kanji : identification de Kanjis par leur silhouette ou tracé flou

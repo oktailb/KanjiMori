@@ -22,7 +22,11 @@ fun GamesScreen(
     onSimonClick: () -> Unit,
     onTetrisClick: () -> Unit,
     onCrosswordsClick: () -> Unit,
-    onMemorizeClick: () -> Unit
+    onMemorizeClick: () -> Unit,
+    onParticlesClick: () -> Unit,
+    onForgeClick: () -> Unit,
+    onShiritoriClick: () -> Unit,
+    onShadowClick: () -> Unit
 ) {
     val scrollState = rememberScrollState()
 
@@ -82,6 +86,42 @@ fun GamesScreen(
                 subtitle = stringResource(Res.string.game_crosswords_subtitle),
                 kanjiTitle = "十字語",
                 onClick = onCrosswordsClick
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            BigModeCard(
+                title = stringResource(Res.string.game_particles_title),
+                subtitle = stringResource(Res.string.game_particles_subtitle),
+                kanjiTitle = "助詞",
+                onClick = onParticlesClick
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            BigModeCard(
+                title = stringResource(Res.string.game_forge_title),
+                subtitle = stringResource(Res.string.game_forge_subtitle),
+                kanjiTitle = "鍛冶",
+                onClick = onForgeClick
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            BigModeCard(
+                title = stringResource(Res.string.game_shiritori_title),
+                subtitle = stringResource(Res.string.game_shiritori_subtitle),
+                kanjiTitle = "しりとり",
+                onClick = onShiritoriClick
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            BigModeCard(
+                title = stringResource(Res.string.game_shadow_title),
+                subtitle = stringResource(Res.string.game_shadow_subtitle),
+                kanjiTitle = "影",
+                onClick = onShadowClick
             )
 
             Spacer(modifier = Modifier.height(24.dp))

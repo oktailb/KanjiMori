@@ -32,15 +32,23 @@ class GamesFragment : Fragment() {
                             val action = GamesFragmentDirections.actionNavGamesToNavSimon()
                             findNavController().navigate(action)
                         },
-                        onTetrisClick = { Toast.makeText(context, "Coming soon: Tetris", Toast.LENGTH_SHORT).show() },
-                        onCrosswordsClick = { Toast.makeText(context, "Coming soon: Crosswords", Toast.LENGTH_SHORT).show() },
+                        onTetrisClick = { showComingSoon("Blocks") },
+                        onCrosswordsClick = { showComingSoon("Crosswords") },
                         onMemorizeClick = { 
                             val action = GamesFragmentDirections.actionNavGamesToNavMemorize()
                             findNavController().navigate(action)
-                        }
+                        },
+                        onParticlesClick = { showComingSoon("Particle Defender") },
+                        onForgeClick = { showComingSoon("Radical Forge") },
+                        onShiritoriClick = { showComingSoon("Shiritori Zen") },
+                        onShadowClick = { showComingSoon("Shadow Kanji") }
                     )
                 }
             }
         }
+    }
+
+    private fun showComingSoon(gameName: String) {
+        Toast.makeText(context, "Coming soon: $gameName", Toast.LENGTH_SHORT).show()
     }
 }
