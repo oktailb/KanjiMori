@@ -14,6 +14,7 @@ import org.nihongo.mochi.settings.REMOVE_GOOD_ANSWERS_PREF_KEY
 object ScoreManager : ScoreRepository {
 
     private const val DEFAULT_LIST_NAME = "Default"
+    private const val MEMORIZE_HISTORY_KEY = "memorize_history_json"
     private lateinit var scoresSettings: Settings
     private lateinit var userListSettings: Settings
     private lateinit var appSettings: Settings
@@ -54,13 +55,21 @@ object ScoreManager : ScoreRepository {
         }
     }
 
+    // --- Memorize History ---
+    fun saveMemorizeHistory(historyJson: String) {
+        appSettings.putString(MEMORIZE_HISTORY_KEY, historyJson)
+    }
+
+    fun getMemorizeHistory(): String {
+        return appSettings.getString(MEMORIZE_HISTORY_KEY, "[]")
+    }
+
     private fun getList(listName: String): MutableSet<String> {
         val serialized = userListSettings.getString(listName, "")
         if (serialized.isEmpty()) return mutableSetOf()
         return try {
              Json.decodeFromString<Set<String>>(serialized).toMutableSet()
         } catch (_: Exception) {
-            // Fallback for CSV if we used that, or empty
             mutableSetOf()
         }
     }
@@ -86,8 +95,6 @@ object ScoreManager : ScoreRepository {
 
     override fun getScore(key: String, type: ScoreType): LearningScore {
         val actualKey = getActualKey(key, type)
-        // Ensure we return the correct type. Although getScoreInternal returns LearningScore (as KanjiScore or potentially GrammarRuleScore logic),
-        // we might want to be explicit. For now, reusing the internal logic is fine.
         return getScoreInternal(actualKey)
     }
 
@@ -169,7 +176,6 @@ object ScoreManager : ScoreRepository {
                     val weeksPassed = (currentTime - lastDate) / ONE_WEEK_MS
 
                     if (weeksPassed >= 1 && successes > 0) {
-                        // Benevolent Decay: 10% per week, max 50% total
                         val decayPercent = (weeksPassed * 0.10).coerceAtMost(0.50)
                         val newSuccesses = (successes * (1.0 - decayPercent)).toInt()
                         
@@ -177,7 +183,6 @@ object ScoreManager : ScoreRepository {
                         anyScoreDecayed = true
                     }
                 } catch (_: Exception) {
-                    // Ignore
                 }
             }
         }
@@ -193,15 +198,12 @@ object ScoreManager : ScoreRepository {
 
         val userListsMap = mutableMapOf<String, List<String>>()
         userListSettings.keys.forEach { key ->
-            // Here we assume keys in userListSettings are list names
-            // And values are JSON strings (after migration)
             val listJson = userListSettings.getString(key, "")
             if (listJson.isNotEmpty()) {
                  try {
                      val list = Json.decodeFromString<List<String>>(listJson)
                      userListsMap[key] = list
                  } catch (_: Exception) {
-                     // Could be old format or invalid
                  }
             }
         }
@@ -217,6 +219,8 @@ object ScoreManager : ScoreRepository {
                     }
                 }
             })
+            // Add Memorize history to backup
+            put("memorize_history", JsonPrimitive(getMemorizeHistory()))
         }
 
         return Json.encodeToString(jsonObject)
@@ -241,11 +245,16 @@ object ScoreManager : ScoreRepository {
                     userListsElement.forEach { (key, value) ->
                         if (value is kotlinx.serialization.json.JsonArray) {
                             val list = value.map { (it as JsonPrimitive).content }
-                            // Save as JSON string
                             val serialized = Json.encodeToString(list)
                             userListSettings.putString(key, serialized)
                         }
                     }
+                }
+                
+                // Restore Memorize history
+                val memorizeHistory = jsonElement["memorize_history"]
+                if (memorizeHistory is JsonPrimitive && memorizeHistory.isString) {
+                    saveMemorizeHistory(memorizeHistory.content)
                 }
             }
         } catch (e: Exception) {

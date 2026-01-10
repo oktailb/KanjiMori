@@ -7,6 +7,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import org.nihongo.mochi.data.ScoreManager
 import org.nihongo.mochi.domain.kanji.KanjiRepository
 import org.nihongo.mochi.domain.settings.SettingsRepository
 import org.nihongo.mochi.presentation.ViewModel
@@ -18,11 +21,11 @@ class MemorizeViewModel(
 
     // --- Setup State ---
     private val allPossibleGridSizes = listOf(
-        MemorizeGridSize(4, 3), // 12 cards -> 6 pairs
-        MemorizeGridSize(4, 4), // 16 cards -> 8 pairs
-        MemorizeGridSize(5, 4), // 20 cards -> 10 pairs
-        MemorizeGridSize(6, 4), // 24 cards -> 12 pairs
-        MemorizeGridSize(6, 5)  // 30 cards -> 15 pairs
+        MemorizeGridSize(4, 3), 
+        MemorizeGridSize(4, 4), 
+        MemorizeGridSize(5, 4), 
+        MemorizeGridSize(6, 4), 
+        MemorizeGridSize(6, 5)  
     )
 
     private val _availableGridSizes = MutableStateFlow<List<MemorizeGridSize>>(allPossibleGridSizes)
@@ -58,6 +61,7 @@ class MemorizeViewModel(
 
     private var firstSelectedCardIndex: Int? = null
     private var timerJob: Job? = null
+    private val json = Json { ignoreUnknownKeys = true }
 
     init {
         val allKanji = kanjiRepository.getAllKanji()
@@ -65,6 +69,17 @@ class MemorizeViewModel(
         _maxStrokes.value = maxS
         _selectedMaxStrokes.value = maxS
         updateAvailableGridSizes()
+        loadScoresHistory()
+    }
+
+    private fun loadScoresHistory() {
+        try {
+            val historyJson = ScoreManager.getMemorizeHistory()
+            val history = json.decodeFromString<List<MemorizeGameResult>>(historyJson)
+            _scoresHistory.value = history
+        } catch (e: Exception) {
+            _scoresHistory.value = emptyList()
+        }
     }
 
     private fun updateAvailableGridSizes() {
@@ -73,11 +88,8 @@ class MemorizeViewModel(
             .count { (it.strokes?.toIntOrNull() ?: 0) <= _selectedMaxStrokes.value }
         
         val filtered = allPossibleGridSizes.filter { it.pairsCount <= count }
-        
-        // Ensure we always have at least the smallest if possible
         _availableGridSizes.value = filtered.ifEmpty { listOf(allPossibleGridSizes.first()) }
         
-        // If current selection is no longer available, pick the largest available
         if (_selectedGridSize.value !in _availableGridSizes.value) {
             _selectedGridSize.value = _availableGridSizes.value.last()
         }
@@ -180,6 +192,15 @@ class MemorizeViewModel(
         )
         val currentHistory = _scoresHistory.value.toMutableList()
         currentHistory.add(0, result)
-        _scoresHistory.value = currentHistory.take(10)
+        val newHistory = currentHistory.take(10)
+        _scoresHistory.value = newHistory
+        
+        // Persist via ScoreManager
+        try {
+            val historyJson = json.encodeToString(newHistory)
+            ScoreManager.saveMemorizeHistory(historyJson)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 }
